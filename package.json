@@ -5,6 +5,8 @@
   "scripts": {
     "postinstall": "nuxt prepare",
     "dev": "nuxt dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "build": "nuxt build",
     "preview": "nuxt preview"
   },
