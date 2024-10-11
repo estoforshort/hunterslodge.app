@@ -3,5 +3,6 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-10-11',
   devtools: { enabled: true },
   future: { compatibilityVersion: 4 },
-  modules: ['@nuxt/eslint']
+  extends: ['@nuxt/ui-pro'],
+  modules: ['@nuxt/ui', '@nuxt/eslint']
 })
