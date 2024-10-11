@@ -2,5 +2,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-10-11',
   devtools: { enabled: true },
-  future: { compatibilityVersion: 4 }
+  future: { compatibilityVersion: 4 },
+  modules: ['@nuxt/eslint']
 })
