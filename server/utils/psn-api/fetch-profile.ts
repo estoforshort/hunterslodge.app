@@ -1,10 +1,13 @@
-type RequestData = {
-  accessToken: string;
-  accountId: string;
-};
-
-export const psnApiFetchProfile = async (requestData: RequestData) => {
+export const psnApiFetchProfile = async (accountId: string) => {
   try {
+    const tokens = await psnApiAccessToken();
+
+    if (!tokens.data) {
+      return {
+        data: null,
+      };
+    }
+
     const [fetchProfile, fetchTrophySummary] = await Promise.all([
       $fetch<{
         onlineId: string;
@@ -21,10 +24,10 @@ export const psnApiFetchProfile = async (requestData: RequestData) => {
         isOfficiallyVerified: boolean;
         isMe: boolean;
       }>(
-        `${psnApiVariables.BASE_API}/userProfile/v1/internal/users/${requestData.accountId}/profiles`,
+        `${psnApiVariables.BASE_API}/userProfile/v1/internal/users/${accountId}/profiles`,
         {
           headers: {
-            Authorization: `Bearer ${requestData.accessToken}`,
+            Authorization: `Bearer ${tokens.data.accessToken}`,
           },
         },
       ),
@@ -43,10 +46,10 @@ export const psnApiFetchProfile = async (requestData: RequestData) => {
           platinum: number;
         };
       }>(
-        `${psnApiVariables.BASE_API}/trophy/v1/users/${requestData.accountId}/trophySummary`,
+        `${psnApiVariables.BASE_API}/trophy/v1/users/${accountId}/trophySummary`,
         {
           headers: {
-            Authorization: `Bearer ${requestData.accessToken}`,
+            Authorization: `Bearer ${tokens.data.accessToken}`,
           },
         },
       ),

@@ -10,3 +10,25 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model App {
+  id String @id @db.Char(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tokens AppTokens?
+}
+
+model AppTokens {
+  appId String @unique @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  accessToken           String?   @db.VarChar(3072)
+  expiresAt             DateTime?
+  refreshToken          String?   @db.Char(36)
+  refreshTokenExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

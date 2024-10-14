@@ -1,5 +1,4 @@
 type RequestData = {
-  accessToken: string;
   accountId: string;
   limit: number;
   offset: number;
@@ -7,6 +6,14 @@ type RequestData = {
 
 export const psnApiFetchProjects = async (requestData: RequestData) => {
   try {
+    const tokens = await psnApiAccessToken();
+
+    if (!tokens.data) {
+      return {
+        data: null,
+      };
+    }
+
     const fetchProjects: {
       trophyTitles: {
         npServiceName: string;
@@ -40,7 +47,7 @@ export const psnApiFetchProjects = async (requestData: RequestData) => {
       `${psnApiVariables.BASE_API}/trophy/v1/users/${requestData.accountId}/trophyTitles?limit=${requestData.limit}&offset=${requestData.offset}`,
       {
         headers: {
-          Authorization: `Bearer ${requestData.accessToken}`,
+          Authorization: `Bearer ${tokens.data.accessToken}`,
         },
       },
     );

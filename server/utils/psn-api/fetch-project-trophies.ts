@@ -1,5 +1,4 @@
 type RequestData = {
-  accessToken: string;
   accountId: string;
   npCommunicationId: string;
   trophyGroupId?: string;
@@ -15,6 +14,14 @@ enum TrophyType {
 
 export const psnApiFetchProjectTrophies = async (requestData: RequestData) => {
   try {
+    const tokens = await psnApiAccessToken();
+
+    if (!tokens.data) {
+      return {
+        data: null,
+      };
+    }
+
     const fetchProjectTrophies: {
       trophySetVersion: string;
       hasTrophyGroups: boolean;
@@ -45,7 +52,7 @@ export const psnApiFetchProjectTrophies = async (requestData: RequestData) => {
       `${psnApiVariables.BASE_API}/trophy/v1/users/${requestData.accountId}/npCommunicationIds/${requestData.npCommunicationId}/trophyGroups/${requestData.trophyGroupId ?? "all"}/trophies?npServiceName=${requestData.npServiceName}`,
       {
         headers: {
-          Authorization: `Bearer ${requestData.accessToken}`,
+          Authorization: `Bearer ${tokens.data.accessToken}`,
         },
       },
     );

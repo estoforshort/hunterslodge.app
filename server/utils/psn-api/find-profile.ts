@@ -1,10 +1,13 @@
-type RequestData = {
-  accessToken: string;
-  onlineId: string;
-};
-
-export const psnApiFindProfile = async (requestData: RequestData) => {
+export const psnApiFindProfile = async (onlineId: string) => {
   try {
+    const tokens = await psnApiAccessToken();
+
+    if (!tokens.data) {
+      return {
+        data: null,
+      };
+    }
+
     const [fetchProfile, fetchAccountId] = await Promise.all([
       $fetch<{
         onlineId: string;
@@ -15,10 +18,10 @@ export const psnApiFindProfile = async (requestData: RequestData) => {
         languagesUsed: string[];
         plus: number;
       }>(
-        `https://us-prof.np.community.playstation.net/userProfile/v1/users/${requestData.onlineId}/profile`,
+        `https://us-prof.np.community.playstation.net/userProfile/v1/users/${onlineId}/profile`,
         {
           headers: {
-            Authorization: `Bearer ${requestData.accessToken}`,
+            Authorization: `Bearer ${tokens.data.accessToken}`,
           },
         },
       ),
@@ -27,10 +30,10 @@ export const psnApiFindProfile = async (requestData: RequestData) => {
           accountId: string;
         };
       }>(
-        `https://us-prof.np.community.playstation.net/userProfile/v1/users/${requestData.onlineId}/profile2?fields=accountId`,
+        `https://us-prof.np.community.playstation.net/userProfile/v1/users/${onlineId}/profile2?fields=accountId`,
         {
           headers: {
-            Authorization: `Bearer ${requestData.accessToken}`,
+            Authorization: `Bearer ${tokens.data.accessToken}`,
           },
         },
       ),
@@ -54,7 +57,7 @@ export const psnApiFindProfile = async (requestData: RequestData) => {
       `${psnApiVariables.BASE_API}/trophy/v1/users/${fetchAccountId.profile.accountId}/trophySummary`,
       {
         headers: {
-          Authorization: `Bearer ${requestData.accessToken}`,
+          Authorization: `Bearer ${tokens.data.accessToken}`,
         },
       },
     );
