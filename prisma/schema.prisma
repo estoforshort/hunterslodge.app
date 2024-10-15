@@ -17,7 +17,9 @@ model App {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tokens AppTokens?
+  tokens         AppTokens?
+  profileRegions ProfileRegion[]
+  profiles       Profile[]
 }
 
 model AppTokens {
@@ -28,7 +30,66 @@ model AppTokens {
   expiresAt             DateTime?
   refreshToken          String?   @db.Char(36)
   refreshTokenExpiresAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
 
+model ProfileRegion {
+  id String @id @db.Char(2)
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  name      String?  @db.VarChar(64)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  profiles Profile[]
+}
+
+model Profile {
+  id Int @id @default(autoincrement()) @db.UnsignedSmallInt
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  regionId String        @db.Char(2)
+  region   ProfileRegion @relation(references: [id], fields: [regionId])
+
+  accountId     String   @unique @db.VarChar(36)
+  onlineId      String   @unique @db.VarChar(16)
+  imageUrl      String   @db.VarChar(512)
+  platinum      Int      @db.UnsignedSmallInt
+  gold          Int      @db.UnsignedMediumInt
+  silver        Int      @db.UnsignedMediumInt
+  bronze        Int      @db.UnsignedMediumInt
+  lastCheckedAt DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  summary ProfileSummary?
+}
+
+model ProfileSummary {
+  profileId Int     @unique @db.UnsignedSmallInt
+  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  startedProjects     Int      @default(0) @db.UnsignedSmallInt
+  completedProjects   Int      @default(0) @db.UnsignedSmallInt
+  definedPlatinum     Int      @default(0) @db.UnsignedSmallInt
+  definedGold         Int      @default(0) @db.UnsignedMediumInt
+  definedSilver       Int      @default(0) @db.UnsignedMediumInt
+  definedBronze       Int      @default(0) @db.UnsignedMediumInt
+  earnedPlatinum      Int      @default(0) @db.UnsignedSmallInt
+  earnedGold          Int      @default(0) @db.UnsignedMediumInt
+  earnedSilver        Int      @default(0) @db.UnsignedMediumInt
+  earnedBronze        Int      @default(0) @db.UnsignedMediumInt
+  lastTrophyAt        DateTime @default(now())
+  firstTrophyAt       DateTime @default(now())
+  hiddenTrophies      Int      @default(0) @db.UnsignedMediumInt
+  completion          Decimal  @default(0) @db.Decimal(5, 2)
+  lastPartialUpdateAt DateTime @default(now())
+  lastFullUpdateAt    DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
