@@ -11,4 +11,6 @@ export default defineNitroPlugin(async () => {
       },
     });
   }
+
+  updateQueueWorker.run();
 });
