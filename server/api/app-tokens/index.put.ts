@@ -8,13 +8,15 @@ export default defineEventHandler(async (event) => {
   const newTokens = await psnApiExcangeNpsso(body.npsso);
 
   if (!newTokens.data) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-    });
+    return {
+      data: {
+        success: false,
+        message: "Successfully failed to get the new tokens",
+      },
+    };
   }
 
-  return await prisma.appTokens.update({
+  await prisma.appTokens.update({
     data: {
       accessToken: newTokens.data.access_token,
       expiresAt: dayjs().add(newTokens.data.expires_in, "s").format(),
@@ -25,4 +27,11 @@ export default defineEventHandler(async (event) => {
     },
     where: { appId: "app" },
   });
+
+  return {
+    data: {
+      success: true,
+      message: "App tokens successfully updated",
+    },
+  };
 });
