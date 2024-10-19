@@ -15,7 +15,7 @@ const options = {
 export const updateQueueWorker = new Worker(
   "update",
   async (job: Job) => {
-    console.log(job);
+    await runUpdate(job.data.updateId);
   },
   options,
 );

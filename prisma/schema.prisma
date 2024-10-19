@@ -20,6 +20,13 @@ model App {
   tokens         AppTokens?
   profileRegions ProfileRegion[]
   profiles       Profile[]
+  updates        Update[]
+  games          Game[]
+  platforms      Platform[]
+  groups         Group[]
+  trophies       Trophy[]
+  projects       Project[]
+  earnedTrophies ProjectTrophy[]
 }
 
 model AppTokens {
@@ -67,29 +74,346 @@ model Profile {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  summary ProfileSummary?
+  summary  ProfileSummary?
+  updates  Update[]
+  projects Project[]
 }
 
 model ProfileSummary {
   profileId Int     @unique @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
 
-  startedProjects     Int      @default(0) @db.UnsignedSmallInt
-  completedProjects   Int      @default(0) @db.UnsignedSmallInt
-  definedPlatinum     Int      @default(0) @db.UnsignedSmallInt
-  definedGold         Int      @default(0) @db.UnsignedMediumInt
-  definedSilver       Int      @default(0) @db.UnsignedMediumInt
-  definedBronze       Int      @default(0) @db.UnsignedMediumInt
-  earnedPlatinum      Int      @default(0) @db.UnsignedSmallInt
-  earnedGold          Int      @default(0) @db.UnsignedMediumInt
-  earnedSilver        Int      @default(0) @db.UnsignedMediumInt
-  earnedBronze        Int      @default(0) @db.UnsignedMediumInt
-  lastTrophyAt        DateTime @default(now())
-  firstTrophyAt       DateTime @default(now())
-  hiddenTrophies      Int      @default(0) @db.UnsignedMediumInt
-  completion          Decimal  @default(0) @db.Decimal(5, 2)
-  lastPartialUpdateAt DateTime @default(now())
-  lastFullUpdateAt    DateTime @default(now())
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  startedProjects     Int       @default(0) @db.UnsignedSmallInt
+  completedProjects   Int       @default(0) @db.UnsignedSmallInt
+  definedPlatinum     Int       @default(0) @db.UnsignedSmallInt
+  definedGold         Int       @default(0) @db.UnsignedMediumInt
+  definedSilver       Int       @default(0) @db.UnsignedMediumInt
+  definedBronze       Int       @default(0) @db.UnsignedMediumInt
+  earnedPlatinum      Int       @default(0) @db.UnsignedSmallInt
+  earnedGold          Int       @default(0) @db.UnsignedMediumInt
+  earnedSilver        Int       @default(0) @db.UnsignedMediumInt
+  earnedBronze        Int       @default(0) @db.UnsignedMediumInt
+  hiddenTrophies      Int       @default(0) @db.UnsignedMediumInt
+  completion          Decimal   @default(0) @db.Decimal(5, 2)
+  lastFullUpdateAt    DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+enum updateStatus {
+  WAITING
+  RUNNING
+  SUCCESSFUL
+  FAILED
+}
+
+enum updateType {
+  INITIAL
+  MANUAL
+  OVERLAY
+  AUTOMATIC
+  FORCED
+}
+
+model Update {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  status                updateStatus
+  type                  updateType
+  fullUpdate            Boolean
+  startedAt             DateTime?
+  progress              Int          @default(0) @db.UnsignedTinyInt
+  finishedAt            DateTime?
+  startedProjectsFrom   Int          @db.UnsignedSmallInt
+  startedProjectsTo     Int          @default(0) @db.UnsignedSmallInt
+  completedProjectsFrom Int          @db.UnsignedSmallInt
+  completedProjectsTo   Int          @default(0) @db.UnsignedSmallInt
+  definedPlatinumFrom   Int          @db.UnsignedSmallInt
+  definedPlatinumTo     Int          @default(0) @db.UnsignedSmallInt
+  definedGoldFrom       Int          @db.UnsignedMediumInt
+  definedGoldTo         Int          @default(0) @db.UnsignedMediumInt
+  definedSilverFrom     Int          @db.UnsignedMediumInt
+  definedSilverTo       Int          @default(0) @db.UnsignedMediumInt
+  definedBronzeFrom     Int          @db.UnsignedMediumInt
+  definedBronzeTo       Int          @default(0) @db.UnsignedMediumInt
+  earnedPlatinumFrom    Int          @db.UnsignedSmallInt
+  earnedPlatinumTo      Int          @default(0) @db.UnsignedSmallInt
+  earnedGoldFrom        Int          @db.UnsignedMediumInt
+  earnedGoldTo          Int          @default(0) @db.UnsignedMediumInt
+  earnedSilverFrom      Int          @db.UnsignedMediumInt
+  earnedSilverTo        Int          @default(0) @db.UnsignedMediumInt
+  earnedBronzeFrom      Int          @db.UnsignedMediumInt
+  earnedBronzeTo        Int          @default(0) @db.UnsignedMediumInt
+  hiddenTrophiesFrom    Int          @db.UnsignedMediumInt
+  hiddenTrophiesTo      Int          @default(0) @db.UnsignedMediumInt
+  completionFrom        Decimal      @db.Decimal(5, 2)
+  completionTo          Decimal      @default(0) @db.Decimal(5, 2)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+}
+
+model Game {
+  id Int @id @default(autoincrement()) @db.UnsignedSmallInt
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  hash                String    @unique @db.Char(32)
+  service             String    @db.VarChar(7)
+  name                String    @db.VarChar(512)
+  imageUrl            String    @db.VarChar(512)
+  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
+  definedGold         Int       @default(0) @db.UnsignedSmallInt
+  definedSilver       Int       @default(0) @db.UnsignedSmallInt
+  definedBronze       Int       @default(0) @db.UnsignedSmallInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  timesStarted        Int       @default(0) @db.UnsignedSmallInt
+  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
+  avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  platforms PlatformsOnGames[]
+  groups    Group[]
+  stacks    Stack[]
+}
+
+model Platform {
+  id String @id @db.VarChar(6)
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  games PlatformsOnGames[]
+}
+
+model PlatformsOnGames {
+  gameId Int  @db.UnsignedSmallInt
+  game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
+
+  platformId String   @db.VarChar(6)
+  platform   Platform @relation(references: [id], fields: [platformId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([gameId, platformId])
+}
+
+model Group {
+  gameId Int  @db.UnsignedSmallInt
+  game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  id                  String    @db.Char(3)
+  name                String    @db.VarChar(512)
+  imageUrl            String    @db.VarChar(512)
+  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
+  definedGold         Int       @default(0) @db.UnsignedTinyInt
+  definedSilver       Int       @default(0) @db.UnsignedTinyInt
+  definedBronze       Int       @default(0) @db.UnsignedTinyInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
+  avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  trophies    Trophy[]
+  stackGroups StackGroup[]
+
+  @@id([gameId, id])
+}
+
+enum TrophyType {
+  platinum
+  gold
+  silver
+  bronze
+}
+
+model Trophy {
+  gameId  Int    @db.UnsignedSmallInt
+  groupId String @db.Char(3)
+  group   Group  @relation(fields: [gameId, groupId], references: [gameId, id], onDelete: Cascade)
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  id            Int        @db.UnsignedSmallInt
+  type          TrophyType
+  name          String     @db.VarChar(512)
+  description   String     @db.VarChar(1024)
+  imageUrl      String     @db.VarChar(512)
+  firstEarnedAt DateTime?
+  lastEarnedAt  DateTime?
+  psnRate       Decimal    @default(0) @db.Decimal(5, 2)
+  timesEarned   Int        @default(0) @db.UnsignedSmallInt
+  rate          Decimal    @default(0) @db.Decimal(5, 2)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  stackTrophies StackTrophy[]
+
+  @@id([gameId, groupId, id])
+}
+
+model Stack {
+  id String @id @db.VarChar(36)
+
+  gameId Int  @db.UnsignedSmallInt
+  game   Game @relation(references: [id], fields: [gameId])
+
+  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
+  definedGold         Int       @default(0) @db.UnsignedSmallInt
+  definedSilver       Int       @default(0) @db.UnsignedSmallInt
+  definedBronze       Int       @default(0) @db.UnsignedSmallInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  timesStarted        Int       @default(0) @db.UnsignedSmallInt
+  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
+  avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  groups   StackGroup[]
+  projects Project[]
+
+  @@index([gameId])
+}
+
+model StackGroup {
+  stackId String @db.VarChar(36)
+  stack   Stack  @relation(references: [id], fields: [stackId])
+
+  gameId    Int    @db.UnsignedSmallInt
+  groupId   String @db.Char(3)
+  gameGroup Group  @relation(fields: [gameId, groupId], references: [gameId, id])
+
+  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
+  definedGold         Int       @default(0) @db.UnsignedTinyInt
+  definedSilver       Int       @default(0) @db.UnsignedTinyInt
+  definedBronze       Int       @default(0) @db.UnsignedTinyInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
+  avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  trophies      StackTrophy[]
+  projectGroups ProjectGroup[]
+
+  @@id([stackId, groupId])
+}
+
+model StackTrophy {
+  stackId    String     @db.VarChar(36)
+  groupId    String     @db.Char(3)
+  stackGroup StackGroup @relation(fields: [stackId, groupId], references: [stackId, groupId])
+
+  gameId     Int    @db.UnsignedSmallInt
+  trophyId   Int    @db.UnsignedSmallInt
+  gameTrophy Trophy @relation(fields: [gameId, groupId, trophyId], references: [gameId, groupId, id])
+
+  firstEarnedAt DateTime?
+  lastEarnedAt  DateTime?
+  psnRate       Decimal   @default(0) @db.Decimal(5, 2)
+  timesEarned   Int       @default(0) @db.UnsignedSmallInt
+  rate          Decimal   @default(0) @db.Decimal(5, 2)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projectTrophies ProjectTrophy[]
+
+  @@id([stackId, groupId, trophyId])
+  @@index([stackId])
+  @@index([gameId, trophyId])
+}
+
+model Project {
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  stackId String @db.VarChar(36)
+  stack   Stack  @relation(fields: [stackId], references: [id])
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  earnedPlatinum      Int       @default(0) @db.UnsignedTinyInt
+  earnedGold          Int       @default(0) @db.UnsignedSmallInt
+  earnedSilver        Int       @default(0) @db.UnsignedSmallInt
+  earnedBronze        Int       @default(0) @db.UnsignedSmallInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  progress            Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  groups ProjectGroup[]
+
+  @@id([profileId, stackId])
+  @@index([stackId, progress])
+}
+
+model ProjectGroup {
+  profileId Int     @db.UnsignedSmallInt
+  stackId   String  @db.VarChar(36)
+  project   Project @relation(fields: [profileId, stackId], references: [profileId, stackId], onDelete: Cascade)
+
+  groupId    String     @db.Char(3)
+  stackGroup StackGroup @relation(fields: [stackId, groupId], references: [stackId, groupId])
+
+  earnedPlatinum      Int       @default(0) @db.UnsignedTinyInt
+  earnedGold          Int       @default(0) @db.UnsignedSmallInt
+  earnedSilver        Int       @default(0) @db.UnsignedSmallInt
+  earnedBronze        Int       @default(0) @db.UnsignedSmallInt
+  firstTrophyEarnedAt DateTime?
+  lastTrophyEarnedAt  DateTime?
+  progress            Int       @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  trophies ProjectTrophy[]
+
+  @@id([profileId, stackId, groupId])
+  @@index([stackId, groupId])
+}
+
+model ProjectTrophy {
+  profileId    Int          @db.UnsignedSmallInt
+  stackId      String       @db.VarChar(36)
+  groupId      String       @db.Char(3)
+  projectGroup ProjectGroup @relation(fields: [profileId, stackId, groupId], references: [profileId, stackId, groupId], onDelete: Cascade)
+
+  trophyId    Int         @db.UnsignedSmallInt
+  stackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  earnedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@id([profileId, stackId, groupId, trophyId])
 }

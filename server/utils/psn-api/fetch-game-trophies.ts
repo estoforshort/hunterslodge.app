@@ -1,15 +1,10 @@
+import type { TrophyType } from "@prisma/client";
+
 type RequestData = {
   npCommunicationId: string;
   trophyGroupId?: string;
   npServiceName: string;
 };
-
-enum TrophyType {
-  bronze,
-  silver,
-  gold,
-  platinum,
-}
 
 export const psnApiFetchGameTrophies = async (requestData: RequestData) => {
   try {

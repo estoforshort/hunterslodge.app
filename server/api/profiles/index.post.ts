@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
 
   const region = await getRegion();
 
-  await prisma.profile.create({
+  const createProfile = await prisma.profile.create({
     data: {
       appId: "app",
       regionId: region.id,
@@ -80,6 +80,34 @@ export default defineEventHandler(async (event) => {
       summary: { create: {} },
     },
   });
+
+  const createUpdate = await prisma.update.create({
+    data: {
+      appId: "app",
+      profileId: createProfile.id,
+      status: "WAITING",
+      type: "INITIAL",
+      fullUpdate: true,
+      startedProjectsFrom: 0,
+      completedProjectsFrom: 0,
+      definedPlatinumFrom: 0,
+      definedGoldFrom: 0,
+      definedSilverFrom: 0,
+      definedBronzeFrom: 0,
+      earnedPlatinumFrom: 0,
+      earnedGoldFrom: 0,
+      earnedSilverFrom: 0,
+      earnedBronzeFrom: 0,
+      hiddenTrophiesFrom: 0,
+      completionFrom: 0,
+    },
+  });
+
+  await updateQueue.add(
+    "update",
+    { updateId: createUpdate.id },
+    { priority: 3 },
+  );
 
   return {
     data: {
