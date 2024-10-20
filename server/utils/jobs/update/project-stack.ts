@@ -64,7 +64,7 @@ export const updateProjectAndStack = async (data: Data) => {
       findProjectWithStack.stack.definedBronze !==
         data.project.definedTrophies.bronze
     ) {
-      const projectGroups = await psnApiFetchProjectGroups({
+      const projectGroups = await psn.projectGroups({
         accountId: data.profile.accountId,
         npCommunicationId: data.project.npCommunicationId,
         npServiceName: data.project.npServiceName,

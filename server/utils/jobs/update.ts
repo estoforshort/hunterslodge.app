@@ -97,7 +97,7 @@ export const runUpdate = async (updateId: number) => {
         };
       }[] = [];
 
-      const projectsFromPsn = await psnApiFetchProjects({
+      const projectsFromPsn = await psn.projects({
         accountId: update.profile.accountId,
         limit: 100,
         offset: 0,
@@ -119,7 +119,7 @@ export const runUpdate = async (updateId: number) => {
           let offset = 100;
 
           for (let c = 0, ctd = callsToDo; c < ctd; c++) {
-            const moreProjectsFromPsn = await psnApiFetchProjects({
+            const moreProjectsFromPsn = await psn.projects({
               accountId: update.profile.accountId,
               limit: 100,
               offset,

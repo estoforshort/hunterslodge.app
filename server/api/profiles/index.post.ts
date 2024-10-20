@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
-  const psnProfile = await psnApiFindProfile(body.onlineId);
+  const psnProfile = await psn.findProfile({ onlineId: body.onlineId });
 
   if (!psnProfile.data) {
     return {

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
 
   // Obviously needs validation
 
-  const newTokens = await psnApiExcangeNpsso(body.npsso);
+  const newTokens = await psn.exchangeNpsso({ npssoToken: body.npsso });
 
   if (!newTokens.data) {
     return {

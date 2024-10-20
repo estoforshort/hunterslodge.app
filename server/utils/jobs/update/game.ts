@@ -40,7 +40,7 @@ export const updateGame = async (data: Data) => {
       findGame.definedSilver !== data.definedSilver ||
       findGame.definedBronze !== data.definedBronze
     ) {
-      const groups = await psnApiFetchGameGroups({
+      const groups = await psn.gameGroups({
         npCommunicationId: data.stackId,
         npServiceName: data.service,
       });
