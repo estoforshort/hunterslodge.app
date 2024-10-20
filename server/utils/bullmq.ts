@@ -1,36 +1,23 @@
 import { Queue, Worker } from "bullmq";
 
-import type { Job } from "bullmq";
 import type { UpdateType } from "@prisma/client";
+import type {
+  ConnectionOptions,
+  Job,
+  QueueOptions,
+  WorkerOptions,
+} from "bullmq";
 
-const connection = {
+const connection: ConnectionOptions = {
   host: "127.0.0.1",
   port: 6379,
 };
 
-const queueOptions = {
+const queueOptions: QueueOptions = {
   connection,
-};
-
-const workerOptions = {
-  connection,
-  removeOnComplete: { count: 0 },
-  removeOnFail: { count: 0 },
-  concurrency: 1,
-  autorun: false,
 };
 
 const jobQueue = new Queue("jobs", queueOptions);
-
-export const worker = new Worker(
-  "jobs",
-  async (job: Job) => {
-    if (job.data.type === "UPDATE") {
-      return await runUpdate(job.data.updateId);
-    }
-  },
-  workerOptions,
-);
 
 type JobData = {
   type: "UPDATE";
@@ -79,3 +66,21 @@ export const addJob = async (data: JobData) => {
     return;
   }
 };
+
+const workerOptions: WorkerOptions = {
+  connection,
+  removeOnComplete: { count: 0 },
+  removeOnFail: { count: 0 },
+  concurrency: 1,
+  autorun: false,
+};
+
+export const worker = new Worker(
+  "jobs",
+  async (job: Job) => {
+    if (job.data.type === "UPDATE") {
+      return await runUpdate(job.data.updateId);
+    }
+  },
+  workerOptions,
+);
