@@ -103,11 +103,10 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  await updateQueue.add(
-    "update",
-    { updateId: createUpdate.id },
-    { priority: 3 },
-  );
+  await addJob({
+    type: "UPDATE",
+    update: { id: createUpdate.id, type: "INITIAL" },
+  });
 
   return {
     data: {
