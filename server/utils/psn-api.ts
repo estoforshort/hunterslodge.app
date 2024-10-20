@@ -168,7 +168,7 @@ const tokensManager = defineCachedFunction(
       };
     }
   },
-  { maxAge: 300, swr: false },
+  { maxAge: 300, swr: false, name: "tokensManager", getKey: () => "default" },
 );
 
 type FindProfile = {

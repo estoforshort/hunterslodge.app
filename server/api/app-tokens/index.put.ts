@@ -28,6 +28,10 @@ export default defineEventHandler(async (event) => {
     where: { appId: "app" },
   });
 
+  await useStorage("cache").removeItem(
+    "nitro:functions:tokensManager:default.json",
+  );
+
   return {
     data: {
       success: true,
