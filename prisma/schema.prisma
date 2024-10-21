@@ -48,6 +48,7 @@ model ProfileRegion {
   app   App    @relation(references: [id], fields: [appId])
 
   name      String?  @db.VarChar(64)
+  points    Decimal  @default(0) @db.Decimal(24, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -97,6 +98,7 @@ model ProfileSummary {
   earnedBronze        Int       @default(0) @db.UnsignedMediumInt
   hiddenTrophies      Int       @default(0) @db.UnsignedMediumInt
   completion          Decimal   @default(0) @db.Decimal(5, 2)
+  points              Decimal   @default(0) @db.Decimal(19, 2)
   lastFullUpdateAt    DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -156,6 +158,8 @@ model Update {
   hiddenTrophiesTo      Int          @default(0) @db.UnsignedMediumInt
   completionFrom        Decimal      @db.Decimal(5, 2)
   completionTo          Decimal      @default(0) @db.Decimal(5, 2)
+  pointsFrom            Decimal      @db.Decimal(19, 2)
+  pointsTo              Decimal      @default(0) @db.Decimal(19, 2)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 }
@@ -166,22 +170,16 @@ model Game {
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  hash                String    @unique @db.Char(32)
-  service             String    @db.VarChar(7)
-  name                String    @db.VarChar(512)
-  imageUrl            String    @db.VarChar(512)
-  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
-  definedGold         Int       @default(0) @db.UnsignedSmallInt
-  definedSilver       Int       @default(0) @db.UnsignedSmallInt
-  definedBronze       Int       @default(0) @db.UnsignedSmallInt
-  firstTrophyEarnedAt DateTime?
-  lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
-  timesStarted        Int       @default(0) @db.UnsignedSmallInt
-  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
-  avgProgress         Int       @default(0) @db.UnsignedTinyInt
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  hash            String   @unique @db.Char(32)
+  service         String   @db.VarChar(7)
+  name            String   @db.VarChar(512)
+  imageUrl        String   @db.VarChar(512)
+  definedPlatinum Int      @default(0) @db.UnsignedTinyInt
+  definedGold     Int      @default(0) @db.UnsignedSmallInt
+  definedSilver   Int      @default(0) @db.UnsignedSmallInt
+  definedBronze   Int      @default(0) @db.UnsignedSmallInt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   platforms PlatformsOnGames[]
   groups    Group[]
@@ -220,20 +218,15 @@ model Group {
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  id                  String    @db.Char(3)
-  name                String    @db.VarChar(512)
-  imageUrl            String    @db.VarChar(512)
-  definedPlatinum     Int       @default(0) @db.UnsignedTinyInt
-  definedGold         Int       @default(0) @db.UnsignedTinyInt
-  definedSilver       Int       @default(0) @db.UnsignedTinyInt
-  definedBronze       Int       @default(0) @db.UnsignedTinyInt
-  firstTrophyEarnedAt DateTime?
-  lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
-  timesCompleted      Int       @default(0) @db.UnsignedSmallInt
-  avgProgress         Int       @default(0) @db.UnsignedTinyInt
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id              String   @db.Char(3)
+  name            String   @db.VarChar(512)
+  imageUrl        String   @db.VarChar(512)
+  definedPlatinum Int      @default(0) @db.UnsignedTinyInt
+  definedGold     Int      @default(0) @db.UnsignedTinyInt
+  definedSilver   Int      @default(0) @db.UnsignedTinyInt
+  definedBronze   Int      @default(0) @db.UnsignedTinyInt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   trophies    Trophy[]
   stackGroups StackGroup[]
@@ -256,18 +249,13 @@ model Trophy {
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  id            Int        @db.UnsignedSmallInt
-  type          TrophyType
-  name          String     @db.VarChar(512)
-  description   String     @db.VarChar(1024)
-  imageUrl      String     @db.VarChar(512)
-  firstEarnedAt DateTime?
-  lastEarnedAt  DateTime?
-  psnRate       Decimal    @default(0) @db.Decimal(5, 2)
-  timesEarned   Int        @default(0) @db.UnsignedSmallInt
-  rate          Decimal    @default(0) @db.Decimal(5, 2)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id          Int        @db.UnsignedSmallInt
+  type        TrophyType
+  name        String     @db.VarChar(512)
+  description String     @db.VarChar(1024)
+  imageUrl    String     @db.VarChar(512)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   stackTrophies StackTrophy[]
 
@@ -290,6 +278,7 @@ model Stack {
   timesStarted        Int       @default(0) @db.UnsignedSmallInt
   timesCompleted      Int       @default(0) @db.UnsignedSmallInt
   avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  value               Decimal   @default(0) @db.Decimal(14, 2)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -316,6 +305,7 @@ model StackGroup {
   psnRate             Decimal   @default(0) @db.Decimal(5, 2)
   timesCompleted      Int       @default(0) @db.UnsignedSmallInt
   avgProgress         Int       @default(0) @db.UnsignedTinyInt
+  value               Decimal   @default(0) @db.Decimal(14, 2)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -339,6 +329,8 @@ model StackTrophy {
   psnRate       Decimal   @default(0) @db.Decimal(5, 2)
   timesEarned   Int       @default(0) @db.UnsignedSmallInt
   rate          Decimal   @default(0) @db.Decimal(5, 2)
+  ratio         Decimal   @default(1) @db.Decimal(7, 2)
+  value         Decimal   @default(0) @db.Decimal(10, 2)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -366,6 +358,9 @@ model Project {
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
   progress            Int       @default(0) @db.UnsignedTinyInt
+  value               Decimal   @default(0) @db.Decimal(14, 2)
+  points              Decimal   @default(0) @db.Decimal(14, 2)
+  completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -390,6 +385,9 @@ model ProjectGroup {
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
   progress            Int       @default(0) @db.UnsignedTinyInt
+  value               Decimal   @default(0) @db.Decimal(14, 2)
+  points              Decimal   @default(0) @db.Decimal(14, 2)
+  completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -412,6 +410,7 @@ model ProjectTrophy {
   app   App    @relation(references: [id], fields: [appId])
 
   earnedAt  DateTime?
+  points    Decimal   @db.Decimal(10, 2)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

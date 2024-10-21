@@ -100,6 +100,7 @@ export default defineEventHandler(async (event) => {
       earnedBronzeFrom: 0,
       hiddenTrophiesFrom: 0,
       completionFrom: 0,
+      pointsFrom: 0,
     },
   });
 

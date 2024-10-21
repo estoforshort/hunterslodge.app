@@ -25,6 +25,7 @@ CREATE TABLE `ProfileRegion` (
     `id` CHAR(2) NOT NULL,
     `appId` CHAR(3) NOT NULL,
     `name` VARCHAR(64) NULL,
+    `points` DECIMAL(24, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -69,6 +70,7 @@ CREATE TABLE `ProfileSummary` (
     `earnedBronze` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `hiddenTrophies` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `points` DECIMAL(19, 2) NOT NULL DEFAULT 0,
     `lastFullUpdateAt` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -111,6 +113,8 @@ CREATE TABLE `Update` (
     `hiddenTrophiesTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `completionFrom` DECIMAL(5, 2) NOT NULL,
     `completionTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `pointsFrom` DECIMAL(19, 2) NOT NULL,
+    `pointsTo` DECIMAL(19, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -129,12 +133,6 @@ CREATE TABLE `Game` (
     `definedGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `definedSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `definedBronze` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `firstTrophyEarnedAt` DATETIME(3) NULL,
-    `lastTrophyEarnedAt` DATETIME(3) NULL,
-    `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
-    `timesStarted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `timesCompleted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `avgProgress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -173,11 +171,6 @@ CREATE TABLE `Group` (
     `definedGold` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `definedSilver` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `definedBronze` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    `firstTrophyEarnedAt` DATETIME(3) NULL,
-    `lastTrophyEarnedAt` DATETIME(3) NULL,
-    `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
-    `timesCompleted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `avgProgress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -194,11 +187,6 @@ CREATE TABLE `Trophy` (
     `name` VARCHAR(512) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
     `imageUrl` VARCHAR(512) NOT NULL,
-    `firstEarnedAt` DATETIME(3) NULL,
-    `lastEarnedAt` DATETIME(3) NULL,
-    `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
-    `timesEarned` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `rate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -219,6 +207,7 @@ CREATE TABLE `Stack` (
     `timesStarted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `timesCompleted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `avgProgress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -240,6 +229,7 @@ CREATE TABLE `StackGroup` (
     `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `timesCompleted` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `avgProgress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -257,6 +247,8 @@ CREATE TABLE `StackTrophy` (
     `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `timesEarned` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `rate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `ratio` DECIMAL(7, 2) NOT NULL DEFAULT 1,
+    `value` DECIMAL(10, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -277,6 +269,9 @@ CREATE TABLE `Project` (
     `firstTrophyEarnedAt` DATETIME(3) NULL,
     `lastTrophyEarnedAt` DATETIME(3) NULL,
     `progress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `points` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `completion` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -296,6 +291,9 @@ CREATE TABLE `ProjectGroup` (
     `firstTrophyEarnedAt` DATETIME(3) NULL,
     `lastTrophyEarnedAt` DATETIME(3) NULL,
     `progress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `points` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `completion` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -311,6 +309,7 @@ CREATE TABLE `ProjectTrophy` (
     `trophyId` SMALLINT UNSIGNED NOT NULL,
     `appId` CHAR(3) NOT NULL,
     `earnedAt` DATETIME(3) NULL,
+    `points` DECIMAL(10, 2) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 

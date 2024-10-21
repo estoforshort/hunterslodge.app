@@ -3,9 +3,15 @@ import dayjs from "dayjs";
 import type { Prisma, TrophyType } from "@prisma/client";
 
 type Data = {
-  profileId: number;
+  profile: {
+    id: number;
+    completion: number;
+  };
   gameId: number;
-  groupId: string;
+  group: {
+    id: string;
+    progress: number;
+  };
   stack: {
     id: string;
     timesStarted: number;
@@ -26,7 +32,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         where: {
           stackId_groupId_trophyId: {
             stackId: data.stack.id,
-            groupId: data.groupId,
+            groupId: data.group.id,
             trophyId: data.trophy.trophyId,
           },
         },
@@ -37,7 +43,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       return await prisma.stackTrophy.create({
         data: {
           stackId: data.stack.id,
-          groupId: data.groupId,
+          groupId: data.group.id,
           gameId: data.gameId,
           trophyId: data.trophy.trophyId,
         },
@@ -48,9 +54,9 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       prisma.projectTrophy.findUnique({
         where: {
           profileId_stackId_groupId_trophyId: {
-            profileId: data.profileId,
+            profileId: data.profile.id,
             stackId: data.stack.id,
-            groupId: data.groupId,
+            groupId: data.group.id,
             trophyId: data.trophy.trophyId,
           },
         },
@@ -64,9 +70,77 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       psnRate: data.trophy.trophyEarnedRate as unknown as Prisma.Decimal,
       timesEarned: stackTrophy.timesEarned,
       rate: stackTrophy.rate,
+      ratio: stackTrophy.ratio,
+      value: stackTrophy.value,
     };
 
+    if (data.trophy.earned && !findProjectTrophy) {
+      stackTrophyData.timesEarned += 1;
+
+      stackTrophyData.rate = (Math.round(
+        ((100 * stackTrophyData.timesEarned) / data.stack.timesStarted +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+
+      if (stackTrophyData.timesEarned) {
+        stackTrophyData.ratio = (Math.round(
+          (data.stack.timesStarted / stackTrophyData.timesEarned +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
+      } else {
+        stackTrophyData.ratio = data.stack
+          .timesStarted as unknown as Prisma.Decimal;
+      }
+    }
+
+    switch (data.trophy.trophyType) {
+      case "platinum": {
+        const valueLoss = (Number(stackTrophyData.psnRate) / 100) * 300;
+        stackTrophyData.value = (300 - valueLoss) as unknown as Prisma.Decimal;
+        break;
+      }
+
+      case "gold": {
+        const valueLoss = (Number(stackTrophyData.psnRate) / 100) * 90;
+        stackTrophyData.value = (90 - valueLoss) as unknown as Prisma.Decimal;
+        break;
+      }
+
+      case "silver": {
+        const valueLoss = (Number(stackTrophyData.psnRate) / 100) * 30;
+        stackTrophyData.value = (30 - valueLoss) as unknown as Prisma.Decimal;
+        break;
+      }
+
+      case "bronze": {
+        const valueLoss = (Number(stackTrophy.psnRate) / 100) * 15;
+        stackTrophyData.value = (15 - valueLoss) as unknown as Prisma.Decimal;
+        break;
+      }
+    }
+
+    stackTrophyData.value = (Math.round(
+      (Number(stackTrophyData.ratio) * Number(stackTrophyData.value) +
+        Number.EPSILON) *
+        100,
+    ) / 100) as unknown as Prisma.Decimal;
+
     if (data.trophy.earned) {
+      let points = 0 as unknown as Prisma.Decimal;
+
+      points = (Math.round(
+        ((data.group.progress / 100) * Number(stackTrophyData.value) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+
+      points = (Math.round(
+        ((data.profile.completion / 100) * Number(points) + Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+
       if (!findProjectTrophy) {
         if (data.trophy.earnedDateTime) {
           if (
@@ -92,24 +166,18 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
           }
         }
 
-        stackTrophyData.timesEarned += 1;
-        stackTrophyData.rate = (Math.round(
-          ((100 * stackTrophyData.timesEarned) / data.stack.timesStarted +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-
         const [createProjectTrophy, updateStackTrophy] = await Promise.all([
           prisma.projectTrophy.create({
             data: {
-              profileId: data.profileId,
+              profileId: data.profile.id,
               stackId: data.stack.id,
-              groupId: data.groupId,
+              groupId: data.group.id,
               trophyId: data.trophy.trophyId,
               appId: "app",
               earnedAt: data.trophy.earnedDateTime
                 ? dayjs(data.trophy.earnedDateTime).format()
                 : null,
+              points,
             },
           }),
           prisma.stackTrophy.update({
@@ -124,83 +192,6 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
           }),
         ]);
 
-        const stackTrophies = await prisma.stackTrophy.findMany({
-          select: {
-            firstEarnedAt: true,
-            lastEarnedAt: true,
-            psnRate: true,
-            timesEarned: true,
-            rate: true,
-          },
-          where: {
-            gameId: data.gameId,
-            trophyId: data.trophy.trophyId,
-          },
-        });
-
-        const gameTrophyData = {
-          firstEarnedAt: null as null | Date,
-          lastEarnedAt: null as null | Date,
-          psnRate: 0 as unknown as Prisma.Decimal,
-          timesEarned: 0,
-          rate: 0 as unknown as Prisma.Decimal,
-        };
-
-        for (let st = 0, stl = stackTrophies.length; st < stl; st++) {
-          const trophy = stackTrophies[st];
-
-          if (trophy.firstEarnedAt) {
-            if (
-              !gameTrophyData.firstEarnedAt ||
-              dayjs(trophy.firstEarnedAt).isBefore(gameTrophyData.firstEarnedAt)
-            ) {
-              gameTrophyData.firstEarnedAt = dayjs(
-                trophy.firstEarnedAt,
-              ).format() as unknown as Date;
-            }
-          }
-
-          if (trophy.lastEarnedAt) {
-            if (
-              !gameTrophyData.lastEarnedAt ||
-              dayjs(trophy.lastEarnedAt).isAfter(gameTrophyData.lastEarnedAt)
-            ) {
-              gameTrophyData.lastEarnedAt = dayjs(
-                trophy.lastEarnedAt,
-              ).format() as unknown as Date;
-            }
-          }
-
-          gameTrophyData.psnRate = (Number(gameTrophyData.psnRate) +
-            Number(trophy.psnRate)) as unknown as Prisma.Decimal;
-          gameTrophyData.timesEarned += trophy.timesEarned;
-          gameTrophyData.rate = (Number(gameTrophyData.rate) +
-            Number(trophy.rate)) as unknown as Prisma.Decimal;
-        }
-
-        gameTrophyData.psnRate = (Math.round(
-          (Number(gameTrophyData.psnRate) / stackTrophies.length +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-
-        gameTrophyData.rate = (Math.round(
-          (Number(gameTrophyData.rate) / stackTrophies.length +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-
-        await prisma.trophy.update({
-          where: {
-            gameId_groupId_id: {
-              gameId: data.gameId,
-              groupId: data.groupId,
-              id: data.trophy.trophyId,
-            },
-          },
-          data: gameTrophyData,
-        });
-
         return {
           data: {
             projectTrophy: createProjectTrophy,
@@ -209,7 +200,38 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         };
       }
 
-      if (Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate)) {
+      if (
+        Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate) ||
+        Number(stackTrophyData.value) !== Number(stackTrophy.value)
+      ) {
+        if (Number(points) !== Number(findProjectTrophy.points)) {
+          return {
+            data: {
+              projectTrophy: await prisma.projectTrophy.update({
+                where: {
+                  profileId_stackId_groupId_trophyId: {
+                    profileId: findProjectTrophy.profileId,
+                    stackId: findProjectTrophy.stackId,
+                    groupId: findProjectTrophy.groupId,
+                    trophyId: findProjectTrophy.trophyId,
+                  },
+                },
+                data: { points },
+              }),
+              stackTrophy: await prisma.stackTrophy.update({
+                where: {
+                  stackId_groupId_trophyId: {
+                    stackId: stackTrophy.stackId,
+                    groupId: stackTrophy.groupId,
+                    trophyId: stackTrophy.trophyId,
+                  },
+                },
+                data: stackTrophyData,
+              }),
+            },
+          };
+        }
+
         return {
           data: {
             projectTrophy: findProjectTrophy,
@@ -227,6 +249,25 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         };
       }
 
+      if (Number(points) !== Number(findProjectTrophy.points)) {
+        return {
+          data: {
+            projectTrophy: await prisma.projectTrophy.update({
+              where: {
+                profileId_stackId_groupId_trophyId: {
+                  profileId: findProjectTrophy.profileId,
+                  stackId: findProjectTrophy.stackId,
+                  groupId: findProjectTrophy.groupId,
+                  trophyId: findProjectTrophy.trophyId,
+                },
+              },
+              data: { points },
+            }),
+            stackTrophy: stackTrophy,
+          },
+        };
+      }
+
       return {
         data: {
           projectTrophy: findProjectTrophy,
@@ -235,7 +276,10 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       };
     }
 
-    if (Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate)) {
+    if (
+      Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate) ||
+      Number(stackTrophyData.value) !== Number(stackTrophy.value)
+    ) {
       return {
         data: {
           projectTrophy: findProjectTrophy,

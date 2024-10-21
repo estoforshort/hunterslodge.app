@@ -39,6 +39,7 @@ export const runUpdate = async (updateId: number) => {
         earnedBronzeFrom: true,
         hiddenTrophiesFrom: true,
         completionFrom: true,
+        pointsFrom: true,
       },
       where: { id: updateId },
     });
@@ -73,6 +74,7 @@ export const runUpdate = async (updateId: number) => {
       completion: update.fullUpdate
         ? (0 as unknown as Prisma.Decimal)
         : update.completionFrom,
+      points: update.fullUpdate ? 0 : update.pointsFrom,
     };
 
     const getProjects = async () => {
@@ -187,6 +189,7 @@ export const runUpdate = async (updateId: number) => {
           profile: {
             id: update.profile.id,
             accountId: update.profile.accountId,
+            completion: Math.floor(Number(profileSummary.completion)),
           },
           project,
         });
@@ -245,6 +248,19 @@ export const runUpdate = async (updateId: number) => {
           profileSummary.earnedGold += changes.trophies.earned.gold;
           profileSummary.earnedSilver += changes.trophies.earned.silver;
           profileSummary.earnedBronze += changes.trophies.earned.bronze;
+          profileSummary.points = (Math.round(
+            (Number(profileSummary.points) +
+              Number(changes.points) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
+        } else {
+          profileSummary.points = (Math.round(
+            (Number(profileSummary.points) +
+              Number(updatedProject.data.project.points) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
         }
       }
 
@@ -292,6 +308,7 @@ export const runUpdate = async (updateId: number) => {
         earnedBronze: profileSummary.earnedBronze,
         hiddenTrophies: profileSummary.hiddenTrophies,
         completion: profileSummary.completion,
+        points: profileSummary.points,
         lastFullUpdateAt: update.fullUpdate
           ? dayjs().format()
           : update.profile.summary!.lastFullUpdateAt,
@@ -315,6 +332,7 @@ export const runUpdate = async (updateId: number) => {
         earnedBronzeTo: profileSummary.earnedBronze,
         hiddenTrophiesTo: profileSummary.hiddenTrophies,
         completionTo: profileSummary.completion,
+        pointsTo: profileSummary.points,
       },
       where: { id: update.id },
     });

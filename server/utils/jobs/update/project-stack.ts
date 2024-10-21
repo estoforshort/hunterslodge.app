@@ -9,6 +9,7 @@ type Data = {
   profile: {
     id: number;
     accountId: string;
+    completion: number;
   };
   project: {
     npServiceName: string;
@@ -55,6 +56,9 @@ export const updateProjectAndStack = async (data: Data) => {
         data.project.earnedTrophies.silver ||
       findProjectWithStack.earnedBronze !==
         data.project.earnedTrophies.bronze ||
+      Number(findProjectWithStack.value) !==
+        Number(findProjectWithStack.stack.value) ||
+      findProjectWithStack.completion !== data.profile.completion ||
       findProjectWithStack.stack.definedPlatinum !==
         data.project.definedTrophies.platinum ||
       findProjectWithStack.stack.definedGold !==
@@ -182,6 +186,9 @@ export const updateProjectAndStack = async (data: Data) => {
         firstTrophyEarnedAt: project.firstTrophyEarnedAt,
         lastTrophyEarnedAt: project.lastTrophyEarnedAt,
         progress: data.project.progress,
+        value: 0 as unknown as Prisma.Decimal,
+        points: 0 as unknown as Prisma.Decimal,
+        completion: data.profile.completion,
       };
 
       const stackData = {
@@ -195,6 +202,7 @@ export const updateProjectAndStack = async (data: Data) => {
         timesStarted: timesStarted,
         timesCompleted: 0,
         avgProgress: 0,
+        value: 0 as unknown as Prisma.Decimal,
       };
 
       for (
@@ -248,6 +256,20 @@ export const updateProjectAndStack = async (data: Data) => {
           }
         }
 
+        projectData.value = (Math.round(
+          (Number(projectData.value) +
+            Number(updatedGroup.data.stackGroup.value) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
+
+        projectData.points = (Math.round(
+          (Number(projectData.points) +
+            Number(updatedGroup.data.projectGroup.points) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
+
         if (updatedGroup.data.stackGroup.firstTrophyEarnedAt) {
           if (
             !stackData.firstTrophyEarnedAt ||
@@ -278,6 +300,13 @@ export const updateProjectAndStack = async (data: Data) => {
           Number(
             updatedGroup.data.stackGroup.psnRate,
           )) as unknown as Prisma.Decimal;
+
+        stackData.value = (Math.round(
+          (Number(stackData.value) +
+            Number(updatedGroup.data.stackGroup.value) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
       }
 
       if (!updateSuccessful) {
@@ -327,61 +356,6 @@ export const updateProjectAndStack = async (data: Data) => {
         data: stackData,
       });
 
-      const stacks = await prisma.stack.findMany({
-        where: { gameId: stack.gameId },
-      });
-
-      const gameData = {
-        firstTrophyEarnedAt: null as null | Date,
-        lastTrophyEarnedAt: null as null | Date,
-        psnRate: 0 as unknown as Prisma.Decimal,
-        timesStarted: 0,
-        timesCompleted: 0,
-        avgProgress: 0,
-      };
-
-      for (let s = 0, sl = stacks.length; s < sl; s++) {
-        if (stacks[s].firstTrophyEarnedAt) {
-          if (
-            !gameData.firstTrophyEarnedAt ||
-            dayjs(stacks[s].firstTrophyEarnedAt).isBefore(
-              gameData.firstTrophyEarnedAt,
-            )
-          ) {
-            gameData.firstTrophyEarnedAt = dayjs(
-              stacks[s].firstTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        if (stacks[s].lastTrophyEarnedAt) {
-          if (
-            !gameData.lastTrophyEarnedAt ||
-            dayjs(stacks[s].lastTrophyEarnedAt).isAfter(
-              gameData.lastTrophyEarnedAt,
-            )
-          ) {
-            gameData.lastTrophyEarnedAt = dayjs(
-              stacks[s].lastTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        gameData.psnRate = (Number(gameData.psnRate) +
-          Number(stacks[s].psnRate)) as unknown as Prisma.Decimal;
-        gameData.timesStarted += stacks[s].timesStarted;
-        gameData.timesCompleted += stacks[s].timesCompleted;
-        gameData.avgProgress += stacks[s].avgProgress;
-      }
-
-      gameData.psnRate = (Math.round(
-        (Number(gameData.psnRate) / stacks.length + Number.EPSILON) * 100,
-      ) / 100) as unknown as Prisma.Decimal;
-
-      gameData.avgProgress = Math.round(gameData.avgProgress / stacks.length);
-
-      await prisma.game.update({ where: { id: stack.gameId }, data: gameData });
-
       return {
         data: {
           project: updateProject,
@@ -405,6 +379,13 @@ export const updateProjectAndStack = async (data: Data) => {
                 bronze: updateProject.earnedBronze - project.earnedBronze,
               },
             },
+            points:
+              Math.round(
+                (Number(updateProject.points) -
+                  Number(project.points) +
+                  Number.EPSILON) *
+                  100,
+              ) / 100,
           },
         },
       };
@@ -433,6 +414,7 @@ export const updateProjectAndStack = async (data: Data) => {
               bronze: 0,
             },
           },
+          points: 0,
         },
       },
     };

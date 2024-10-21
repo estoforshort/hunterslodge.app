@@ -7,6 +7,7 @@ type Data = {
   profile: {
     id: number;
     accountId: string;
+    completion: number;
   };
   game: {
     id: number;
@@ -57,6 +58,10 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data.group.earnedTrophies.silver ||
       findProjectGroupWithStackGroupAndGameGroup.earnedBronze !==
         data.group.earnedTrophies.bronze ||
+      Number(findProjectGroupWithStackGroupAndGameGroup.value) !==
+        Number(findProjectGroupWithStackGroupAndGameGroup.stackGroup.value) ||
+      findProjectGroupWithStackGroupAndGameGroup.completion !==
+        data.profile.completion ||
       findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedPlatinum !==
         findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
           .definedPlatinum ||
@@ -168,6 +173,9 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         firstTrophyEarnedAt: projectGroup.firstTrophyEarnedAt,
         lastTrophyEarnedAt: projectGroup.lastTrophyEarnedAt,
         progress: data.group.progress,
+        value: 0 as unknown as Prisma.Decimal,
+        points: 0 as unknown as Prisma.Decimal,
+        completion: data.profile.completion,
       };
 
       const stackGroupData = {
@@ -180,15 +188,22 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         psnRate: 0 as unknown as Prisma.Decimal,
         timesCompleted: stackGroup.timesCompleted,
         avgProgress: 0,
+        value: 0 as unknown as Prisma.Decimal,
       };
 
       for (let t = 0, tl = trophies.data.trophies.length; t < tl; t++) {
         const trophy = trophies.data.trophies[t];
 
         const updatedTrophy = await updateProjectAndStackTrophy({
-          profileId: data.profile.id,
+          profile: {
+            id: data.profile.id,
+            completion: data.profile.completion,
+          },
           gameId: data.game.id,
-          groupId: gameGroup.id,
+          group: {
+            id: gameGroup.id,
+            progress: data.group.progress,
+          },
           stack: {
             id: data.stack.id,
             timesStarted: data.stack.timesStarted,
@@ -227,9 +242,23 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               ).format() as unknown as Date;
             }
           }
+
+          projectGroupData.points = (Math.round(
+            (Number(projectGroupData.points) +
+              Number(projectTrophy.points) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
         }
 
         const stackTrophy = updatedTrophy.data.stackTrophy;
+
+        projectGroupData.value = (Math.round(
+          (Number(projectGroupData.value) +
+            Number(stackTrophy.value) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
 
         if (stackTrophy.firstEarnedAt) {
           if (
@@ -242,7 +271,9 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               stackTrophy.firstEarnedAt,
             ).format() as unknown as Date;
           }
+        }
 
+        if (stackTrophy.lastEarnedAt) {
           if (
             !stackGroupData.lastTrophyEarnedAt ||
             dayjs(stackTrophy.lastEarnedAt).isAfter(
@@ -257,6 +288,13 @@ export const updateProjectAndStackGroup = async (data: Data) => {
 
         stackGroupData.psnRate = (Number(stackGroupData.psnRate) +
           Number(stackTrophy.psnRate)) as unknown as Prisma.Decimal;
+
+        stackGroupData.value = (Math.round(
+          (Number(stackGroupData.value) +
+            Number(stackTrophy.value) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
       }
 
       if (!updateSuccessful) {
@@ -312,72 +350,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           },
         },
         data: stackGroupData,
-      });
-
-      const stackGroups = await prisma.stackGroup.findMany({
-        where: { gameId: data.game.id, groupId: stackGroup.groupId },
-      });
-
-      const gameGroupData = {
-        firstTrophyEarnedAt: gameGroup.firstTrophyEarnedAt,
-        lastTrophyEarnedAt: gameGroup.lastTrophyEarnedAt,
-        psnRate: 0 as unknown as Prisma.Decimal,
-        timesCompleted: 0,
-        avgProgress: 0,
-      };
-
-      for (let sg = 0, sgl = stackGroups.length; sg < sgl; sg++) {
-        const group = stackGroups[sg];
-
-        if (group.firstTrophyEarnedAt) {
-          if (
-            !gameGroupData.firstTrophyEarnedAt ||
-            dayjs(group.firstTrophyEarnedAt).isBefore(
-              gameGroupData.firstTrophyEarnedAt,
-            )
-          ) {
-            gameGroupData.firstTrophyEarnedAt = dayjs(
-              group.firstTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        if (group.lastTrophyEarnedAt) {
-          if (
-            !gameGroupData.lastTrophyEarnedAt ||
-            dayjs(group.lastTrophyEarnedAt).isAfter(
-              gameGroupData.lastTrophyEarnedAt,
-            )
-          ) {
-            gameGroupData.lastTrophyEarnedAt = dayjs(
-              group.lastTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        gameGroupData.psnRate = (Number(gameGroupData.psnRate) +
-          Number(group.psnRate)) as unknown as Prisma.Decimal;
-        gameGroupData.timesCompleted += group.timesCompleted;
-        gameGroupData.avgProgress += group.avgProgress;
-      }
-
-      gameGroupData.psnRate = (Math.round(
-        (Number(gameGroupData.psnRate) / stackGroups.length + Number.EPSILON) *
-          100,
-      ) / 100) as unknown as Prisma.Decimal;
-
-      gameGroupData.avgProgress = Math.round(
-        gameGroupData.avgProgress / stackGroups.length,
-      );
-
-      await prisma.group.update({
-        where: {
-          gameId_id: {
-            gameId: data.game.id,
-            id: gameGroup.id,
-          },
-        },
-        data: gameGroupData,
       });
 
       return {
