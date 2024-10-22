@@ -162,6 +162,8 @@ model Update {
   pointsTo              Decimal      @default(0) @db.Decimal(19, 2)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
+
+  changes ProjectChange[]
 }
 
 model Game {
@@ -284,6 +286,7 @@ model Stack {
 
   groups   StackGroup[]
   projects Project[]
+  changes  StackChange[]
 
   @@index([gameId])
 }
@@ -311,6 +314,7 @@ model StackGroup {
 
   trophies      StackTrophy[]
   projectGroups ProjectGroup[]
+  changes       StackGroupChange[]
 
   @@id([stackId, groupId])
 }
@@ -335,6 +339,7 @@ model StackTrophy {
   updatedAt     DateTime  @updatedAt
 
   projectTrophies ProjectTrophy[]
+  changes         StackTrophyChange[]
 
   @@id([stackId, groupId, trophyId])
   @@index([stackId])
@@ -364,7 +369,8 @@ model Project {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  groups ProjectGroup[]
+  groups  ProjectGroup[]
+  changes ProjectChange[]
 
   @@id([profileId, stackId])
   @@index([stackId, progress])
@@ -392,6 +398,7 @@ model ProjectGroup {
   updatedAt           DateTime  @updatedAt
 
   trophies ProjectTrophy[]
+  changes  ProjectGroupChange[]
 
   @@id([profileId, stackId, groupId])
   @@index([stackId, groupId])
@@ -414,5 +421,169 @@ model ProjectTrophy {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  changes ProjectTrophyChange[]
+
   @@id([profileId, stackId, groupId, trophyId])
+}
+
+model ProjectChange {
+  updateId Int    @db.UnsignedInt
+  update   Update @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  profileId Int     @db.UnsignedSmallInt
+  stackId   String  @db.VarChar(36)
+  Project   Project @relation(fields: [profileId, stackId], references: [profileId, stackId], onDelete: Cascade)
+
+  earnedPlatinumFrom Int      @db.UnsignedTinyInt
+  earnedPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  earnedGoldFrom     Int      @db.UnsignedSmallInt
+  earnedGoldTo       Int      @default(0) @db.UnsignedSmallInt
+  earnedSilverFrom   Int      @db.UnsignedSmallInt
+  earnedSilverTo     Int      @default(0) @db.UnsignedSmallInt
+  earnedBronzeFrom   Int      @db.UnsignedSmallInt
+  earnedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
+  progressFrom       Int      @db.UnsignedTinyInt
+  progressTo         Int      @default(0) @db.UnsignedTinyInt
+  pointsFrom         Decimal  @db.Decimal(14, 2)
+  pointsTo           Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  groupChanges ProjectGroupChange[]
+
+  @@id([updateId, stackId])
+}
+
+model ProjectGroupChange {
+  updateId      Int           @db.UnsignedInt
+  stackId       String        @db.VarChar(36)
+  projectChange ProjectChange @relation(fields: [updateId, stackId], references: [updateId, stackId], onDelete: Cascade)
+
+  profileId    Int          @db.UnsignedSmallInt
+  groupId      String       @db.Char(3)
+  projectGroup ProjectGroup @relation(fields: [profileId, stackId, groupId], references: [profileId, stackId, groupId], onDelete: Cascade)
+
+  earnedPlatinumFrom Int      @db.UnsignedTinyInt
+  earnedPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  earnedGoldFrom     Int      @db.UnsignedSmallInt
+  earnedGoldTo       Int      @default(0) @db.UnsignedSmallInt
+  earnedSilverFrom   Int      @db.UnsignedSmallInt
+  earnedSilverTo     Int      @default(0) @db.UnsignedSmallInt
+  earnedBronzeFrom   Int      @db.UnsignedSmallInt
+  earnedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
+  progressFrom       Int      @db.UnsignedTinyInt
+  progressTo         Int      @default(0) @db.UnsignedTinyInt
+  pointsFrom         Decimal  @db.Decimal(14, 2)
+  pointsTo           Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  trophyChanges ProjectTrophyChange[]
+
+  @@id([updateId, stackId, groupId])
+}
+
+model ProjectTrophyChange {
+  updateId           Int                @db.UnsignedInt
+  stackId            String             @db.VarChar(36)
+  groupId            String             @db.Char(3)
+  projectGroupChange ProjectGroupChange @relation(fields: [updateId, stackId, groupId], references: [updateId, stackId, groupId], onDelete: Cascade)
+
+  profileId     Int           @db.UnsignedSmallInt
+  trophyId      Int           @db.UnsignedSmallInt
+  projectTrophy ProjectTrophy @relation(fields: [profileId, stackId, groupId, trophyId], references: [profileId, stackId, groupId, trophyId], onDelete: Cascade)
+
+  pointsFrom Decimal  @db.Decimal(10, 2)
+  pointsTo   Decimal  @db.Decimal(10, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@id([updateId, stackId, groupId, trophyId])
+}
+
+model StackChange {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  stackId String @db.VarChar(36)
+  stack   Stack  @relation(fields: [stackId], references: [id])
+
+  definedPlatinumFrom Int      @db.UnsignedTinyInt
+  definedPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  definedGoldFrom     Int      @db.UnsignedSmallInt
+  definedGoldTo       Int      @default(0) @db.UnsignedSmallInt
+  definedSilverFrom   Int      @db.UnsignedSmallInt
+  definedSilverTo     Int      @default(0) @db.UnsignedSmallInt
+  definedBronzeFrom   Int      @db.UnsignedSmallInt
+  definedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
+  psnRateFrom         Decimal  @db.Decimal(5, 2)
+  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
+  timesStartedFrom    Int      @db.UnsignedSmallInt
+  timesStartedTo      Int      @default(0) @db.UnsignedSmallInt
+  timesCompletedFrom  Int      @db.UnsignedSmallInt
+  timesCompletedTo    Int      @default(0) @db.UnsignedSmallInt
+  avgProgressFrom     Int      @db.UnsignedTinyInt
+  avgProgressTo       Int      @default(0) @db.UnsignedTinyInt
+  valueFrom           Decimal  @db.Decimal(14, 2)
+  valueTo             Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  groupChanges StackGroupChange[]
+}
+
+model StackGroupChange {
+  stackChangeId Int         @db.UnsignedInt
+  stackChange   StackChange @relation(fields: [stackChangeId], references: [id])
+
+  stackId    String     @db.VarChar(36)
+  groupId    String     @db.Char(3)
+  stackGroup StackGroup @relation(fields: [stackId, groupId], references: [stackId, groupId])
+
+  definedPlatinumFrom Int      @db.UnsignedTinyInt
+  definedPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  definedGoldFrom     Int      @db.UnsignedTinyInt
+  definedGoldTo       Int      @default(0) @db.UnsignedTinyInt
+  definedSilverFrom   Int      @db.UnsignedTinyInt
+  definedSilverTo     Int      @default(0) @db.UnsignedTinyInt
+  definedBronzeFrom   Int      @db.UnsignedTinyInt
+  definedBronzeTo     Int      @default(0) @db.UnsignedTinyInt
+  psnRateFrom         Decimal  @db.Decimal(5, 2)
+  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
+  timesCompletedFrom  Int      @db.UnsignedSmallInt
+  timesCompletedTo    Int      @default(0) @db.UnsignedSmallInt
+  avgProgressFrom     Int      @db.UnsignedTinyInt
+  avgProgressTo       Int      @default(0) @db.UnsignedTinyInt
+  valueFrom           Decimal  @db.Decimal(14, 2)
+  valueTo             Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  trophyChanges StackTrophyChange[]
+
+  @@id([stackChangeId, stackId, groupId])
+}
+
+model StackTrophyChange {
+  stackChangeId    Int              @db.UnsignedInt
+  stackId          String           @db.VarChar(36)
+  groupId          String           @db.Char(3)
+  stackGroupChange StackGroupChange @relation(fields: [stackChangeId, stackId, groupId], references: [stackChangeId, stackId, groupId])
+
+  trophyId    Int         @db.UnsignedSmallInt
+  StackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
+
+  psnRateFrom     Decimal  @db.Decimal(5, 2)
+  psnRateTo       Decimal  @default(0) @db.Decimal(5, 2)
+  timesEarnedFrom Int      @db.UnsignedSmallInt
+  timesEarnedTo   Int      @default(0) @db.UnsignedSmallInt
+  rateFrom        Decimal  @db.Decimal(5, 2)
+  rateTo          Decimal  @default(0) @db.Decimal(5, 2)
+  ratioFrom       Decimal  @db.Decimal(7, 2)
+  ratioTo         Decimal  @default(1) @db.Decimal(7, 2)
+  valueFrom       Decimal  @db.Decimal(10, 2)
+  valueTo         Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@id([stackChangeId, stackId, groupId, trophyId])
 }

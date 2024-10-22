@@ -316,6 +316,145 @@ CREATE TABLE `ProjectTrophy` (
     PRIMARY KEY (`profileId`, `stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `ProjectChange` (
+    `updateId` INTEGER UNSIGNED NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `earnedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `earnedPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedGoldFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedGoldTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedSilverFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedBronzeFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `progressFrom` TINYINT UNSIGNED NOT NULL,
+    `progressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `pointsFrom` DECIMAL(14, 2) NOT NULL,
+    `pointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`updateId`, `stackId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProjectGroupChange` (
+    `updateId` INTEGER UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `earnedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `earnedPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedGoldFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedGoldTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedSilverFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedBronzeFrom` SMALLINT UNSIGNED NOT NULL,
+    `earnedBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `progressFrom` TINYINT UNSIGNED NOT NULL,
+    `progressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `pointsFrom` DECIMAL(14, 2) NOT NULL,
+    `pointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`updateId`, `stackId`, `groupId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProjectTrophyChange` (
+    `updateId` INTEGER UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `trophyId` SMALLINT UNSIGNED NOT NULL,
+    `pointsFrom` DECIMAL(10, 2) NOT NULL,
+    `pointsTo` DECIMAL(10, 2) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`updateId`, `stackId`, `groupId`, `trophyId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `StackChange` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `stackId` VARCHAR(36) NOT NULL,
+    `definedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `definedPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedGoldFrom` SMALLINT UNSIGNED NOT NULL,
+    `definedGoldTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedSilverFrom` SMALLINT UNSIGNED NOT NULL,
+    `definedSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedBronzeFrom` SMALLINT UNSIGNED NOT NULL,
+    `definedBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `psnRateFrom` DECIMAL(5, 2) NOT NULL,
+    `psnRateTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `timesStartedFrom` SMALLINT UNSIGNED NOT NULL,
+    `timesStartedTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `timesCompletedFrom` SMALLINT UNSIGNED NOT NULL,
+    `timesCompletedTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `avgProgressFrom` TINYINT UNSIGNED NOT NULL,
+    `avgProgressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `valueFrom` DECIMAL(14, 2) NOT NULL,
+    `valueTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `StackGroupChange` (
+    `stackChangeId` INTEGER UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `definedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `definedPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedGoldFrom` TINYINT UNSIGNED NOT NULL,
+    `definedGoldTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedSilverFrom` TINYINT UNSIGNED NOT NULL,
+    `definedSilverTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `definedBronzeFrom` TINYINT UNSIGNED NOT NULL,
+    `definedBronzeTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `psnRateFrom` DECIMAL(5, 2) NOT NULL,
+    `psnRateTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `timesCompletedFrom` SMALLINT UNSIGNED NOT NULL,
+    `timesCompletedTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `avgProgressFrom` TINYINT UNSIGNED NOT NULL,
+    `avgProgressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `valueFrom` DECIMAL(14, 2) NOT NULL,
+    `valueTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`stackChangeId`, `stackId`, `groupId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `StackTrophyChange` (
+    `stackChangeId` INTEGER UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `trophyId` SMALLINT UNSIGNED NOT NULL,
+    `psnRateFrom` DECIMAL(5, 2) NOT NULL,
+    `psnRateTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `timesEarnedFrom` SMALLINT UNSIGNED NOT NULL,
+    `timesEarnedTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `rateFrom` DECIMAL(5, 2) NOT NULL,
+    `rateTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    `ratioFrom` DECIMAL(7, 2) NOT NULL,
+    `ratioTo` DECIMAL(7, 2) NOT NULL DEFAULT 1,
+    `valueFrom` DECIMAL(10, 2) NOT NULL,
+    `valueTo` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`stackChangeId`, `stackId`, `groupId`, `trophyId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `AppTokens` ADD CONSTRAINT `AppTokens_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -399,3 +538,36 @@ ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_stackId_groupId_trophy
 
 -- AddForeignKey
 ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectChange` ADD CONSTRAINT `ProjectChange_updateId_fkey` FOREIGN KEY (`updateId`) REFERENCES `Update`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectChange` ADD CONSTRAINT `ProjectChange_profileId_stackId_fkey` FOREIGN KEY (`profileId`, `stackId`) REFERENCES `Project`(`profileId`, `stackId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectGroupChange` ADD CONSTRAINT `ProjectGroupChange_updateId_stackId_fkey` FOREIGN KEY (`updateId`, `stackId`) REFERENCES `ProjectChange`(`updateId`, `stackId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectGroupChange` ADD CONSTRAINT `ProjectGroupChange_profileId_stackId_groupId_fkey` FOREIGN KEY (`profileId`, `stackId`, `groupId`) REFERENCES `ProjectGroup`(`profileId`, `stackId`, `groupId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectTrophyChange` ADD CONSTRAINT `ProjectTrophyChange_updateId_stackId_groupId_fkey` FOREIGN KEY (`updateId`, `stackId`, `groupId`) REFERENCES `ProjectGroupChange`(`updateId`, `stackId`, `groupId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectTrophyChange` ADD CONSTRAINT `ProjectTrophyChange_profileId_stackId_groupId_trophyId_fkey` FOREIGN KEY (`profileId`, `stackId`, `groupId`, `trophyId`) REFERENCES `ProjectTrophy`(`profileId`, `stackId`, `groupId`, `trophyId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackChange` ADD CONSTRAINT `StackChange_stackId_fkey` FOREIGN KEY (`stackId`) REFERENCES `Stack`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackGroupChange` ADD CONSTRAINT `StackGroupChange_stackChangeId_fkey` FOREIGN KEY (`stackChangeId`) REFERENCES `StackChange`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackGroupChange` ADD CONSTRAINT `StackGroupChange_stackId_groupId_fkey` FOREIGN KEY (`stackId`, `groupId`) REFERENCES `StackGroup`(`stackId`, `groupId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackChangeId_stackId_groupId_fkey` FOREIGN KEY (`stackChangeId`, `stackId`, `groupId`) REFERENCES `StackGroupChange`(`stackChangeId`, `stackId`, `groupId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackId_groupId_trophyId_fkey` FOREIGN KEY (`stackId`, `groupId`, `trophyId`) REFERENCES `StackTrophy`(`stackId`, `groupId`, `trophyId`) ON DELETE RESTRICT ON UPDATE CASCADE;

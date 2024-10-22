@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import type { Prisma, TrophyType } from "@prisma/client";
 
 type Data = {
+  updateId: number;
+  stackChangeId: number;
   profile: {
     id: number;
     completion: number;
@@ -178,6 +180,13 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 ? dayjs(data.trophy.earnedDateTime).format()
                 : null,
               points,
+              changes: {
+                create: {
+                  updateId: data.updateId,
+                  pointsFrom: 0,
+                  pointsTo: points,
+                },
+              },
             },
           }),
           prisma.stackTrophy.update({
@@ -188,7 +197,24 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 trophyId: stackTrophy.trophyId,
               },
             },
-            data: stackTrophyData,
+            data: {
+              ...stackTrophyData,
+              changes: {
+                create: {
+                  stackChangeId: data.stackChangeId,
+                  psnRateFrom: stackTrophy.psnRate,
+                  psnRateTo: stackTrophyData.psnRate,
+                  timesEarnedFrom: stackTrophy.timesEarned,
+                  timesEarnedTo: stackTrophyData.timesEarned,
+                  rateFrom: stackTrophy.rate,
+                  rateTo: stackTrophyData.rate,
+                  ratioFrom: stackTrophy.ratio,
+                  ratioTo: stackTrophyData.ratio,
+                  valueFrom: stackTrophy.value,
+                  valueTo: stackTrophyData.value,
+                },
+              },
+            },
           }),
         ]);
 
@@ -216,7 +242,16 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                     trophyId: findProjectTrophy.trophyId,
                   },
                 },
-                data: { points },
+                data: {
+                  points,
+                  changes: {
+                    create: {
+                      updateId: data.updateId,
+                      pointsFrom: findProjectTrophy.points,
+                      pointsTo: points,
+                    },
+                  },
+                },
               }),
               stackTrophy: await prisma.stackTrophy.update({
                 where: {
@@ -226,7 +261,24 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                     trophyId: stackTrophy.trophyId,
                   },
                 },
-                data: stackTrophyData,
+                data: {
+                  ...stackTrophyData,
+                  changes: {
+                    create: {
+                      stackChangeId: data.stackChangeId,
+                      psnRateFrom: stackTrophy.psnRate,
+                      psnRateTo: stackTrophyData.psnRate,
+                      timesEarnedFrom: stackTrophy.timesEarned,
+                      timesEarnedTo: stackTrophyData.timesEarned,
+                      rateFrom: stackTrophy.rate,
+                      rateTo: stackTrophyData.rate,
+                      ratioFrom: stackTrophy.ratio,
+                      ratioTo: stackTrophyData.ratio,
+                      valueFrom: stackTrophy.value,
+                      valueTo: stackTrophyData.value,
+                    },
+                  },
+                },
               }),
             },
           };
@@ -243,7 +295,24 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   trophyId: stackTrophy.trophyId,
                 },
               },
-              data: stackTrophyData,
+              data: {
+                ...stackTrophyData,
+                changes: {
+                  create: {
+                    stackChangeId: data.stackChangeId,
+                    psnRateFrom: stackTrophy.psnRate,
+                    psnRateTo: stackTrophyData.psnRate,
+                    timesEarnedFrom: stackTrophy.timesEarned,
+                    timesEarnedTo: stackTrophyData.timesEarned,
+                    rateFrom: stackTrophy.rate,
+                    rateTo: stackTrophyData.rate,
+                    ratioFrom: stackTrophy.ratio,
+                    ratioTo: stackTrophyData.ratio,
+                    valueFrom: stackTrophy.value,
+                    valueTo: stackTrophyData.value,
+                  },
+                },
+              },
             }),
           },
         };
@@ -261,7 +330,16 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   trophyId: findProjectTrophy.trophyId,
                 },
               },
-              data: { points },
+              data: {
+                points,
+                changes: {
+                  create: {
+                    updateId: data.updateId,
+                    pointsFrom: findProjectTrophy.points,
+                    pointsTo: points,
+                  },
+                },
+              },
             }),
             stackTrophy: stackTrophy,
           },
@@ -291,7 +369,24 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 trophyId: stackTrophy.trophyId,
               },
             },
-            data: stackTrophyData,
+            data: {
+              ...stackTrophyData,
+              changes: {
+                create: {
+                  stackChangeId: data.stackChangeId,
+                  psnRateFrom: stackTrophy.psnRate,
+                  psnRateTo: stackTrophyData.psnRate,
+                  timesEarnedFrom: stackTrophy.timesEarned,
+                  timesEarnedTo: stackTrophyData.timesEarned,
+                  rateFrom: stackTrophy.rate,
+                  rateTo: stackTrophyData.rate,
+                  ratioFrom: stackTrophy.ratio,
+                  ratioTo: stackTrophyData.ratio,
+                  valueFrom: stackTrophy.value,
+                  valueTo: stackTrophyData.value,
+                },
+              },
+            },
           }),
         },
       };

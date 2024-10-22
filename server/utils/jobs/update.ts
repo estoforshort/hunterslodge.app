@@ -186,6 +186,7 @@ export const runUpdate = async (updateId: number) => {
 
       if (project.progress) {
         const updatedProject = await updateProjectAndStack({
+          updateId: update.id,
           profile: {
             id: update.profile.id,
             accountId: update.profile.accountId,

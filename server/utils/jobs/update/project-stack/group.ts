@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import type { Prisma } from "@prisma/client";
 
 type Data = {
+  updateId: number;
+  stackChangeId: number;
   profile: {
     id: number;
     accountId: string;
@@ -191,10 +193,45 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         value: 0 as unknown as Prisma.Decimal,
       };
 
+      const [createProjectGroupChange, createStackGroupChange] =
+        await Promise.all([
+          prisma.projectGroupChange.create({
+            data: {
+              updateId: data.updateId,
+              stackId: data.stack.id,
+              profileId: data.profile.id,
+              groupId: projectGroup.groupId,
+              earnedPlatinumFrom: projectGroup.earnedPlatinum,
+              earnedGoldFrom: projectGroup.earnedGold,
+              earnedSilverFrom: projectGroup.earnedSilver,
+              earnedBronzeFrom: projectGroup.earnedBronze,
+              progressFrom: projectGroup.progress,
+              pointsFrom: projectGroup.points,
+            },
+          }),
+          prisma.stackGroupChange.create({
+            data: {
+              stackChangeId: data.stackChangeId,
+              stackId: stackGroup.stackId,
+              groupId: stackGroup.groupId,
+              definedPlatinumFrom: stackGroup.definedPlatinum,
+              definedGoldFrom: stackGroup.definedGold,
+              definedSilverFrom: stackGroup.definedSilver,
+              definedBronzeFrom: stackGroup.definedBronze,
+              psnRateFrom: stackGroup.psnRate,
+              timesCompletedFrom: stackGroup.timesCompleted,
+              avgProgressFrom: stackGroup.avgProgress,
+              valueFrom: stackGroup.value,
+            },
+          }),
+        ]);
+
       for (let t = 0, tl = trophies.data.trophies.length; t < tl; t++) {
         const trophy = trophies.data.trophies[t];
 
         const updatedTrophy = await updateProjectAndStackTrophy({
+          stackChangeId: data.stackChangeId,
+          updateId: data.updateId,
           profile: {
             id: data.profile.id,
             completion: data.profile.completion,
@@ -314,6 +351,24 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data: projectGroupData,
       });
 
+      await prisma.projectGroupChange.update({
+        where: {
+          updateId_stackId_groupId: {
+            updateId: createProjectGroupChange.updateId,
+            stackId: createProjectGroupChange.stackId,
+            groupId: createProjectGroupChange.groupId,
+          },
+        },
+        data: {
+          earnedPlatinumTo: updateProjectGroup.earnedPlatinum,
+          earnedGoldTo: updateProjectGroup.earnedGold,
+          earnedSilverTo: updateProjectGroup.earnedSilver,
+          earnedBronzeTo: updateProjectGroup.earnedBronze,
+          progressTo: updateProjectGroup.progress,
+          pointsTo: updateProjectGroup.points,
+        },
+      });
+
       stackGroupData.psnRate = (Math.round(
         (Number(stackGroupData.psnRate) / trophies.data.trophies.length +
           Number.EPSILON) *
@@ -350,6 +405,26 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           },
         },
         data: stackGroupData,
+      });
+
+      await prisma.stackGroupChange.update({
+        where: {
+          stackChangeId_stackId_groupId: {
+            stackChangeId: createStackGroupChange.stackChangeId,
+            stackId: createStackGroupChange.stackId,
+            groupId: createStackGroupChange.groupId,
+          },
+        },
+        data: {
+          definedPlatinumTo: updateStackGroup.definedPlatinum,
+          definedGoldTo: updateStackGroup.definedGold,
+          definedSilverTo: updateStackGroup.definedSilver,
+          definedBronzeTo: updateStackGroup.definedBronze,
+          psnRateTo: updateStackGroup.psnRate,
+          timesCompletedTo: updateStackGroup.timesCompleted,
+          avgProgressTo: updateStackGroup.avgProgress,
+          valueTo: updateStackGroup.value,
+        },
       });
 
       return {
