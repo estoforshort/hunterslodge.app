@@ -55,11 +55,13 @@ model ProfileRegion {
   earnedBronze   Int      @default(0) @db.UnsignedInt
   completion     Decimal  @default(0) @db.Decimal(5, 2)
   points         Decimal  @default(0) @db.Decimal(24, 2)
+  position       Int      @default(0) @db.UnsignedTinyInt
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  profiles Profile[]
-  history  ProfileRegionHistory[]
+  profiles        Profile[]
+  changes         ProfileRegionChange[]
+  positionChanges ProfileRegionPositionChange[]
 }
 
 model Profile {
@@ -71,22 +73,24 @@ model Profile {
   regionId String        @db.Char(2)
   region   ProfileRegion @relation(references: [id], fields: [regionId])
 
-  accountId      String   @unique @db.VarChar(36)
-  onlineId       String   @unique @db.VarChar(16)
-  imageUrl       String   @db.VarChar(512)
-  platinum       Int      @db.UnsignedSmallInt
-  gold           Int      @db.UnsignedMediumInt
-  silver         Int      @db.UnsignedMediumInt
-  bronze         Int      @db.UnsignedMediumInt
-  lastCheckedAt  DateTime
-  regionPosition Int      @default(0) @db.UnsignedSmallInt
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  accountId        String   @unique @db.VarChar(36)
+  onlineId         String   @unique @db.VarChar(16)
+  imageUrl         String   @db.VarChar(512)
+  platinum         Int      @db.UnsignedSmallInt
+  gold             Int      @db.UnsignedMediumInt
+  silver           Int      @db.UnsignedMediumInt
+  bronze           Int      @db.UnsignedMediumInt
+  lastCheckedAt    DateTime
+  regionalPosition Int      @default(0) @db.UnsignedSmallInt
+  gloabalPosition  Int      @default(0) @db.UnsignedSmallInt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  summary              ProfileSummary?
-  updates              Update[]
-  projects             Project[]
-  regionPostionHistory RegionPositionHistory[]
+  summary                ProfileSummary?
+  updates                Update[]
+  projects               Project[]
+  regionalPostionChanges ProfileRegionalPositionChange[]
+  globalPositionChanges  ProfielGlobalPositionChange[]
 
   @@index([regionId])
 }
@@ -113,6 +117,8 @@ model ProfileSummary {
   lastFullUpdateAt    DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+
+  @@index([lastFullUpdateAt])
 }
 
 enum UpdateStatus {
@@ -599,11 +605,11 @@ model StackTrophyChange {
   @@id([stackChangeId, stackId, groupId, trophyId])
 }
 
-model ProfileRegionHistory {
+model ProfileRegionChange {
   id Int @id @default(autoincrement()) @db.UnsignedInt
 
-  profileRegionId String        @db.Char(2)
-  profileRegion   ProfileRegion @relation(fields: [profileRegionId], references: [id])
+  regionId      String        @db.Char(2)
+  profileRegion ProfileRegion @relation(fields: [regionId], references: [id])
 
   rankedProfilesFrom Int      @db.UnsignedSmallInt
   rankedProfilesTo   Int      @db.UnsignedSmallInt
@@ -623,14 +629,38 @@ model ProfileRegionHistory {
   updatedAt          DateTime @updatedAt
 }
 
-model RegionPositionHistory {
+model ProfileRegionPositionChange {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  regionId      String        @db.Char(2)
+  profileRegion ProfileRegion @relation(fields: [regionId], references: [id])
+
+  positionFrom Int      @db.UnsignedTinyInt
+  positionTo   Int      @db.UnsignedTinyInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ProfileRegionalPositionChange {
   id Int @id @default(autoincrement()) @db.UnsignedInt
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(fields: [profileId], references: [id])
 
-  regionPositionFrom Int      @db.UnsignedSmallInt
-  regionPositionTo   Int      @db.UnsignedSmallInt
+  regionalPositionFrom Int      @db.UnsignedSmallInt
+  regionalPositionTo   Int      @db.UnsignedSmallInt
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ProfielGlobalPositionChange {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  globalPositionFrom Int      @db.UnsignedSmallInt
+  globalPositionTo   Int      @db.UnsignedSmallInt
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }

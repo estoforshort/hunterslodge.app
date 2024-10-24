@@ -32,6 +32,7 @@ CREATE TABLE `ProfileRegion` (
     `earnedBronze` INTEGER UNSIGNED NOT NULL DEFAULT 0,
     `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(24, 2) NOT NULL DEFAULT 0,
+    `position` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -51,7 +52,8 @@ CREATE TABLE `Profile` (
     `silver` MEDIUMINT UNSIGNED NOT NULL,
     `bronze` MEDIUMINT UNSIGNED NOT NULL,
     `lastCheckedAt` DATETIME(3) NOT NULL,
-    `regionPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `regionalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `gloabalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -83,7 +85,8 @@ CREATE TABLE `ProfileSummary` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `ProfileSummary_profileId_key`(`profileId`)
+    UNIQUE INDEX `ProfileSummary_profileId_key`(`profileId`),
+    INDEX `ProfileSummary_lastFullUpdateAt_idx`(`lastFullUpdateAt`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -464,9 +467,9 @@ CREATE TABLE `StackTrophyChange` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ProfileRegionHistory` (
+CREATE TABLE `ProfileRegionChange` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-    `profileRegionId` CHAR(2) NOT NULL,
+    `regionId` CHAR(2) NOT NULL,
     `rankedProfilesFrom` SMALLINT UNSIGNED NOT NULL,
     `rankedProfilesTo` SMALLINT UNSIGNED NOT NULL,
     `earnedPlatinumFrom` MEDIUMINT UNSIGNED NOT NULL,
@@ -488,11 +491,35 @@ CREATE TABLE `ProfileRegionHistory` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RegionPositionHistory` (
+CREATE TABLE `ProfileRegionPositionChange` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `regionId` CHAR(2) NOT NULL,
+    `positionFrom` TINYINT UNSIGNED NOT NULL,
+    `positionTo` TINYINT UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProfileRegionalPositionChange` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `profileId` SMALLINT UNSIGNED NOT NULL,
-    `regionPositionFrom` SMALLINT UNSIGNED NOT NULL,
-    `regionPositionTo` SMALLINT UNSIGNED NOT NULL,
+    `regionalPositionFrom` SMALLINT UNSIGNED NOT NULL,
+    `regionalPositionTo` SMALLINT UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProfielGlobalPositionChange` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `globalPositionFrom` SMALLINT UNSIGNED NOT NULL,
+    `globalPositionTo` SMALLINT UNSIGNED NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -617,7 +644,13 @@ ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackChangeId_
 ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackId_groupId_trophyId_fkey` FOREIGN KEY (`stackId`, `groupId`, `trophyId`) REFERENCES `StackTrophy`(`stackId`, `groupId`, `trophyId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `ProfileRegionHistory` ADD CONSTRAINT `ProfileRegionHistory_profileRegionId_fkey` FOREIGN KEY (`profileRegionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `ProfileRegionChange` ADD CONSTRAINT `ProfileRegionChange_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `RegionPositionHistory` ADD CONSTRAINT `RegionPositionHistory_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `ProfileRegionPositionChange` ADD CONSTRAINT `ProfileRegionPositionChange_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProfileRegionalPositionChange` ADD CONSTRAINT `ProfileRegionalPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProfielGlobalPositionChange` ADD CONSTRAINT `ProfielGlobalPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -331,7 +331,7 @@ export const runUpdate = async (updateId: number) => {
         profiles: {
           select: {
             id: true,
-            regionPosition: true,
+            regionalPosition: true,
             summary: {
               select: {
                 earnedPlatinum: true,
@@ -370,7 +370,7 @@ export const runUpdate = async (updateId: number) => {
     };
 
     if (profileRegion) {
-      let regionPosition = 1;
+      let regionalPosition = 1;
 
       for (
         let prp = 0, prpl = profileRegion.profiles.length;
@@ -399,14 +399,14 @@ export const runUpdate = async (updateId: number) => {
                 100,
             ) / 100) as unknown as Prisma.Decimal;
 
-            if (profile.regionPosition !== regionPosition) {
+            if (profile.regionalPosition !== regionalPosition) {
               await prisma.profile.update({
                 data: {
-                  regionPosition: regionPosition,
-                  regionPostionHistory: {
+                  regionalPosition: regionalPosition,
+                  regionalPostionChanges: {
                     create: {
-                      regionPositionFrom: profile.regionPosition,
-                      regionPositionTo: regionPosition,
+                      regionalPositionFrom: profile.regionalPosition,
+                      regionalPositionTo: regionalPosition,
                     },
                   },
                 },
@@ -414,16 +414,16 @@ export const runUpdate = async (updateId: number) => {
               });
             }
 
-            regionPosition += 1;
+            regionalPosition += 1;
           } else {
-            if (profile.regionPosition) {
+            if (profile.regionalPosition) {
               await prisma.profile.update({
                 data: {
-                  regionPosition: 0,
-                  regionPostionHistory: {
+                  regionalPosition: 0,
+                  regionalPostionChanges: {
                     create: {
-                      regionPositionFrom: profile.regionPosition,
-                      regionPositionTo: 0,
+                      regionalPositionFrom: profile.regionalPosition,
+                      regionalPositionTo: 0,
                     },
                   },
                 },
@@ -451,7 +451,7 @@ export const runUpdate = async (updateId: number) => {
           earnedBronze: profileRegionData.earnedBronze,
           completion: profileRegionData.completion,
           points: profileRegionData.points,
-          history: {
+          changes: {
             create: {
               rankedProfilesFrom: profileRegion.rankedProfiles,
               rankedProfilesTo: profileRegionData.rankedProfiles,
@@ -493,6 +493,16 @@ export const runUpdate = async (updateId: number) => {
       },
       where: { id: update.id },
     });
+
+    const otherUpdates = await prisma.update.count({
+      where: {
+        OR: [{ status: "WAITING" }, { status: "RUNNING" }],
+      },
+    });
+
+    if (!otherUpdates) {
+      await addJob({ type: "RANK" });
+    }
 
     return;
 

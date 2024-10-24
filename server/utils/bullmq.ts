@@ -20,7 +20,7 @@ const queueOptions: QueueOptions = {
 const jobQueue = new Queue("jobs", queueOptions);
 
 type JobData = {
-  type: "UPDATE";
+  type: "UPDATE" | "RANK";
   update?: {
     id: number;
     type: UpdateType;
@@ -60,6 +60,10 @@ export const addJob = async (data: JobData) => {
       }
     }
 
+    if (data.type === "RANK") {
+      return await jobQueue.add("job", { type: "RANK" }, { priority: 1 });
+    }
+
     return;
   } catch (e) {
     console.error(e);
@@ -81,6 +85,12 @@ export const worker = new Worker(
     if (job.data.type === "UPDATE") {
       return await runUpdate(job.data.updateId);
     }
+
+    if (job.data.type === "RANK") {
+      return await runRankings();
+    }
+
+    return;
   },
   workerOptions,
 );
