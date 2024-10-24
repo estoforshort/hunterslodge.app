@@ -25,6 +25,12 @@ CREATE TABLE `ProfileRegion` (
     `id` CHAR(2) NOT NULL,
     `appId` CHAR(3) NOT NULL,
     `name` VARCHAR(64) NULL,
+    `rankedProfiles` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedPlatinum` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `earnedGold` INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    `earnedSilver` INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    `earnedBronze` INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(24, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -45,11 +51,13 @@ CREATE TABLE `Profile` (
     `silver` MEDIUMINT UNSIGNED NOT NULL,
     `bronze` MEDIUMINT UNSIGNED NOT NULL,
     `lastCheckedAt` DATETIME(3) NOT NULL,
+    `regionPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Profile_accountId_key`(`accountId`),
     UNIQUE INDEX `Profile_onlineId_key`(`onlineId`),
+    INDEX `Profile_regionId_idx`(`regionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -455,6 +463,42 @@ CREATE TABLE `StackTrophyChange` (
     PRIMARY KEY (`stackChangeId`, `stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `ProfileRegionHistory` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `profileRegionId` CHAR(2) NOT NULL,
+    `rankedProfilesFrom` SMALLINT UNSIGNED NOT NULL,
+    `rankedProfilesTo` SMALLINT UNSIGNED NOT NULL,
+    `earnedPlatinumFrom` MEDIUMINT UNSIGNED NOT NULL,
+    `earnedPlatinumTo` MEDIUMINT UNSIGNED NOT NULL,
+    `earnedGoldFrom` INTEGER UNSIGNED NOT NULL,
+    `earnedGoldTo` INTEGER UNSIGNED NOT NULL,
+    `earnedSilverFrom` INTEGER UNSIGNED NOT NULL,
+    `earnedSilverTo` INTEGER UNSIGNED NOT NULL,
+    `earnedBronzeFrom` INTEGER UNSIGNED NOT NULL,
+    `earnedBronzeTo` INTEGER UNSIGNED NOT NULL,
+    `completionFrom` DECIMAL(5, 2) NOT NULL,
+    `completionTo` DECIMAL(5, 2) NOT NULL,
+    `pointsFrom` DECIMAL(24, 2) NOT NULL,
+    `pointsTo` DECIMAL(24, 2) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `RegionPositionHistory` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `regionPositionFrom` SMALLINT UNSIGNED NOT NULL,
+    `regionPositionTo` SMALLINT UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `AppTokens` ADD CONSTRAINT `AppTokens_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -571,3 +615,9 @@ ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackChangeId_
 
 -- AddForeignKey
 ALTER TABLE `StackTrophyChange` ADD CONSTRAINT `StackTrophyChange_stackId_groupId_trophyId_fkey` FOREIGN KEY (`stackId`, `groupId`, `trophyId`) REFERENCES `StackTrophy`(`stackId`, `groupId`, `trophyId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProfileRegionHistory` ADD CONSTRAINT `ProfileRegionHistory_profileRegionId_fkey` FOREIGN KEY (`profileRegionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `RegionPositionHistory` ADD CONSTRAINT `RegionPositionHistory_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

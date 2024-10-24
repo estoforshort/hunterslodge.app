@@ -11,6 +11,7 @@ export const runUpdate = async (updateId: number) => {
         profile: {
           select: {
             id: true,
+            regionId: true,
             accountId: true,
             platinum: true,
             gold: true,
@@ -316,6 +317,161 @@ export const runUpdate = async (updateId: number) => {
       },
       where: { profileId: update.profile.id },
     });
+
+    const profileRegion = await prisma.profileRegion.findUnique({
+      select: {
+        id: true,
+        rankedProfiles: true,
+        earnedPlatinum: true,
+        earnedGold: true,
+        earnedSilver: true,
+        earnedBronze: true,
+        completion: true,
+        points: true,
+        profiles: {
+          select: {
+            id: true,
+            regionPosition: true,
+            summary: {
+              select: {
+                earnedPlatinum: true,
+                earnedGold: true,
+                earnedSilver: true,
+                earnedBronze: true,
+                hiddenTrophies: true,
+                completion: true,
+                points: true,
+              },
+            },
+          },
+          where: {
+            summary: {
+              lastFullUpdateAt: { not: null },
+            },
+          },
+          orderBy: {
+            summary: {
+              points: "desc",
+            },
+          },
+        },
+      },
+      where: { id: update.profile.regionId },
+    });
+
+    const profileRegionData = {
+      rankedProfiles: 0,
+      earnedPlatinum: 0,
+      earnedGold: 0,
+      earnedSilver: 0,
+      earnedBronze: 0,
+      completion: 0 as unknown as Prisma.Decimal,
+      points: 0 as unknown as Prisma.Decimal,
+    };
+
+    if (profileRegion) {
+      let regionPosition = 1;
+
+      for (
+        let prp = 0, prpl = profileRegion.profiles.length;
+        prp < prpl;
+        prp++
+      ) {
+        const profile = profileRegion.profiles[prp];
+
+        if (profile.summary) {
+          if (!profile.summary.hiddenTrophies) {
+            profileRegionData.rankedProfiles += 1;
+            profileRegionData.earnedPlatinum += profile.summary.earnedPlatinum;
+            profileRegionData.earnedGold += profile.summary.earnedGold;
+            profileRegionData.earnedSilver += profile.summary.earnedSilver;
+            profileRegionData.earnedBronze += profile.summary.earnedBronze;
+            profileRegionData.completion = (Math.round(
+              (Number(profileRegionData.completion) +
+                Number(profile.summary.completion) +
+                Number.EPSILON) *
+                100,
+            ) / 100) as unknown as Prisma.Decimal;
+            profileRegionData.points = (Math.round(
+              (Number(profileRegionData.points) +
+                Number(profile.summary.points) +
+                Number.EPSILON) *
+                100,
+            ) / 100) as unknown as Prisma.Decimal;
+
+            if (profile.regionPosition !== regionPosition) {
+              await prisma.profile.update({
+                data: {
+                  regionPosition: regionPosition,
+                  regionPostionHistory: {
+                    create: {
+                      regionPositionFrom: profile.regionPosition,
+                      regionPositionTo: regionPosition,
+                    },
+                  },
+                },
+                where: { id: profile.id },
+              });
+            }
+
+            regionPosition += 1;
+          } else {
+            if (profile.regionPosition) {
+              await prisma.profile.update({
+                data: {
+                  regionPosition: 0,
+                  regionPostionHistory: {
+                    create: {
+                      regionPositionFrom: profile.regionPosition,
+                      regionPositionTo: 0,
+                    },
+                  },
+                },
+                where: { id: profile.id },
+              });
+            }
+          }
+        }
+      }
+
+      profileRegionData.completion = (Math.round(
+        (Number(profileRegionData.completion) /
+          profileRegionData.rankedProfiles +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+
+      await prisma.profileRegion.update({
+        where: { id: profileRegion.id },
+        data: {
+          rankedProfiles: profileRegionData.rankedProfiles,
+          earnedPlatinum: profileRegionData.earnedPlatinum,
+          earnedGold: profileRegionData.earnedGold,
+          earnedSilver: profileRegionData.earnedSilver,
+          earnedBronze: profileRegionData.earnedBronze,
+          completion: profileRegionData.completion,
+          points: profileRegionData.points,
+          history: {
+            create: {
+              rankedProfilesFrom: profileRegion.rankedProfiles,
+              rankedProfilesTo: profileRegionData.rankedProfiles,
+              earnedPlatinumFrom: profileRegion.earnedPlatinum,
+              earnedPlatinumTo: profileRegionData.earnedPlatinum,
+              earnedGoldFrom: profileRegion.earnedGold,
+              earnedGoldTo: profileRegionData.earnedGold,
+              earnedSilverFrom: profileRegion.earnedSilver,
+              earnedSilverTo: profileRegionData.earnedSilver,
+              earnedBronzeFrom: profileRegion.earnedBronze,
+              earnedBronzeTo: profileRegionData.earnedBronze,
+              completionFrom: profileRegion.completion,
+              completionTo: profileRegionData.completion,
+              pointsFrom: profileRegion.points,
+              pointsTo: profileRegionData.points,
+            },
+          },
+        },
+      });
+    }
 
     await prisma.update.update({
       data: {

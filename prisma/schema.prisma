@@ -47,12 +47,19 @@ model ProfileRegion {
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  name      String?  @db.VarChar(64)
-  points    Decimal  @default(0) @db.Decimal(24, 2)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  name           String?  @db.VarChar(64)
+  rankedProfiles Int      @default(0) @db.UnsignedSmallInt
+  earnedPlatinum Int      @default(0) @db.UnsignedMediumInt
+  earnedGold     Int      @default(0) @db.UnsignedInt
+  earnedSilver   Int      @default(0) @db.UnsignedInt
+  earnedBronze   Int      @default(0) @db.UnsignedInt
+  completion     Decimal  @default(0) @db.Decimal(5, 2)
+  points         Decimal  @default(0) @db.Decimal(24, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   profiles Profile[]
+  history  ProfileRegionHistory[]
 }
 
 model Profile {
@@ -64,20 +71,24 @@ model Profile {
   regionId String        @db.Char(2)
   region   ProfileRegion @relation(references: [id], fields: [regionId])
 
-  accountId     String   @unique @db.VarChar(36)
-  onlineId      String   @unique @db.VarChar(16)
-  imageUrl      String   @db.VarChar(512)
-  platinum      Int      @db.UnsignedSmallInt
-  gold          Int      @db.UnsignedMediumInt
-  silver        Int      @db.UnsignedMediumInt
-  bronze        Int      @db.UnsignedMediumInt
-  lastCheckedAt DateTime
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  accountId      String   @unique @db.VarChar(36)
+  onlineId       String   @unique @db.VarChar(16)
+  imageUrl       String   @db.VarChar(512)
+  platinum       Int      @db.UnsignedSmallInt
+  gold           Int      @db.UnsignedMediumInt
+  silver         Int      @db.UnsignedMediumInt
+  bronze         Int      @db.UnsignedMediumInt
+  lastCheckedAt  DateTime
+  regionPosition Int      @default(0) @db.UnsignedSmallInt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  summary  ProfileSummary?
-  updates  Update[]
-  projects Project[]
+  summary              ProfileSummary?
+  updates              Update[]
+  projects             Project[]
+  regionPostionHistory RegionPositionHistory[]
+
+  @@index([regionId])
 }
 
 model ProfileSummary {
@@ -586,4 +597,40 @@ model StackTrophyChange {
   updatedAt       DateTime @updatedAt
 
   @@id([stackChangeId, stackId, groupId, trophyId])
+}
+
+model ProfileRegionHistory {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  profileRegionId String        @db.Char(2)
+  profileRegion   ProfileRegion @relation(fields: [profileRegionId], references: [id])
+
+  rankedProfilesFrom Int      @db.UnsignedSmallInt
+  rankedProfilesTo   Int      @db.UnsignedSmallInt
+  earnedPlatinumFrom Int      @db.UnsignedMediumInt
+  earnedPlatinumTo   Int      @db.UnsignedMediumInt
+  earnedGoldFrom     Int      @db.UnsignedInt
+  earnedGoldTo       Int      @db.UnsignedInt
+  earnedSilverFrom   Int      @db.UnsignedInt
+  earnedSilverTo     Int      @db.UnsignedInt
+  earnedBronzeFrom   Int      @db.UnsignedInt
+  earnedBronzeTo     Int      @db.UnsignedInt
+  completionFrom     Decimal  @db.Decimal(5, 2)
+  completionTo       Decimal  @db.Decimal(5, 2)
+  pointsFrom         Decimal  @db.Decimal(24, 2)
+  pointsTo           Decimal  @db.Decimal(24, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model RegionPositionHistory {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  regionPositionFrom Int      @db.UnsignedSmallInt
+  regionPositionTo   Int      @db.UnsignedSmallInt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
