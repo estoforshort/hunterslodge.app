@@ -8,6 +8,9 @@ export default defineNitroPlugin(async () => {
         tokens: {
           create: {},
         },
+        settings: {
+          create: {},
+        },
       },
     });
   }
