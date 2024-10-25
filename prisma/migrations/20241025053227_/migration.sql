@@ -21,6 +21,17 @@ CREATE TABLE `AppTokens` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `AppSettings` (
+    `appId` CHAR(3) NOT NULL,
+    `linkingEnabled` BOOLEAN NOT NULL DEFAULT false,
+    `updatesEnabled` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `AppSettings_appId_key`(`appId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `ProfileRegion` (
     `id` CHAR(2) NOT NULL,
     `appId` CHAR(3) NOT NULL,
@@ -528,6 +539,9 @@ CREATE TABLE `ProfielGlobalPositionChange` (
 
 -- AddForeignKey
 ALTER TABLE `AppTokens` ADD CONSTRAINT `AppTokens_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AppSettings` ADD CONSTRAINT `AppSettings_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProfileRegion` ADD CONSTRAINT `ProfileRegion_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
