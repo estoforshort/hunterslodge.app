@@ -98,6 +98,7 @@ model Profile {
   updatedAt        DateTime @updatedAt
 
   summary                ProfileSummary?
+  image                  ProfileImage?
   updates                Update[]
   projects               Project[]
   regionalPostionChanges ProfileRegionalPositionChange[]
@@ -130,6 +131,15 @@ model ProfileSummary {
   updatedAt           DateTime  @updatedAt
 
   @@index([lastFullUpdateAt])
+}
+
+model ProfileImage {
+  profileId Int     @unique @db.UnsignedSmallInt
+  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  image     Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UpdateStatus {
@@ -211,9 +221,19 @@ model Game {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  image     GameImage?
   platforms PlatformsOnGames[]
   groups    Group[]
   stacks    Stack[]
+}
+
+model GameImage {
+  gameId Int  @unique @db.UnsignedSmallInt
+  game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
+
+  image     Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Platform {
@@ -258,10 +278,23 @@ model Group {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  image       GroupImage?
   trophies    Trophy[]
   stackGroups StackGroup[]
 
   @@id([gameId, id])
+}
+
+model GroupImage {
+  gameId  Int    @db.UnsignedSmallInt
+  groupId String @db.Char(3)
+  group   Group  @relation(references: [gameId, id], fields: [gameId, groupId], onDelete: Cascade)
+
+  image     Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([gameId, groupId])
 }
 
 enum TrophyType {
@@ -287,9 +320,23 @@ model Trophy {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  image         TrophyImage?
   stackTrophies StackTrophy[]
 
   @@id([gameId, groupId, id])
+}
+
+model TrophyImage {
+  gameId   Int    @db.UnsignedSmallInt
+  groupId  String @db.Char(3)
+  trophyId Int    @db.UnsignedSmallInt
+  trophy   Trophy @relation(references: [gameId, groupId, id], fields: [gameId, groupId, trophyId], onDelete: Cascade)
+
+  image     Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([gameId, groupId, trophyId])
 }
 
 model Stack {

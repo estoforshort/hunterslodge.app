@@ -1,4 +1,5 @@
 import type { TrophyType } from "@prisma/client";
+import fetch from "node-fetch";
 
 type Data = {
   gameId: number;
@@ -30,19 +31,40 @@ export const updateTrophy = async (data: Data) => {
       };
     }
 
+    const createTrophy = await prisma.trophy.create({
+      data: {
+        gameId: data.gameId,
+        groupId: data.groupId,
+        appId: "app",
+        id: data.trophy.trophyId,
+        type: data.trophy.trophyType,
+        name: data.trophy.trophyName.replace(/\s+/g, " ").trim(),
+        description: data.trophy.trophyDetail.replace(/\s+/g, " ").trim(),
+        imageUrl: data.trophy.trophyIconUrl,
+      },
+    });
+
+    try {
+      const fetchImage = await fetch(createTrophy.imageUrl);
+
+      if (fetchImage.ok) {
+        const image = Buffer.from(await fetchImage.arrayBuffer());
+
+        await prisma.trophyImage.create({
+          data: {
+            gameId: createTrophy.gameId,
+            groupId: createTrophy.groupId,
+            trophyId: createTrophy.id,
+            image,
+          },
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     return {
-      data: await prisma.trophy.create({
-        data: {
-          gameId: data.gameId,
-          groupId: data.groupId,
-          appId: "app",
-          id: data.trophy.trophyId,
-          type: data.trophy.trophyType,
-          name: data.trophy.trophyName.replace(/\s+/g, " ").trim(),
-          description: data.trophy.trophyDetail.replace(/\s+/g, " ").trim(),
-          imageUrl: data.trophy.trophyIconUrl,
-        },
-      }),
+      data: createTrophy,
     };
   } catch (e) {
     console.error(e);

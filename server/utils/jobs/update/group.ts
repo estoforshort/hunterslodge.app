@@ -1,4 +1,5 @@
 import { updateTrophy } from "./trophy";
+import fetch from "node-fetch";
 
 type Data = {
   service: string;
@@ -54,7 +55,7 @@ export const updateGroup = async (data: Data) => {
 
       const getGroup = async () => {
         if (!findGroup) {
-          return await prisma.group.create({
+          const createGroup = await prisma.group.create({
             data: {
               gameId: data.gameId,
               appId: "app",
@@ -66,6 +67,26 @@ export const updateGroup = async (data: Data) => {
               imageUrl: data.group.trophyGroupIconUrl,
             },
           });
+
+          try {
+            const fetchImage = await fetch(createGroup.imageUrl);
+
+            if (fetchImage.ok) {
+              const image = Buffer.from(await fetchImage.arrayBuffer());
+
+              await prisma.groupImage.create({
+                data: {
+                  gameId: createGroup.gameId,
+                  groupId: createGroup.id,
+                  image,
+                },
+              });
+            }
+          } catch (e) {
+            console.error(e);
+          }
+
+          return createGroup;
         }
 
         return findGroup;

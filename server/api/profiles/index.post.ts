@@ -1,4 +1,5 @@
 import { getName } from "country-list";
+import fetch from "node-fetch";
 import dayjs from "dayjs";
 
 export default defineEventHandler(async (event) => {
@@ -80,6 +81,23 @@ export default defineEventHandler(async (event) => {
       summary: { create: {} },
     },
   });
+
+  try {
+    const fetchImage = await fetch(createProfile.imageUrl);
+
+    if (fetchImage.ok) {
+      const image = Buffer.from(await fetchImage.arrayBuffer());
+
+      await prisma.profileImage.create({
+        data: {
+          profileId: createProfile.id,
+          image,
+        },
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
 
   const createUpdate = await prisma.update.create({
     data: {

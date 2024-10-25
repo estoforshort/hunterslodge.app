@@ -101,6 +101,16 @@ CREATE TABLE `ProfileSummary` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ProfileImage` (
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `image` MEDIUMBLOB NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ProfileImage_profileId_key`(`profileId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Update` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `appId` CHAR(3) NOT NULL,
@@ -163,6 +173,16 @@ CREATE TABLE `Game` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `GameImage` (
+    `gameId` SMALLINT UNSIGNED NOT NULL,
+    `image` MEDIUMBLOB NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `GameImage_gameId_key`(`gameId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Platform` (
     `id` VARCHAR(6) NOT NULL,
     `appId` CHAR(3) NOT NULL,
@@ -200,6 +220,17 @@ CREATE TABLE `Group` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `GroupImage` (
+    `gameId` SMALLINT UNSIGNED NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `image` MEDIUMBLOB NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`gameId`, `groupId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Trophy` (
     `gameId` SMALLINT UNSIGNED NOT NULL,
     `groupId` CHAR(3) NOT NULL,
@@ -213,6 +244,18 @@ CREATE TABLE `Trophy` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`gameId`, `groupId`, `id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `TrophyImage` (
+    `gameId` SMALLINT UNSIGNED NOT NULL,
+    `groupId` CHAR(3) NOT NULL,
+    `trophyId` SMALLINT UNSIGNED NOT NULL,
+    `image` MEDIUMBLOB NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`gameId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -556,6 +599,9 @@ ALTER TABLE `Profile` ADD CONSTRAINT `Profile_regionId_fkey` FOREIGN KEY (`regio
 ALTER TABLE `ProfileSummary` ADD CONSTRAINT `ProfileSummary_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `ProfileImage` ADD CONSTRAINT `ProfileImage_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Update` ADD CONSTRAINT `Update_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -563,6 +609,9 @@ ALTER TABLE `Update` ADD CONSTRAINT `Update_profileId_fkey` FOREIGN KEY (`profil
 
 -- AddForeignKey
 ALTER TABLE `Game` ADD CONSTRAINT `Game_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `GameImage` ADD CONSTRAINT `GameImage_gameId_fkey` FOREIGN KEY (`gameId`) REFERENCES `Game`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Platform` ADD CONSTRAINT `Platform_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -580,10 +629,16 @@ ALTER TABLE `Group` ADD CONSTRAINT `Group_gameId_fkey` FOREIGN KEY (`gameId`) RE
 ALTER TABLE `Group` ADD CONSTRAINT `Group_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `GroupImage` ADD CONSTRAINT `GroupImage_gameId_groupId_fkey` FOREIGN KEY (`gameId`, `groupId`) REFERENCES `Group`(`gameId`, `id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Trophy` ADD CONSTRAINT `Trophy_gameId_groupId_fkey` FOREIGN KEY (`gameId`, `groupId`) REFERENCES `Group`(`gameId`, `id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Trophy` ADD CONSTRAINT `Trophy_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrophyImage` ADD CONSTRAINT `TrophyImage_gameId_groupId_trophyId_fkey` FOREIGN KEY (`gameId`, `groupId`, `trophyId`) REFERENCES `Trophy`(`gameId`, `groupId`, `id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Stack` ADD CONSTRAINT `Stack_gameId_fkey` FOREIGN KEY (`gameId`) REFERENCES `Game`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

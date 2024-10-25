@@ -1,4 +1,5 @@
 import { updateGroup } from "./group";
+import fetch from "node-fetch";
 
 type Data = {
   gameId: number | null;
@@ -62,6 +63,23 @@ export const updateGame = async (data: Data) => {
               imageUrl: data.imageUrl,
             },
           });
+
+          try {
+            const fetchImage = await fetch(createGame.imageUrl);
+
+            if (fetchImage.ok) {
+              const image = Buffer.from(await fetchImage.arrayBuffer());
+
+              await prisma.gameImage.create({
+                data: {
+                  gameId: createGame.id,
+                  image,
+                },
+              });
+            }
+          } catch (e) {
+            console.error(e);
+          }
 
           await updatePlatforms(createGame.id);
           return createGame;
