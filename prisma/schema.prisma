@@ -19,6 +19,7 @@ model App {
 
   tokens         AppTokens?
   settings       AppSettings?
+  users          User[]
   profileRegions ProfileRegion[]
   profiles       Profile[]
   updates        Update[]
@@ -52,6 +53,34 @@ model AppSettings {
   updatedAt      DateTime @updatedAt
 }
 
+model User {
+  id String @id @db.VarChar(36)
+
+  appId String @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
+  username    String   @unique @db.VarChar(25)
+  displayName String   @db.VarChar(50)
+  imageUrl    String   @db.VarChar(512)
+  isAdmin     Boolean
+  isFounder   Boolean
+  isLinked    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  image   UserImage?
+  profile Profile?
+}
+
+model UserImage {
+  userId String @unique @db.VarChar(36)
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  image     Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model ProfileRegion {
   id String @id @db.Char(2)
 
@@ -80,6 +109,9 @@ model Profile {
 
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
+
+  userId String @unique @db.VarChar(36)
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   regionId String        @db.Char(2)
   region   ProfileRegion @relation(references: [id], fields: [regionId])

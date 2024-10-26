@@ -3,6 +3,36 @@ import fetch from "node-fetch";
 import dayjs from "dayjs";
 
 export default defineEventHandler(async (event) => {
+  const { user } = await requireUserSession(event);
+
+  const findUser = await prisma.user.findUnique({
+    select: {
+      id: true,
+      isLinked: true,
+    },
+    where: {
+      id: user.id,
+    },
+  });
+
+  if (!findUser) {
+    return {
+      data: {
+        success: false,
+        message: "You need to be logged in to link your profile",
+      },
+    };
+  }
+
+  if (findUser.isLinked) {
+    return {
+      data: {
+        success: false,
+        message: "You have already linked your profile",
+      },
+    };
+  }
+
   const body = await readBody(event);
 
   const psnProfile = await psn.findProfile({ onlineId: body.onlineId });
@@ -68,6 +98,7 @@ export default defineEventHandler(async (event) => {
 
   const createProfile = await prisma.profile.create({
     data: {
+      userId: findUser.id,
       appId: "app",
       regionId: region.id,
       accountId: psnProfile.data.trophySummary.accountId,
@@ -99,6 +130,15 @@ export default defineEventHandler(async (event) => {
     console.error(e);
   }
 
+  await prisma.user.update({
+    where: {
+      id: findUser.id,
+    },
+    data: {
+      isLinked: true,
+    },
+  });
+
   const createUpdate = await prisma.update.create({
     data: {
       appId: "app",
@@ -125,6 +165,13 @@ export default defineEventHandler(async (event) => {
   await addJob({
     type: "UPDATE",
     update: { id: createUpdate.id, type: "INITIAL" },
+  });
+
+  await setUserSession(event, {
+    user: {
+      ...user,
+      isLinked: true,
+    },
   });
 
   return {

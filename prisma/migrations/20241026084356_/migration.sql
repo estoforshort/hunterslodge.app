@@ -32,6 +32,33 @@ CREATE TABLE `AppSettings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `User` (
+    `id` VARCHAR(36) NOT NULL,
+    `appId` CHAR(3) NOT NULL,
+    `username` VARCHAR(25) NOT NULL,
+    `displayName` VARCHAR(50) NOT NULL,
+    `imageUrl` VARCHAR(512) NOT NULL,
+    `isAdmin` BOOLEAN NOT NULL,
+    `isFounder` BOOLEAN NOT NULL,
+    `isLinked` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `User_username_key`(`username`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserImage` (
+    `userId` VARCHAR(36) NOT NULL,
+    `image` MEDIUMBLOB NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `UserImage_userId_key`(`userId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `ProfileRegion` (
     `id` CHAR(2) NOT NULL,
     `appId` CHAR(3) NOT NULL,
@@ -54,6 +81,7 @@ CREATE TABLE `ProfileRegion` (
 CREATE TABLE `Profile` (
     `id` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `appId` CHAR(3) NOT NULL,
+    `userId` VARCHAR(36) NOT NULL,
     `regionId` CHAR(2) NOT NULL,
     `accountId` VARCHAR(36) NOT NULL,
     `onlineId` VARCHAR(16) NOT NULL,
@@ -68,6 +96,7 @@ CREATE TABLE `Profile` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Profile_userId_key`(`userId`),
     UNIQUE INDEX `Profile_accountId_key`(`accountId`),
     UNIQUE INDEX `Profile_onlineId_key`(`onlineId`),
     INDEX `Profile_regionId_idx`(`regionId`),
@@ -587,10 +616,19 @@ ALTER TABLE `AppTokens` ADD CONSTRAINT `AppTokens_appId_fkey` FOREIGN KEY (`appI
 ALTER TABLE `AppSettings` ADD CONSTRAINT `AppSettings_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `User` ADD CONSTRAINT `User_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserImage` ADD CONSTRAINT `UserImage_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `ProfileRegion` ADD CONSTRAINT `ProfileRegion_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Profile` ADD CONSTRAINT `Profile_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Profile` ADD CONSTRAINT `Profile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Profile` ADD CONSTRAINT `Profile_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -4,5 +4,20 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   future: { compatibilityVersion: 4 },
   extends: ["@nuxt/ui-pro"],
-  modules: ["@nuxt/ui", "@nuxt/eslint"],
+  modules: ["@nuxt/ui", "@nuxt/eslint", "nuxt-auth-utils"],
+  runtimeConfig: {
+    session: {
+      name: "lodge-session",
+      cookie: {
+        sameSite: "strict",
+      },
+    },
+    oauth: {
+      twitch: {
+        clientId: "",
+        clientSecret: "",
+        redirectURL: "",
+      },
+    },
+  },
 });
