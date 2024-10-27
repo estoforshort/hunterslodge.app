@@ -1,47 +1,36 @@
+import { linkProfile } from "~/utils/abilities/profiles";
+import { useValidatedBody, z } from "h3-zod";
 import { getName } from "country-list";
 import fetch from "node-fetch";
 import dayjs from "dayjs";
 
 export default defineEventHandler(async (event) => {
-  const { user } = await requireUserSession(event);
+  const session = await requireUserSession(event);
+  await authorize(event, linkProfile);
 
-  const findUser = await prisma.user.findUnique({
-    select: {
-      id: true,
-      isLinked: true,
-    },
-    where: {
-      id: user.id,
-    },
+  const { onlineId } = await useValidatedBody(event, {
+    onlineId: z.string().min(3).max(16),
   });
 
-  if (!findUser) {
-    return {
-      data: {
-        success: false,
-        message: "You need to be logged in to link your profile",
-      },
-    };
-  }
-
-  if (findUser.isLinked) {
-    return {
-      data: {
-        success: false,
-        message: "You have already linked your profile",
-      },
-    };
-  }
-
-  const body = await readBody(event);
-
-  const psnProfile = await psn.findProfile({ onlineId: body.onlineId });
+  const psnProfile = await psn.findProfile({ onlineId });
 
   if (!psnProfile.data) {
     return {
       data: {
         success: false,
         message: "Successfully failed to find profile on PSN",
+      },
+    };
+  }
+
+  if (
+    psnProfile.data.profile.aboutMe.trim().toLowerCase() !==
+    `link:${session.user.username}`
+  ) {
+    return {
+      data: {
+        success: false,
+        message: `Please change your About me on PSN temporarily to "link:${session.user.username}"`,
       },
     };
   }
@@ -98,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
   const createProfile = await prisma.profile.create({
     data: {
-      userId: findUser.id,
+      userId: session.user.id,
       appId: "app",
       regionId: region.id,
       accountId: psnProfile.data.trophySummary.accountId,
@@ -132,7 +121,7 @@ export default defineEventHandler(async (event) => {
 
   await prisma.user.update({
     where: {
-      id: findUser.id,
+      id: session.user.id,
     },
     data: {
       isLinked: true,
@@ -169,7 +158,7 @@ export default defineEventHandler(async (event) => {
 
   await setUserSession(event, {
     user: {
-      ...user,
+      ...session.user,
       isLinked: true,
     },
   });
