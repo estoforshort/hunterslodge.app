@@ -9,24 +9,6 @@ export default defineOAuthTwitchEventHandler({
     });
 
     if (!findUser) {
-      const founders = [
-        "114642521",
-        "121599182",
-        "32281939",
-        "24358377",
-        "51082993",
-        "486253638",
-        "214330815",
-        "72557708",
-        "872952859",
-        "147222570",
-        "1037561015",
-        "175360378",
-        "248234898",
-        "79629859",
-        "22372490",
-      ];
-
       const createUser = await prisma.user.create({
         data: {
           id: user.id,
@@ -35,7 +17,7 @@ export default defineOAuthTwitchEventHandler({
           displayName: user.display_name,
           imageUrl: user.profile_image_url,
           isAdmin: user.id === "423142326" ? true : false,
-          isFounder: founders.includes(user.id) ? true : false,
+          isFounder: foundersList.includes(user.id) ? true : false,
         },
       });
 
