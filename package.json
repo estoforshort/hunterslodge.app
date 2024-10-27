@@ -19,7 +19,8 @@
     "dayjs": "^1.11.13",
     "node-fetch": "^3.3.2",
     "nuxt": "^3.13.0",
-    "nuxt-auth-utils": "^0.5.0"
+    "nuxt-auth-utils": "^0.5.0",
+    "nuxt-authorization": "^0.3.0"
   },
   "devDependencies": {
     "@iconify-json/simple-icons": "^1.2.7",

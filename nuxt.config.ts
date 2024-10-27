@@ -4,7 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   future: { compatibilityVersion: 4 },
   extends: ["@nuxt/ui-pro"],
-  modules: ["@nuxt/ui", "@nuxt/eslint", "nuxt-auth-utils"],
+  modules: [
+    "@nuxt/ui",
+    "@nuxt/eslint",
+    "nuxt-auth-utils",
+    "nuxt-authorization",
+  ],
   runtimeConfig: {
     session: {
       name: "lodge-session",
