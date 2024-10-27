@@ -8,6 +8,20 @@ export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
   await authorize(event, linkProfile);
 
+  const appSettings = await prisma.appSettings.findUniqueOrThrow({
+    select: { linkingEnabled: true },
+    where: { appId: "app" },
+  });
+
+  if (!appSettings.linkingEnabled) {
+    return {
+      data: {
+        success: false,
+        message: "Linking is currently disabled",
+      },
+    };
+  }
+
   const { onlineId } = await useValidatedBody(event, {
     onlineId: z.string().min(3).max(16),
   });
