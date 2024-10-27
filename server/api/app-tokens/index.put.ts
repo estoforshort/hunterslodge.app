@@ -1,11 +1,15 @@
+import { updateTokens } from "~/utils/abilities/app-tokens";
+import { useValidatedBody, z } from "h3-zod";
 import dayjs from "dayjs";
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
+  await authorize(event, updateTokens);
 
-  // Obviously needs validation
+  const { npsso } = await useValidatedBody(event, {
+    npsso: z.string().min(1),
+  });
 
-  const newTokens = await psn.exchangeNpsso({ npssoToken: body.npsso });
+  const newTokens = await psn.exchangeNpsso({ npssoToken: npsso });
 
   if (!newTokens.data) {
     return {
