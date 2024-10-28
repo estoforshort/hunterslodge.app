@@ -125,7 +125,7 @@ model Profile {
   bronze           Int      @db.UnsignedMediumInt
   lastCheckedAt    DateTime
   regionalPosition Int      @default(0) @db.UnsignedSmallInt
-  gloabalPosition  Int      @default(0) @db.UnsignedSmallInt
+  globalPosition   Int      @default(0) @db.UnsignedSmallInt
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

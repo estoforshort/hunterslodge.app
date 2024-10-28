@@ -14,7 +14,7 @@ export const runRankings = async () => {
       prisma.profile.findMany({
         select: {
           id: true,
-          gloabalPosition: true,
+          globalPosition: true,
           summary: {
             select: {
               hiddenTrophies: true,
@@ -67,14 +67,14 @@ export const runRankings = async () => {
 
       if (profile.summary) {
         if (!profile.summary.hiddenTrophies) {
-          if (profile.gloabalPosition !== profileGlobalPosition) {
+          if (profile.globalPosition !== profileGlobalPosition) {
             await prisma.profile.update({
               where: { id: profile.id },
               data: {
-                gloabalPosition: profileGlobalPosition,
+                globalPosition: profileGlobalPosition,
                 globalPositionChanges: {
                   create: {
-                    globalPositionFrom: profile.gloabalPosition,
+                    globalPositionFrom: profile.globalPosition,
                     globalPositionTo: profileGlobalPosition,
                   },
                 },
@@ -84,14 +84,14 @@ export const runRankings = async () => {
 
           profileGlobalPosition += 1;
         } else {
-          if (profile.gloabalPosition) {
+          if (profile.globalPosition) {
             await prisma.profile.update({
               where: { id: profile.id },
               data: {
-                gloabalPosition: 0,
+                globalPosition: 0,
                 globalPositionChanges: {
                   create: {
-                    globalPositionFrom: profile.gloabalPosition,
+                    globalPositionFrom: profile.globalPosition,
                     globalPositionTo: 0,
                   },
                 },
