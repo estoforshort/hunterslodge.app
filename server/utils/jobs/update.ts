@@ -17,13 +17,9 @@ export const runUpdate = async (updateId: number) => {
             gold: true,
             silver: true,
             bronze: true,
-            summary: {
-              select: {
-                firstTrophyEarnedAt: true,
-                lastTrophyEarnedAt: true,
-                lastFullUpdateAt: true,
-              },
-            },
+            firstTrophyEarnedAt: true,
+            lastTrophyEarnedAt: true,
+            lastFullUpdateAt: true,
           },
         },
         status: true,
@@ -51,16 +47,16 @@ export const runUpdate = async (updateId: number) => {
     let progress = 0;
 
     await prisma.update.update({
+      where: { id: update.id },
       data: {
         status: "RUNNING",
         startedAt: dayjs().format(),
       },
-      where: { id: update.id },
     });
 
     const profileSummary = {
-      firstTrophyEarnedAt: update.profile.summary!.firstTrophyEarnedAt,
-      lastTrophyEarnedAt: update.profile.summary!.lastTrophyEarnedAt,
+      firstTrophyEarnedAt: update.profile.firstTrophyEarnedAt,
+      lastTrophyEarnedAt: update.profile.lastTrophyEarnedAt,
       startedProjects: update.fullUpdate ? 0 : update.startedProjectsFrom,
       completedProjects: update.fullUpdate ? 0 : update.completedProjectsFrom,
       definedPlatinum: update.fullUpdate ? 0 : update.definedPlatinumFrom,
@@ -146,11 +142,11 @@ export const runUpdate = async (updateId: number) => {
 
     if (!updateSuccessful || !projects.length) {
       await prisma.update.update({
+        where: { id: update.id },
         data: {
           status: "FAILED",
           finishedAt: dayjs().format(),
         },
-        where: { id: update.id },
       });
 
       return;
@@ -270,8 +266,8 @@ export const runUpdate = async (updateId: number) => {
 
       if (newProgress > progress) {
         await prisma.update.update({
-          data: { progress: newProgress },
           where: { id: update.id },
+          data: { progress: newProgress },
         });
 
         progress = newProgress;
@@ -280,11 +276,11 @@ export const runUpdate = async (updateId: number) => {
 
     if (!updateSuccessful) {
       await prisma.update.update({
+        where: { id: update.id },
         data: {
           status: "FAILED",
           finishedAt: dayjs().format(),
         },
-        where: { id: update.id },
       });
 
       return;
@@ -294,7 +290,8 @@ export const runUpdate = async (updateId: number) => {
       calculateCompletion();
     }
 
-    await prisma.profileSummary.update({
+    await prisma.profile.update({
+      where: { id: update.profile.id },
       data: {
         firstTrophyEarnedAt: profileSummary.firstTrophyEarnedAt,
         lastTrophyEarnedAt: profileSummary.lastTrophyEarnedAt,
@@ -313,9 +310,8 @@ export const runUpdate = async (updateId: number) => {
         points: profileSummary.points,
         lastFullUpdateAt: update.fullUpdate
           ? dayjs().format()
-          : update.profile.summary!.lastFullUpdateAt,
+          : update.profile.lastFullUpdateAt,
       },
-      where: { profileId: update.profile.id },
     });
 
     const profileRegion = await prisma.profileRegion.findUnique({
@@ -331,28 +327,20 @@ export const runUpdate = async (updateId: number) => {
         profiles: {
           select: {
             id: true,
+            earnedPlatinum: true,
+            earnedGold: true,
+            earnedSilver: true,
+            earnedBronze: true,
+            hiddenTrophies: true,
+            completion: true,
+            points: true,
             regionalPosition: true,
-            summary: {
-              select: {
-                earnedPlatinum: true,
-                earnedGold: true,
-                earnedSilver: true,
-                earnedBronze: true,
-                hiddenTrophies: true,
-                completion: true,
-                points: true,
-              },
-            },
           },
           where: {
-            summary: {
-              lastFullUpdateAt: { not: null },
-            },
+            lastFullUpdateAt: { not: null },
           },
           orderBy: {
-            summary: {
-              points: "desc",
-            },
+            points: "desc",
           },
         },
       },
@@ -379,57 +367,55 @@ export const runUpdate = async (updateId: number) => {
       ) {
         const profile = profileRegion.profiles[prp];
 
-        if (profile.summary) {
-          if (!profile.summary.hiddenTrophies) {
-            profileRegionData.rankedProfiles += 1;
-            profileRegionData.earnedPlatinum += profile.summary.earnedPlatinum;
-            profileRegionData.earnedGold += profile.summary.earnedGold;
-            profileRegionData.earnedSilver += profile.summary.earnedSilver;
-            profileRegionData.earnedBronze += profile.summary.earnedBronze;
-            profileRegionData.completion = (Math.round(
-              (Number(profileRegionData.completion) +
-                Number(profile.summary.completion) +
-                Number.EPSILON) *
-                100,
-            ) / 100) as unknown as Prisma.Decimal;
-            profileRegionData.points = (Math.round(
-              (Number(profileRegionData.points) +
-                Number(profile.summary.points) +
-                Number.EPSILON) *
-                100,
-            ) / 100) as unknown as Prisma.Decimal;
+        if (!profile.hiddenTrophies) {
+          profileRegionData.rankedProfiles += 1;
+          profileRegionData.earnedPlatinum += profile.earnedPlatinum;
+          profileRegionData.earnedGold += profile.earnedGold;
+          profileRegionData.earnedSilver += profile.earnedSilver;
+          profileRegionData.earnedBronze += profile.earnedBronze;
+          profileRegionData.completion = (Math.round(
+            (Number(profileRegionData.completion) +
+              Number(profile.completion) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
+          profileRegionData.points = (Math.round(
+            (Number(profileRegionData.points) +
+              Number(profile.points) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
 
-            if (profile.regionalPosition !== regionalPosition) {
-              await prisma.profile.update({
-                data: {
-                  regionalPosition: regionalPosition,
-                  regionalPostionChanges: {
-                    create: {
-                      regionalPositionFrom: profile.regionalPosition,
-                      regionalPositionTo: regionalPosition,
-                    },
+          if (profile.regionalPosition !== regionalPosition) {
+            await prisma.profile.update({
+              where: { id: profile.id },
+              data: {
+                regionalPosition: regionalPosition,
+                regionalPostionChanges: {
+                  create: {
+                    regionalPositionFrom: profile.regionalPosition,
+                    regionalPositionTo: regionalPosition,
                   },
                 },
-                where: { id: profile.id },
-              });
-            }
+              },
+            });
+          }
 
-            regionalPosition += 1;
-          } else {
-            if (profile.regionalPosition) {
-              await prisma.profile.update({
-                data: {
-                  regionalPosition: 0,
-                  regionalPostionChanges: {
-                    create: {
-                      regionalPositionFrom: profile.regionalPosition,
-                      regionalPositionTo: 0,
-                    },
+          regionalPosition += 1;
+        } else {
+          if (profile.regionalPosition) {
+            await prisma.profile.update({
+              where: { id: profile.id },
+              data: {
+                regionalPosition: 0,
+                regionalPostionChanges: {
+                  create: {
+                    regionalPositionFrom: profile.regionalPosition,
+                    regionalPositionTo: 0,
                   },
                 },
-                where: { id: profile.id },
-              });
-            }
+              },
+            });
           }
         }
       }
@@ -474,6 +460,7 @@ export const runUpdate = async (updateId: number) => {
     }
 
     await prisma.update.update({
+      where: { id: update.id },
       data: {
         status: "SUCCESSFUL",
         finishedAt: dayjs().format(),
@@ -491,7 +478,6 @@ export const runUpdate = async (updateId: number) => {
         completionTo: profileSummary.completion,
         pointsTo: profileSummary.points,
       },
-      where: { id: update.id },
     });
 
     const otherUpdates = await prisma.update.count({
@@ -570,11 +556,11 @@ export const runUpdate = async (updateId: number) => {
     console.error(e);
 
     await prisma.update.update({
+      where: { id: updateId },
       data: {
         status: "FAILED",
         finishedAt: dayjs().format(),
       },
-      where: { id: updateId },
     });
 
     return;

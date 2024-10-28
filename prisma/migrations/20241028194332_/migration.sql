@@ -91,21 +91,6 @@ CREATE TABLE `Profile` (
     `silver` MEDIUMINT UNSIGNED NOT NULL,
     `bronze` MEDIUMINT UNSIGNED NOT NULL,
     `lastCheckedAt` DATETIME(3) NOT NULL,
-    `regionalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `globalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `Profile_userId_key`(`userId`),
-    UNIQUE INDEX `Profile_accountId_key`(`accountId`),
-    UNIQUE INDEX `Profile_onlineId_key`(`onlineId`),
-    INDEX `Profile_regionId_idx`(`regionId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `ProfileSummary` (
-    `profileId` SMALLINT UNSIGNED NOT NULL,
     `firstTrophyEarnedAt` DATETIME(3) NULL,
     `lastTrophyEarnedAt` DATETIME(3) NULL,
     `startedProjects` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
@@ -122,11 +107,17 @@ CREATE TABLE `ProfileSummary` (
     `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(19, 2) NOT NULL DEFAULT 0,
     `lastFullUpdateAt` DATETIME(3) NULL,
+    `regionalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `globalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `ProfileSummary_profileId_key`(`profileId`),
-    INDEX `ProfileSummary_lastFullUpdateAt_idx`(`lastFullUpdateAt`)
+    UNIQUE INDEX `Profile_userId_key`(`userId`),
+    UNIQUE INDEX `Profile_accountId_key`(`accountId`),
+    UNIQUE INDEX `Profile_onlineId_key`(`onlineId`),
+    INDEX `Profile_regionId_idx`(`regionId`),
+    INDEX `Profile_lastFullUpdateAt_idx`(`lastFullUpdateAt`),
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -179,6 +170,7 @@ CREATE TABLE `Update` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `Update_status_idx`(`status`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -632,9 +624,6 @@ ALTER TABLE `Profile` ADD CONSTRAINT `Profile_userId_fkey` FOREIGN KEY (`userId`
 
 -- AddForeignKey
 ALTER TABLE `Profile` ADD CONSTRAINT `Profile_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `ProfileSummary` ADD CONSTRAINT `ProfileSummary_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProfileImage` ADD CONSTRAINT `ProfileImage_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

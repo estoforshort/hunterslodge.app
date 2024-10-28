@@ -112,7 +112,6 @@ export default defineEventHandler(async (event) => {
       silver: psnProfile.data.trophySummary.earnedTrophies.silver,
       bronze: psnProfile.data.trophySummary.earnedTrophies.bronze,
       lastCheckedAt: dayjs().format(),
-      summary: { create: {} },
     },
   });
 

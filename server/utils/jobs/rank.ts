@@ -14,23 +14,15 @@ export const runRankings = async () => {
       prisma.profile.findMany({
         select: {
           id: true,
+          hiddenTrophies: true,
+          points: true,
           globalPosition: true,
-          summary: {
-            select: {
-              hiddenTrophies: true,
-              points: true,
-            },
-          },
         },
         where: {
-          summary: {
-            lastFullUpdateAt: { not: null },
-          },
+          lastFullUpdateAt: { not: null },
         },
         orderBy: {
-          summary: {
-            points: "desc",
-          },
+          points: "desc",
         },
       }),
     ]);
@@ -65,39 +57,37 @@ export const runRankings = async () => {
     for (let p = 0, pl = profiles.length; p < pl; p++) {
       const profile = profiles[p];
 
-      if (profile.summary) {
-        if (!profile.summary.hiddenTrophies) {
-          if (profile.globalPosition !== profileGlobalPosition) {
-            await prisma.profile.update({
-              where: { id: profile.id },
-              data: {
-                globalPosition: profileGlobalPosition,
-                globalPositionChanges: {
-                  create: {
-                    globalPositionFrom: profile.globalPosition,
-                    globalPositionTo: profileGlobalPosition,
-                  },
+      if (!profile.hiddenTrophies) {
+        if (profile.globalPosition !== profileGlobalPosition) {
+          await prisma.profile.update({
+            where: { id: profile.id },
+            data: {
+              globalPosition: profileGlobalPosition,
+              globalPositionChanges: {
+                create: {
+                  globalPositionFrom: profile.globalPosition,
+                  globalPositionTo: profileGlobalPosition,
                 },
               },
-            });
-          }
+            },
+          });
+        }
 
-          profileGlobalPosition += 1;
-        } else {
-          if (profile.globalPosition) {
-            await prisma.profile.update({
-              where: { id: profile.id },
-              data: {
-                globalPosition: 0,
-                globalPositionChanges: {
-                  create: {
-                    globalPositionFrom: profile.globalPosition,
-                    globalPositionTo: 0,
-                  },
+        profileGlobalPosition += 1;
+      } else {
+        if (profile.globalPosition) {
+          await prisma.profile.update({
+            where: { id: profile.id },
+            data: {
+              globalPosition: 0,
+              globalPositionChanges: {
+                create: {
+                  globalPositionFrom: profile.globalPosition,
+                  globalPositionTo: 0,
                 },
               },
-            });
-          }
+            },
+          });
         }
       }
     }
