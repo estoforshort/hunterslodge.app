@@ -116,33 +116,14 @@ model Profile {
   regionId String        @db.Char(2)
   region   ProfileRegion @relation(references: [id], fields: [regionId])
 
-  accountId        String   @unique @db.VarChar(36)
-  onlineId         String   @unique @db.VarChar(16)
-  imageUrl         String   @db.VarChar(512)
-  platinum         Int      @db.UnsignedSmallInt
-  gold             Int      @db.UnsignedMediumInt
-  silver           Int      @db.UnsignedMediumInt
-  bronze           Int      @db.UnsignedMediumInt
-  lastCheckedAt    DateTime
-  regionalPosition Int      @default(0) @db.UnsignedSmallInt
-  globalPosition   Int      @default(0) @db.UnsignedSmallInt
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  summary                ProfileSummary?
-  image                  ProfileImage?
-  updates                Update[]
-  projects               Project[]
-  regionalPostionChanges ProfileRegionalPositionChange[]
-  globalPositionChanges  ProfielGlobalPositionChange[]
-
-  @@index([regionId])
-}
-
-model ProfileSummary {
-  profileId Int     @unique @db.UnsignedSmallInt
-  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
-
+  accountId           String    @unique @db.VarChar(36)
+  onlineId            String    @unique @db.VarChar(16)
+  imageUrl            String    @db.VarChar(512)
+  platinum            Int       @db.UnsignedSmallInt
+  gold                Int       @db.UnsignedMediumInt
+  silver              Int       @db.UnsignedMediumInt
+  bronze              Int       @db.UnsignedMediumInt
+  lastCheckedAt       DateTime
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
   startedProjects     Int       @default(0) @db.UnsignedSmallInt
@@ -159,9 +140,18 @@ model ProfileSummary {
   completion          Decimal   @default(0) @db.Decimal(5, 2)
   points              Decimal   @default(0) @db.Decimal(19, 2)
   lastFullUpdateAt    DateTime?
+  regionalPosition    Int       @default(0) @db.UnsignedSmallInt
+  globalPosition      Int       @default(0) @db.UnsignedSmallInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
+  image                  ProfileImage?
+  updates                Update[]
+  projects               Project[]
+  regionalPostionChanges ProfileRegionalPositionChange[]
+  globalPositionChanges  ProfielGlobalPositionChange[]
+
+  @@index([regionId])
   @@index([lastFullUpdateAt])
 }
 
@@ -234,6 +224,8 @@ model Update {
   updatedAt             DateTime     @updatedAt
 
   changes ProjectChange[]
+
+  @@index([status])
 }
 
 model Game {

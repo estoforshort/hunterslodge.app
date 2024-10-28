@@ -30,4 +30,7 @@ export default defineNuxtConfig({
       },
     },
   },
+  routeRules: {
+    "/api/public/**": { cors: true },
+  },
 });
