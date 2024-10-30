@@ -16,12 +16,6 @@ export default defineNuxtConfig({
     "nuxt-authorization",
   ],
   runtimeConfig: {
-    session: {
-      name: "lodge-session",
-      cookie: {
-        sameSite: "strict",
-      },
-    },
     oauth: {
       twitch: {
         clientId: "",
