@@ -1,8 +1,8 @@
 import { linkProfile } from "~/utils/abilities/profiles";
-import { useValidatedBody, z } from "h3-zod";
 import { getName } from "country-list";
 import fetch from "node-fetch";
 import dayjs from "dayjs";
+import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
@@ -22,11 +22,12 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const { onlineId } = await useValidatedBody(event, {
+  const bodySchema = z.object({
     onlineId: z.string().min(3).max(16),
   });
 
-  const psnProfile = await psn.findProfile({ onlineId });
+  const body = await readValidatedBody(event, bodySchema.parse);
+  const psnProfile = await psn.findProfile({ onlineId: body.onlineId });
 
   if (!psnProfile.data) {
     return {
