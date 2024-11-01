@@ -11,6 +11,7 @@ type Data = {
     id: number;
     accountId: string;
     completion: number;
+    createdAt: Date;
   };
   project: {
     npServiceName: string;
@@ -47,6 +48,8 @@ export const updateProjectAndStack = async (data: Data) => {
       },
       include: { stack: true },
     });
+
+    let streamId = null;
 
     if (
       !findProjectWithStack ||
@@ -340,6 +343,8 @@ export const updateProjectAndStack = async (data: Data) => {
             Number.EPSILON) *
             100,
         ) / 100) as unknown as Prisma.Decimal;
+
+        streamId = updatedGroup.data.streamId;
       }
 
       if (!updateSuccessful) {
@@ -454,6 +459,7 @@ export const updateProjectAndStack = async (data: Data) => {
                   100,
               ) / 100,
           },
+          streamId,
         },
       };
     }
@@ -483,6 +489,7 @@ export const updateProjectAndStack = async (data: Data) => {
           },
           points: 0,
         },
+        streamId,
       },
     };
   } catch (e) {

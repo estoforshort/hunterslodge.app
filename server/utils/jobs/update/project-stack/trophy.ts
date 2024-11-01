@@ -8,6 +8,7 @@ type Data = {
   profile: {
     id: number;
     completion: number;
+    createdAt: Date;
   };
   gameId: number;
   group: {
@@ -129,6 +130,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         100,
     ) / 100) as unknown as Prisma.Decimal;
 
+    let streamId = null;
+
     if (data.trophy.earned) {
       let points = 0 as unknown as Prisma.Decimal;
 
@@ -166,6 +169,25 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               data.trophy.earnedDateTime,
             ).format() as unknown as Date;
           }
+
+          if (
+            dayjs(data.trophy.earnedDateTime).isAfter(data.profile.createdAt)
+          ) {
+            const findStream = await prisma.stream.findFirst({
+              select: {
+                id: true,
+              },
+              where: {
+                profileId: data.profile.id,
+                createdAt: { lt: dayjs(data.trophy.earnedDateTime).format() },
+                endsAt: { gt: dayjs(data.trophy.earnedDateTime).format() },
+              },
+            });
+
+            if (findStream) {
+              streamId = findStream.id;
+            }
+          }
         }
 
         const [createProjectTrophy, updateStackTrophy] = await Promise.all([
@@ -176,6 +198,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               groupId: data.group.id,
               trophyId: data.trophy.trophyId,
               appId: "app",
+              streamId,
               earnedAt: data.trophy.earnedDateTime
                 ? dayjs(data.trophy.earnedDateTime).format()
                 : null,
@@ -222,6 +245,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
           data: {
             projectTrophy: createProjectTrophy,
             stackTrophy: updateStackTrophy,
+            streamId,
           },
         };
       }
@@ -280,6 +304,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   },
                 },
               }),
+              streamId,
             },
           };
         }
@@ -314,6 +339,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 },
               },
             }),
+            streamId,
           },
         };
       }
@@ -342,6 +368,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               },
             }),
             stackTrophy: stackTrophy,
+            streamId,
           },
         };
       }
@@ -350,6 +377,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         data: {
           projectTrophy: findProjectTrophy,
           stackTrophy: stackTrophy,
+          streamId,
         },
       };
     }
@@ -388,6 +416,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               },
             },
           }),
+          streamId,
         },
       };
     }
@@ -396,6 +425,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       data: {
         projectTrophy: findProjectTrophy,
         stackTrophy: stackTrophy,
+        streamId,
       },
     };
   } catch (e) {

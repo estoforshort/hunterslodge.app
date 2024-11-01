@@ -10,6 +10,7 @@ type Data = {
     id: number;
     accountId: string;
     completion: number;
+    createdAt: Date;
   };
   game: {
     id: number;
@@ -49,6 +50,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         },
         include: { stackGroup: { include: { gameGroup: true } } },
       });
+
+    let streamId = null;
 
     if (
       !findProjectGroupWithStackGroupAndGameGroup ||
@@ -235,6 +238,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           profile: {
             id: data.profile.id,
             completion: data.profile.completion,
+            createdAt: data.profile.createdAt,
           },
           gameId: data.game.id,
           group: {
@@ -332,6 +336,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             Number.EPSILON) *
             100,
         ) / 100) as unknown as Prisma.Decimal;
+
+        streamId = updatedTrophy.data.streamId;
       }
 
       if (!updateSuccessful) {
@@ -431,6 +437,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data: {
           projectGroup: updateProjectGroup,
           stackGroup: updateStackGroup,
+          streamId,
         },
       };
     }
@@ -439,6 +446,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
       data: {
         projectGroup: findProjectGroupWithStackGroupAndGameGroup,
         stackGroup: findProjectGroupWithStackGroupAndGameGroup.stackGroup,
+        streamId,
       },
     };
   } catch (e) {

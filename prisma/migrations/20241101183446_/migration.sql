@@ -160,6 +160,7 @@ CREATE TABLE `Stream` (
     `createdAt` DATETIME(3) NOT NULL,
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `Stream_profileId_createdAt_endsAt_idx`(`profileId`, `createdAt`, `endsAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

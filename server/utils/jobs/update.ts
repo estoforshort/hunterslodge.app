@@ -20,6 +20,7 @@ export const runUpdate = async (updateId: number) => {
             firstTrophyEarnedAt: true,
             lastTrophyEarnedAt: true,
             lastFullUpdateAt: true,
+            createdAt: true,
           },
         },
         status: true,
@@ -188,6 +189,7 @@ export const runUpdate = async (updateId: number) => {
             id: update.profile.id,
             accountId: update.profile.accountId,
             completion: Math.floor(Number(profileSummary.completion)),
+            createdAt: update.profile.createdAt,
           },
           project,
         });
@@ -259,6 +261,38 @@ export const runUpdate = async (updateId: number) => {
               Number.EPSILON) *
               100,
           ) / 100) as unknown as Prisma.Decimal;
+        }
+
+        if (updatedProject.data.streamId) {
+          const stream = await prisma.stream.findUnique({
+            select: {
+              platinum: true,
+              gold: true,
+              silver: true,
+              bronze: true,
+            },
+            where: { id: updatedProject.data.streamId },
+          });
+
+          if (stream) {
+            await prisma.stream.update({
+              where: { id: updatedProject.data.streamId },
+              data: {
+                platinum:
+                  stream.platinum +
+                  updatedProject.data.changes.trophies.earned.platinum,
+                gold:
+                  stream.gold +
+                  updatedProject.data.changes.trophies.earned.gold,
+                silver:
+                  stream.silver +
+                  updatedProject.data.changes.trophies.earned.silver,
+                bronze:
+                  stream.bronze +
+                  updatedProject.data.changes.trophies.earned.bronze,
+              },
+            });
+          }
         }
       }
 
