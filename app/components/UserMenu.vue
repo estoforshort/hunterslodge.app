@@ -30,7 +30,7 @@ const items = computed(() => [
       external
     >
       <template #trailing>
-        <UIcon name="i-simple-icons-twitch" class="ms-1 h-4 w-4" />
+        <UIcon name="i-simple-icons-twitch" class="h-4 w-4" />
       </template>
     </UButton>
 
