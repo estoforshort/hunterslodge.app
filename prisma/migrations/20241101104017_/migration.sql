@@ -131,6 +131,51 @@ CREATE TABLE `ProfileImage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Overlay` (
+    `id` VARCHAR(36) NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `lastCalledAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `viewers` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `language` CHAR(2) NOT NULL,
+    `mature` BOOLEAN NOT NULL,
+    `gameId` VARCHAR(36) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Overlay_profileId_key`(`profileId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Stream` (
+    `id` VARCHAR(36) NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `maxViewers` MEDIUMINT UNSIGNED NOT NULL,
+    `avgViewers` MEDIUMINT UNSIGNED NOT NULL,
+    `platinum` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `gold` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `silver` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `bronze` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `endsAt` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Viewers` (
+    `id` VARCHAR(36) NOT NULL,
+    `streamId` VARCHAR(36) NOT NULL,
+    `viewers` MEDIUMINT UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `Viewers_streamId_idx`(`streamId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Update` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `appId` CHAR(3) NOT NULL,
@@ -346,6 +391,7 @@ CREATE TABLE `StackTrophy` (
 -- CreateTable
 CREATE TABLE `Project` (
     `profileId` SMALLINT UNSIGNED NOT NULL,
+    `overlayId` VARCHAR(36) NULL,
     `stackId` VARCHAR(36) NOT NULL,
     `appId` CHAR(3) NOT NULL,
     `earnedPlatinum` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -361,8 +407,21 @@ CREATE TABLE `Project` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Project_overlayId_key`(`overlayId`),
     INDEX `Project_stackId_progress_idx`(`stackId`, `progress`),
     PRIMARY KEY (`profileId`, `stackId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `StreamsOnProjects` (
+    `streamId` VARCHAR(36) NOT NULL,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `stackId` VARCHAR(36) NOT NULL,
+    `timeStreamed` INTEGER UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`streamId`, `profileId`, `stackId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -394,6 +453,7 @@ CREATE TABLE `ProjectTrophy` (
     `groupId` CHAR(3) NOT NULL,
     `trophyId` SMALLINT UNSIGNED NOT NULL,
     `appId` CHAR(3) NOT NULL,
+    `streamId` VARCHAR(36) NULL,
     `earnedAt` DATETIME(3) NULL,
     `points` DECIMAL(10, 2) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -629,6 +689,15 @@ ALTER TABLE `Profile` ADD CONSTRAINT `Profile_regionId_fkey` FOREIGN KEY (`regio
 ALTER TABLE `ProfileImage` ADD CONSTRAINT `ProfileImage_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Overlay` ADD CONSTRAINT `Overlay_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Stream` ADD CONSTRAINT `Stream_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Viewers` ADD CONSTRAINT `Viewers_streamId_fkey` FOREIGN KEY (`streamId`) REFERENCES `Stream`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Update` ADD CONSTRAINT `Update_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -686,10 +755,19 @@ ALTER TABLE `StackTrophy` ADD CONSTRAINT `StackTrophy_gameId_groupId_trophyId_fk
 ALTER TABLE `Project` ADD CONSTRAINT `Project_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Project` ADD CONSTRAINT `Project_overlayId_fkey` FOREIGN KEY (`overlayId`) REFERENCES `Overlay`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Project` ADD CONSTRAINT `Project_stackId_fkey` FOREIGN KEY (`stackId`) REFERENCES `Stack`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Project` ADD CONSTRAINT `Project_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StreamsOnProjects` ADD CONSTRAINT `StreamsOnProjects_streamId_fkey` FOREIGN KEY (`streamId`) REFERENCES `Stream`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StreamsOnProjects` ADD CONSTRAINT `StreamsOnProjects_profileId_stackId_fkey` FOREIGN KEY (`profileId`, `stackId`) REFERENCES `Project`(`profileId`, `stackId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProjectGroup` ADD CONSTRAINT `ProjectGroup_profileId_stackId_fkey` FOREIGN KEY (`profileId`, `stackId`) REFERENCES `Project`(`profileId`, `stackId`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -705,6 +783,9 @@ ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_stackId_groupId_trophy
 
 -- AddForeignKey
 ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_streamId_fkey` FOREIGN KEY (`streamId`) REFERENCES `Stream`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProjectChange` ADD CONSTRAINT `ProjectChange_updateId_fkey` FOREIGN KEY (`updateId`) REFERENCES `Update`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

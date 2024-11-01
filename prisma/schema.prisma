@@ -146,6 +146,8 @@ model Profile {
   updatedAt           DateTime  @updatedAt
 
   image                  ProfileImage?
+  overlay                Overlay?
+  streams                Stream[]
   updates                Update[]
   projects               Project[]
   regionalPostionChanges ProfileRegionalPositionChange[]
@@ -162,6 +164,57 @@ model ProfileImage {
   image     Bytes    @db.MediumBlob
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Overlay {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  profileId Int     @unique @db.UnsignedSmallInt
+  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  project Project?
+
+  lastCalledAt DateTime @default(now())
+  viewers      Int      @default(0) @db.UnsignedMediumInt
+  language     String   @db.Char(2)
+  mature       Boolean
+  gameId       String?  @db.VarChar(36)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Stream {
+  id String @id @db.VarChar(36)
+
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  maxViewers Int      @db.UnsignedMediumInt
+  avgViewers Int      @db.UnsignedMediumInt
+  platinum   Int      @default(0) @db.UnsignedSmallInt
+  gold       Int      @default(0) @db.UnsignedMediumInt
+  silver     Int      @default(0) @db.UnsignedMediumInt
+  bronze     Int      @default(0) @db.UnsignedMediumInt
+  endsAt     DateTime
+  createdAt  DateTime
+  updatedAt  DateTime @updatedAt
+
+  viewers  Viewers[]
+  projects StreamsOnProjects[]
+  trophies ProjectTrophy[]
+}
+
+model Viewers {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  streamId String @db.VarChar(36)
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  viewers   Int      @db.UnsignedMediumInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([streamId])
 }
 
 enum UpdateStatus {
@@ -449,6 +502,9 @@ model Project {
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
+  overlayId String?  @unique @db.VarChar(36)
+  overlay   Overlay? @relation(fields: [overlayId], references: [id], onDelete: SetNull)
+
   stackId String @db.VarChar(36)
   stack   Stack  @relation(fields: [stackId], references: [id])
 
@@ -468,11 +524,27 @@ model Project {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
+  streams StreamsOnProjects[]
   groups  ProjectGroup[]
   changes ProjectChange[]
 
   @@id([profileId, stackId])
   @@index([stackId, progress])
+}
+
+model StreamsOnProjects {
+  streamId String @db.VarChar(36)
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  profileId Int     @db.UnsignedSmallInt
+  stackId   String  @db.VarChar(36)
+  project   Project @relation(fields: [profileId, stackId], references: [profileId, stackId])
+
+  timeStreamed Int      @db.UnsignedInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@id([streamId, profileId, stackId])
 }
 
 model ProjectGroup {
@@ -514,6 +586,9 @@ model ProjectTrophy {
 
   appId String @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
+
+  streamId String? @db.VarChar(36)
+  stream   Stream? @relation(fields: [streamId], references: [id], onDelete: Cascade)
 
   earnedAt  DateTime?
   points    Decimal   @db.Decimal(10, 2)
