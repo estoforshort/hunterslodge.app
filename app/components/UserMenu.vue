@@ -11,6 +11,12 @@ const items = computed(() => [
   ],
   [
     {
+      label: "Administrate",
+      icon: "i-heroicons-bolt",
+      to: "/p/admin",
+      class: user.value?.isAdmin ? "" : "hidden",
+    },
+    {
       label: "Log out",
       icon: "i-heroicons-arrow-left-on-rectangle",
       click: clear,
