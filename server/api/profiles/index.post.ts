@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     return {
       data: {
         success: false,
-        message: `Please change your About me on PSN temporarily to "link:${session.user.username}"`,
+        message: `Please change your About me on PSN temporarily to link:${session.user.username}`,
       },
     };
   }

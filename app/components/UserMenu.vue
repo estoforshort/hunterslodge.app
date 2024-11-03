@@ -1,5 +1,17 @@
 <script setup lang="ts">
-const { user, clear } = useUserSession();
+import LinkPsnModal from "./LinkPsnModal.vue";
+
+const { user, clear, fetch } = useUserSession();
+
+const modal = useModal();
+
+function openLinkPsnModal() {
+  modal.open(LinkPsnModal, {
+    onSuccess() {
+      fetch();
+    },
+  });
+}
 
 const items = computed(() => [
   [
@@ -7,6 +19,19 @@ const items = computed(() => [
       label: "User",
       slot: "user",
       disabled: true,
+    },
+  ],
+  [
+    {
+      label: "Link PSN",
+      icon: "i-heroicons-link",
+      click: openLinkPsnModal,
+      class: user.value?.isLinked ? "hidden" : "",
+    },
+    {
+      label: "Queue update",
+      icon: "i-heroicons-arrow-path",
+      class: user.value?.isLinked ? "" : "hidden",
     },
   ],
   [
