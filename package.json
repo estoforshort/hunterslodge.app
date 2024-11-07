@@ -19,6 +19,7 @@
     "bullmq": "^5.20.0",
     "country-list": "^2.3.0",
     "dayjs": "^1.11.13",
+    "format-thousands": "^2.0.0",
     "fuse.js": "^7.0.0",
     "node-fetch": "^3.3.2",
     "nuxt": "^3.14.159",
@@ -27,9 +28,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@iconify-json/bi": "^1.2.1",
     "@iconify-json/simple-icons": "^1.2.7",
     "@types/country-list": "^2.1.4",
     "@types/eslint-config-prettier": "^6.11.3",
+    "@types/format-thousands": "^2.0.3",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.8",

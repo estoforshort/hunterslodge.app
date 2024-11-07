@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
           id: true,
           userId: true,
           accountId: true,
+          onlineId: true,
           imageUrl: true,
           platinum: true,
           gold: true,
@@ -41,7 +42,30 @@ export default defineEventHandler(async (event) => {
       },
       project: {
         select: {
-          stackId: true,
+          stack: {
+            select: {
+              id: true,
+              game: {
+                select: {
+                  imageUrl: true,
+                },
+              },
+              definedPlatinum: true,
+              definedGold: true,
+              definedSilver: true,
+              definedBronze: true,
+            },
+          },
+          earnedPlatinum: true,
+          earnedGold: true,
+          earnedSilver: true,
+          earnedBronze: true,
+          progress: true,
+          streams: {
+            select: {
+              timeStreamed: true,
+            },
+          },
         },
       },
       viewers: true,
@@ -131,7 +155,7 @@ export default defineEventHandler(async (event) => {
           streamId_profileId_stackId: {
             streamId: stream.id,
             profileId: findOverlay.profile.id,
-            stackId: findOverlay.project.stackId,
+            stackId: findOverlay.project.stack.id,
           },
         },
       });
@@ -161,7 +185,7 @@ export default defineEventHandler(async (event) => {
           data: {
             streamId: stream.id,
             profileId: findOverlay.profile.id,
-            stackId: findOverlay.project.stackId,
+            stackId: findOverlay.project.stack.id,
             timeStreamed: 0,
           },
         });
@@ -219,12 +243,12 @@ export default defineEventHandler(async (event) => {
               },
             });
           } else {
-            if (findOverlay.project.stackId !== results[0].item.stackId) {
+            if (findOverlay.project.stack.id !== results[0].item.stackId) {
               await prisma.project.update({
                 where: {
                   profileId_stackId: {
                     profileId: findOverlay.profile.id,
-                    stackId: findOverlay.project.stackId,
+                    stackId: findOverlay.project.stack.id,
                   },
                 },
                 data: {
@@ -251,7 +275,7 @@ export default defineEventHandler(async (event) => {
               where: {
                 profileId_stackId: {
                   profileId: findOverlay.profile.id,
-                  stackId: findOverlay.project.stackId,
+                  stackId: findOverlay.project.stack.id,
                 },
               },
               data: {
@@ -266,7 +290,7 @@ export default defineEventHandler(async (event) => {
             where: {
               profileId_stackId: {
                 profileId: findOverlay.profile.id,
-                stackId: findOverlay.project.stackId,
+                stackId: findOverlay.project.stack.id,
               },
             },
             data: {
