@@ -364,35 +364,46 @@ export default defineEventHandler(async (event) => {
               }
             }
 
-            const createUpdate = await prisma.update.create({
-              data: {
-                appId: "app",
-                profileId: findOverlay.profile.id,
-                status: "WAITING",
-                type: "AUTOMATIC",
-                fullUpdate: dayjs().isAfter(
-                  dayjs(findOverlay.profile.lastFullUpdateAt).add(3, "hours"),
-                ),
-                startedProjectsFrom: findOverlay.profile.startedProjects,
-                completedProjectsFrom: findOverlay.profile.completedProjects,
-                definedPlatinumFrom: findOverlay.profile.definedPlatinum,
-                definedGoldFrom: findOverlay.profile.definedGold,
-                definedSilverFrom: findOverlay.profile.definedSilver,
-                definedBronzeFrom: findOverlay.profile.definedBronze,
-                earnedPlatinumFrom: findOverlay.profile.earnedPlatinum,
-                earnedGoldFrom: findOverlay.profile.earnedGold,
-                earnedSilverFrom: findOverlay.profile.earnedSilver,
-                earnedBronzeFrom: findOverlay.profile.earnedBronze,
-                hiddenTrophiesFrom: findOverlay.profile.hiddenTrophies,
-                completionFrom: findOverlay.profile.completion,
-                pointsFrom: findOverlay.profile.points,
-              },
-            });
+            if (
+              findOverlay.profile.platinum !==
+                psnProfile.data.trophySummary.earnedTrophies.platinum ||
+              findOverlay.profile.gold !==
+                psnProfile.data.trophySummary.earnedTrophies.gold ||
+              findOverlay.profile.silver !==
+                psnProfile.data.trophySummary.earnedTrophies.silver ||
+              findOverlay.profile.bronze !==
+                psnProfile.data.trophySummary.earnedTrophies.bronze
+            ) {
+              const createUpdate = await prisma.update.create({
+                data: {
+                  appId: "app",
+                  profileId: findOverlay.profile.id,
+                  status: "WAITING",
+                  type: "OVERLAY",
+                  fullUpdate: dayjs().isAfter(
+                    dayjs(findOverlay.profile.lastFullUpdateAt).add(3, "hours"),
+                  ),
+                  startedProjectsFrom: findOverlay.profile.startedProjects,
+                  completedProjectsFrom: findOverlay.profile.completedProjects,
+                  definedPlatinumFrom: findOverlay.profile.definedPlatinum,
+                  definedGoldFrom: findOverlay.profile.definedGold,
+                  definedSilverFrom: findOverlay.profile.definedSilver,
+                  definedBronzeFrom: findOverlay.profile.definedBronze,
+                  earnedPlatinumFrom: findOverlay.profile.earnedPlatinum,
+                  earnedGoldFrom: findOverlay.profile.earnedGold,
+                  earnedSilverFrom: findOverlay.profile.earnedSilver,
+                  earnedBronzeFrom: findOverlay.profile.earnedBronze,
+                  hiddenTrophiesFrom: findOverlay.profile.hiddenTrophies,
+                  completionFrom: findOverlay.profile.completion,
+                  pointsFrom: findOverlay.profile.points,
+                },
+              });
 
-            await addJob({
-              type: "UPDATE",
-              update: { id: createUpdate.id, type: createUpdate.type },
-            });
+              await addJob({
+                type: "UPDATE",
+                update: { id: createUpdate.id, type: createUpdate.type },
+              });
+            }
           }
         }
       }
