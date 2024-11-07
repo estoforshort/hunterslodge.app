@@ -33,6 +33,11 @@ const items = computed(() => [
       icon: "i-heroicons-arrow-path",
       class: user.value?.isLinked ? "" : "hidden",
     },
+    {
+      label: "Settings",
+      icon: "i-heroicons-cog",
+      to: "/p/settings",
+    },
   ],
   [
     {

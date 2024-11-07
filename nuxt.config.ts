@@ -23,6 +23,9 @@ export default defineNuxtConfig({
         redirectURL: "",
       },
     },
+    public: {
+      baseUrl: "",
+    },
   },
   routeRules: {
     "/api/public/**": { cors: true },

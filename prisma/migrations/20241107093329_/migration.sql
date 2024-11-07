@@ -134,11 +134,13 @@ CREATE TABLE `ProfileImage` (
 CREATE TABLE `Overlay` (
     `id` VARCHAR(36) NOT NULL,
     `profileId` SMALLINT UNSIGNED NOT NULL,
-    `lastCalledAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `viewers` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
-    `language` CHAR(2) NOT NULL,
-    `mature` BOOLEAN NOT NULL,
-    `gameId` VARCHAR(36) NULL,
+    `mature` BOOLEAN NOT NULL DEFAULT false,
+    `language` CHAR(2) NULL,
+    `lastLiveAt` DATETIME(3) NULL,
+    `showProject` BOOLEAN NOT NULL DEFAULT false,
+    `updateProject` BOOLEAN NOT NULL DEFAULT false,
+    `updateTrophies` BOOLEAN NOT NULL DEFAULT true,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -216,6 +218,7 @@ CREATE TABLE `Update` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `Update_profileId_status_idx`(`profileId`, `status`),
     INDEX `Update_status_idx`(`status`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -236,6 +239,7 @@ CREATE TABLE `Game` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Game_hash_key`(`hash`),
+    FULLTEXT INDEX `Game_name_idx`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

@@ -174,13 +174,15 @@ model Overlay {
 
   project Project?
 
-  lastCalledAt DateTime @default(now())
-  viewers      Int      @default(0) @db.UnsignedMediumInt
-  language     String   @db.Char(2)
-  mature       Boolean
-  gameId       String?  @db.VarChar(36)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  viewers        Int       @default(0) @db.UnsignedMediumInt
+  mature         Boolean   @default(false)
+  language       String?   @db.Char(2)
+  lastLiveAt     DateTime?
+  showProject    Boolean   @default(false)
+  updateProject  Boolean   @default(false)
+  updateTrophies Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Stream {
@@ -280,6 +282,7 @@ model Update {
 
   changes ProjectChange[]
 
+  @@index([profileId, status])
   @@index([status])
 }
 
@@ -304,6 +307,8 @@ model Game {
   platforms PlatformsOnGames[]
   groups    Group[]
   stacks    Stack[]
+
+  @@fulltext([name])
 }
 
 model GameImage {
