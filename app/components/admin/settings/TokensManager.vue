@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import UpdateTokensModal from "./UpdateTokensModal.vue";
+import relativeTime from "dayjs/plugin/relativeTime";
+import duration from "dayjs/plugin/duration";
+import dayjs from "dayjs";
+
+dayjs.extend(relativeTime);
+dayjs.extend(duration);
 
 const { data: tokens, refresh } = await useFetch("/api/app-tokens");
 

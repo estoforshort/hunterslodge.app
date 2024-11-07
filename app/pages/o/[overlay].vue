@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import relativeTime from "dayjs/plugin/relativeTime";
 import formatThousands from "format-thousands";
+import duration from "dayjs/plugin/duration";
+import dayjs from "dayjs";
+
+dayjs.extend(relativeTime);
+dayjs.extend(duration);
 
 definePageMeta({
   layout: "overlay",
@@ -23,6 +29,7 @@ onMounted(() => {
 });
 
 const timeStreamed = ref(0);
+countTimeStreamed();
 
 function countTimeStreamed() {
   if (overlay.value?.data.project) {
@@ -40,7 +47,7 @@ function countTimeStreamed() {
 <template>
   <figure
     v-if="overlay"
-    class="flex max-h-11 min-h-11 justify-between bg-gradient-to-r from-gray-700/70 via-gray-800/80 to-gray-900/90"
+    class="flex max-h-11 min-h-11 justify-between bg-gradient-to-r from-gray-800/80 via-gray-900/90 to-gray-950"
   >
     <div
       v-if="overlay.data.project"
@@ -49,6 +56,7 @@ function countTimeStreamed() {
       <img :src="overlay.data.project.stack.game.imageUrl" class="me-2 h-11" />
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
+
       <span class="my-auto me-6">
         {{
           formatThousands(
@@ -72,7 +80,7 @@ function countTimeStreamed() {
 
       <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
       <span class="my-auto">{{
-        dayjs.duration(timeStreamed, "seconds").format("HH:mm:ss")
+        dayjs.duration(timeStreamed, "seconds").format("HH:mm")
       }}</span>
     </div>
 
@@ -100,8 +108,8 @@ function countTimeStreamed() {
         formatThousands(overlay.data.profile.earnedPlatinum, ",")
       }}</span>
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-yellow-500" />
-      <span class="my-auto me-6 text-yellow-500">{{
+      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-yellow-400" />
+      <span class="my-auto me-6 text-yellow-400">{{
         formatThousands(overlay.data.profile.earnedGold, ",")
       }}</span>
 
