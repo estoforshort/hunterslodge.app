@@ -266,6 +266,7 @@ export const runUpdate = async (updateId: number) => {
         if (updatedProject.data.streamId) {
           const stream = await prisma.stream.findUnique({
             select: {
+              id: true,
               platinum: true,
               gold: true,
               silver: true,
@@ -276,7 +277,7 @@ export const runUpdate = async (updateId: number) => {
 
           if (stream) {
             await prisma.stream.update({
-              where: { id: updatedProject.data.streamId },
+              where: { id: stream.id },
               data: {
                 platinum:
                   stream.platinum +

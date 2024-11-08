@@ -337,7 +337,9 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             100,
         ) / 100) as unknown as Prisma.Decimal;
 
-        streamId = updatedTrophy.data.streamId;
+        if (!streamId) {
+          streamId = updatedTrophy.data.streamId;
+        }
       }
 
       if (!updateSuccessful) {
