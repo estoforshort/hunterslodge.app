@@ -48,6 +48,10 @@ const columns = [
     <UPageBody>
       <UCard :ui="{ body: { padding: '!p-0' } }">
         <UTable v-if="profiles" :columns="columns" :rows="profiles.data">
+          <template #globalPosition-data="{ row }">
+            {{ ordinal(row.globalPosition) }}
+          </template>
+
           <template #displayName-data="{ row }">
             <NuxtLink :to="`/${row.user.username}`">{{
               row.user.displayName
