@@ -31,7 +31,7 @@ if (updates.value) {
       if (data.value.length === 0) {
         data.value.push({
           x: dayjs(update.startedAt).unix(),
-          y: Number(update.pointsFrom),
+          y: Number(update.pointsTo),
         });
       }
 
