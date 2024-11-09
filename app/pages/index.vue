@@ -13,7 +13,7 @@ const columns = [
     label: "#",
   },
   {
-    key: "user.displayName",
+    key: "displayName",
     label: "Hunter",
   },
   {
@@ -46,8 +46,14 @@ const columns = [
 <template>
   <UPage>
     <UPageBody>
-      <UCard>
+      <UCard :ui="{ body: { padding: '!p-0' } }">
         <UTable v-if="profiles" :columns="columns" :rows="profiles.data">
+          <template #displayName-data="{ row }">
+            <NuxtLink :to="`/${row.user.username}`">{{
+              row.user.displayName
+            }}</NuxtLink>
+          </template>
+
           <template #earnedPlatinum-data="{ row }">
             <span class="text-sky-500 dark:text-sky-300">{{
               formatThousands(row.earnedPlatinum, ",")
