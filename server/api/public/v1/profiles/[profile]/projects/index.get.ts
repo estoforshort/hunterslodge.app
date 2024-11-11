@@ -39,6 +39,11 @@ export default defineEventHandler(async (event) => {
                   id: true,
                   name: true,
                   imageUrl: true,
+                  platforms: {
+                    select: {
+                      platformId: true,
+                    },
+                  },
                 },
               },
               definedPlatinum: true,
