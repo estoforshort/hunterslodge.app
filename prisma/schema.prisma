@@ -136,10 +136,16 @@ model Profile {
   earnedGold          Int       @default(0) @db.UnsignedMediumInt
   earnedSilver        Int       @default(0) @db.UnsignedMediumInt
   earnedBronze        Int       @default(0) @db.UnsignedMediumInt
+  streamPlatinum      Int       @default(0) @db.UnsignedSmallInt
+  streamGold          Int       @default(0) @db.UnsignedMediumInt
+  streamSilver        Int       @default(0) @db.UnsignedMediumInt
+  streamBronze        Int       @default(0) @db.UnsignedMediumInt
   hiddenTrophies      Int       @default(0) @db.UnsignedMediumInt
   completion          Decimal   @default(0) @db.Decimal(5, 2)
   points              Decimal   @default(0) @db.Decimal(19, 2)
+  streamPoints        Decimal   @default(0) @db.Decimal(19, 2)
   lastFullUpdateAt    DateTime?
+  streamPosition      Int       @default(0) @db.UnsignedSmallInt
   regionalPosition    Int       @default(0) @db.UnsignedSmallInt
   globalPosition      Int       @default(0) @db.UnsignedSmallInt
   createdAt           DateTime  @default(now())
@@ -150,8 +156,9 @@ model Profile {
   streams                Stream[]
   updates                Update[]
   projects               Project[]
+  streamPositionChanges  ProfileStreamPositionChange[]
   regionalPostionChanges ProfileRegionalPositionChange[]
-  globalPositionChanges  ProfielGlobalPositionChange[]
+  globalPositionChanges  ProfileGlobalPositionChange[]
 
   @@index([regionId])
   @@index([lastFullUpdateAt])
@@ -271,12 +278,22 @@ model Update {
   earnedSilverTo        Int          @default(0) @db.UnsignedMediumInt
   earnedBronzeFrom      Int          @db.UnsignedMediumInt
   earnedBronzeTo        Int          @default(0) @db.UnsignedMediumInt
+  streamPlatinumFrom    Int          @db.UnsignedSmallInt
+  streamPlatinumTo      Int          @default(0) @db.UnsignedSmallInt
+  streamGoldFrom        Int          @db.UnsignedMediumInt
+  streamGoldTo          Int          @default(0) @db.UnsignedMediumInt
+  streamSilverFrom      Int          @db.UnsignedMediumInt
+  streamSilverTo        Int          @default(0) @db.UnsignedMediumInt
+  streamBronzeFrom      Int          @db.UnsignedMediumInt
+  streamBronzeTo        Int          @default(0) @db.UnsignedMediumInt
   hiddenTrophiesFrom    Int          @db.UnsignedMediumInt
   hiddenTrophiesTo      Int          @default(0) @db.UnsignedMediumInt
   completionFrom        Decimal      @db.Decimal(5, 2)
   completionTo          Decimal      @default(0) @db.Decimal(5, 2)
   pointsFrom            Decimal      @db.Decimal(19, 2)
   pointsTo              Decimal      @default(0) @db.Decimal(19, 2)
+  streamPointsFrom      Decimal      @db.Decimal(19, 2)
+  streamPointsTo        Decimal      @default(0) @db.Decimal(19, 2)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
@@ -522,11 +539,16 @@ model Project {
   earnedGold          Int       @default(0) @db.UnsignedSmallInt
   earnedSilver        Int       @default(0) @db.UnsignedSmallInt
   earnedBronze        Int       @default(0) @db.UnsignedSmallInt
+  streamPlatinum      Int       @default(0) @db.UnsignedTinyInt
+  streamGold          Int       @default(0) @db.UnsignedSmallInt
+  streamSilver        Int       @default(0) @db.UnsignedSmallInt
+  streamBronze        Int       @default(0) @db.UnsignedSmallInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
   progress            Int       @default(0) @db.UnsignedTinyInt
   value               Decimal   @default(0) @db.Decimal(14, 2)
   points              Decimal   @default(0) @db.Decimal(14, 2)
+  streamPoints        Decimal   @default(0) @db.Decimal(14, 2)
   completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -566,11 +588,16 @@ model ProjectGroup {
   earnedGold          Int       @default(0) @db.UnsignedSmallInt
   earnedSilver        Int       @default(0) @db.UnsignedSmallInt
   earnedBronze        Int       @default(0) @db.UnsignedSmallInt
+  streamPlatinum      Int       @default(0) @db.UnsignedTinyInt
+  streamGold          Int       @default(0) @db.UnsignedSmallInt
+  streamSilver        Int       @default(0) @db.UnsignedSmallInt
+  streamBronze        Int       @default(0) @db.UnsignedSmallInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
   progress            Int       @default(0) @db.UnsignedTinyInt
   value               Decimal   @default(0) @db.Decimal(14, 2)
   points              Decimal   @default(0) @db.Decimal(14, 2)
+  streamPoints        Decimal   @default(0) @db.Decimal(14, 2)
   completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -623,10 +650,20 @@ model ProjectChange {
   earnedSilverTo     Int      @default(0) @db.UnsignedSmallInt
   earnedBronzeFrom   Int      @db.UnsignedSmallInt
   earnedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
+  streamPlatinumFrom Int      @db.UnsignedTinyInt
+  streamPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  streamGoldFrom     Int      @db.UnsignedSmallInt
+  streamGoldTo       Int      @default(0) @db.UnsignedSmallInt
+  streamSilverFrom   Int      @db.UnsignedSmallInt
+  streamSilverTo     Int      @default(0) @db.UnsignedSmallInt
+  streamBronzeFrom   Int      @db.UnsignedSmallInt
+  streamBronzeTo     Int      @default(0) @db.UnsignedSmallInt
   progressFrom       Int      @db.UnsignedTinyInt
   progressTo         Int      @default(0) @db.UnsignedTinyInt
   pointsFrom         Decimal  @db.Decimal(14, 2)
   pointsTo           Decimal  @default(0) @db.Decimal(14, 2)
+  streamPointsFrom   Decimal  @db.Decimal(14, 2)
+  streamPointsTo     Decimal  @default(0) @db.Decimal(14, 2)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -652,10 +689,20 @@ model ProjectGroupChange {
   earnedSilverTo     Int      @default(0) @db.UnsignedSmallInt
   earnedBronzeFrom   Int      @db.UnsignedSmallInt
   earnedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
+  streamPlatinumFrom Int      @db.UnsignedTinyInt
+  streamPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
+  streamGoldFrom     Int      @db.UnsignedSmallInt
+  streamGoldTo       Int      @default(0) @db.UnsignedSmallInt
+  streamSilverFrom   Int      @db.UnsignedSmallInt
+  streamSilverTo     Int      @default(0) @db.UnsignedSmallInt
+  streamBronzeFrom   Int      @db.UnsignedSmallInt
+  streamBronzeTo     Int      @default(0) @db.UnsignedSmallInt
   progressFrom       Int      @db.UnsignedTinyInt
   progressTo         Int      @default(0) @db.UnsignedTinyInt
   pointsFrom         Decimal  @db.Decimal(14, 2)
   pointsTo           Decimal  @default(0) @db.Decimal(14, 2)
+  streamPointsFrom   Decimal  @db.Decimal(14, 2)
+  streamPointsTo     Decimal  @default(0) @db.Decimal(14, 2)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -805,6 +852,18 @@ model ProfileRegionPositionChange {
   updatedAt    DateTime @updatedAt
 }
 
+model ProfileStreamPositionChange {
+  id Int @id @default(autoincrement()) @db.UnsignedInt
+
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  streamPositionFrom Int      @db.UnsignedSmallInt
+  streamPositionTo   Int      @db.UnsignedSmallInt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
 model ProfileRegionalPositionChange {
   id Int @id @default(autoincrement()) @db.UnsignedInt
 
@@ -817,7 +876,7 @@ model ProfileRegionalPositionChange {
   updatedAt            DateTime @updatedAt
 }
 
-model ProfielGlobalPositionChange {
+model ProfileGlobalPositionChange {
   id Int @id @default(autoincrement()) @db.UnsignedInt
 
   profileId Int     @db.UnsignedSmallInt

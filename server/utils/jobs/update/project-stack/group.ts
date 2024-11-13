@@ -51,6 +51,13 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         include: { stackGroup: { include: { gameGroup: true } } },
       });
 
+    const newStreamTrophies = {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      bronze: 0,
+    };
+
     let streamId = null;
 
     if (
@@ -175,11 +182,16 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         earnedGold: data.group.earnedTrophies.gold,
         earnedSilver: data.group.earnedTrophies.silver,
         earnedBronze: data.group.earnedTrophies.bronze,
+        streamPlatinum: 0,
+        streamGold: 0,
+        streamSilver: 0,
+        streamBronze: 0,
         firstTrophyEarnedAt: projectGroup.firstTrophyEarnedAt,
         lastTrophyEarnedAt: projectGroup.lastTrophyEarnedAt,
         progress: data.group.progress,
         value: 0 as unknown as Prisma.Decimal,
         points: 0 as unknown as Prisma.Decimal,
+        streamPoints: 0 as unknown as Prisma.Decimal,
         completion: data.profile.completion,
       };
 
@@ -208,8 +220,13 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               earnedGoldFrom: projectGroup.earnedGold,
               earnedSilverFrom: projectGroup.earnedSilver,
               earnedBronzeFrom: projectGroup.earnedBronze,
+              streamPlatinumFrom: projectGroup.streamPlatinum,
+              streamGoldFrom: projectGroup.streamGold,
+              streamSilverFrom: projectGroup.streamSilver,
+              streamBronzeFrom: projectGroup.streamBronze,
               progressFrom: projectGroup.progress,
               pointsFrom: projectGroup.points,
+              streamPointsFrom: projectGroup.streamPoints,
             },
           }),
           prisma.stackGroupChange.create({
@@ -290,6 +307,51 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               Number.EPSILON) *
               100,
           ) / 100) as unknown as Prisma.Decimal;
+
+          if (updatedTrophy.data.streamTrophy) {
+            if (trophy.trophyType === "platinum") {
+              projectGroupData.streamPlatinum += 1;
+
+              if (updatedTrophy.data.streamId) {
+                newStreamTrophies.platinum += 1;
+              }
+            }
+
+            if (trophy.trophyType === "gold") {
+              projectGroupData.streamGold += 1;
+
+              if (updatedTrophy.data.streamId) {
+                newStreamTrophies.gold += 1;
+              }
+            }
+
+            if (trophy.trophyType === "silver") {
+              projectGroupData.streamSilver += 1;
+
+              if (updatedTrophy.data.streamId) {
+                newStreamTrophies.silver += 1;
+              }
+            }
+
+            if (trophy.trophyType === "bronze") {
+              projectGroupData.streamBronze += 1;
+
+              if (updatedTrophy.data.streamId) {
+                newStreamTrophies.bronze += 1;
+              }
+            }
+
+            if (updatedTrophy.data.streamId && !streamId) {
+              streamId = updatedTrophy.data.streamId;
+            }
+
+            projectGroupData.streamPoints = (Math.round(
+              (Number(projectGroupData.streamPoints) +
+                Number(projectTrophy.points) +
+                Number.EPSILON) *
+                100,
+            ) / 100) as unknown as Prisma.Decimal;
+          }
         }
 
         const stackTrophy = updatedTrophy.data.stackTrophy;
@@ -336,10 +398,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             Number.EPSILON) *
             100,
         ) / 100) as unknown as Prisma.Decimal;
-
-        if (!streamId) {
-          streamId = updatedTrophy.data.streamId;
-        }
       }
 
       if (!updateSuccessful) {
@@ -372,8 +430,13 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           earnedGoldTo: updateProjectGroup.earnedGold,
           earnedSilverTo: updateProjectGroup.earnedSilver,
           earnedBronzeTo: updateProjectGroup.earnedBronze,
+          streamPlatinumTo: updateProjectGroup.streamPlatinum,
+          streamGoldTo: updateProjectGroup.streamGold,
+          streamSilverTo: updateProjectGroup.streamSilver,
+          streamBronzeTo: updateProjectGroup.streamBronze,
           progressTo: updateProjectGroup.progress,
           pointsTo: updateProjectGroup.points,
+          streamPointsTo: updateProjectGroup.streamPoints,
         },
       });
 
@@ -439,6 +502,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data: {
           projectGroup: updateProjectGroup,
           stackGroup: updateStackGroup,
+          newStreamTrophies,
           streamId,
         },
       };
@@ -448,6 +512,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
       data: {
         projectGroup: findProjectGroupWithStackGroupAndGameGroup,
         stackGroup: findProjectGroupWithStackGroupAndGameGroup.stackGroup,
+        newStreamTrophies,
         streamId,
       },
     };

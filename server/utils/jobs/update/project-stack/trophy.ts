@@ -130,6 +130,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         100,
     ) / 100) as unknown as Prisma.Decimal;
 
+    let streamTrophy = false;
     let streamId = null;
 
     if (data.trophy.earned) {
@@ -185,6 +186,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
             });
 
             if (findStream) {
+              streamTrophy = true;
               streamId = findStream.id;
             }
           }
@@ -245,9 +247,14 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
           data: {
             projectTrophy: createProjectTrophy,
             stackTrophy: updateStackTrophy,
+            streamTrophy,
             streamId,
           },
         };
+      }
+
+      if (findProjectTrophy.streamId) {
+        streamTrophy = true;
       }
 
       if (
@@ -304,6 +311,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   },
                 },
               }),
+              streamTrophy,
               streamId,
             },
           };
@@ -339,6 +347,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 },
               },
             }),
+            streamTrophy,
             streamId,
           },
         };
@@ -368,6 +377,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               },
             }),
             stackTrophy: stackTrophy,
+            streamTrophy,
             streamId,
           },
         };
@@ -377,6 +387,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         data: {
           projectTrophy: findProjectTrophy,
           stackTrophy: stackTrophy,
+          streamTrophy,
           streamId,
         },
       };
@@ -416,6 +427,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               },
             },
           }),
+          streamTrophy,
           streamId,
         },
       };
@@ -425,6 +437,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       data: {
         projectTrophy: findProjectTrophy,
         stackTrophy: stackTrophy,
+        streamTrophy,
         streamId,
       },
     };

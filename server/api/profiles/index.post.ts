@@ -159,9 +159,14 @@ export default defineEventHandler(async (event) => {
       earnedGoldFrom: 0,
       earnedSilverFrom: 0,
       earnedBronzeFrom: 0,
+      streamPlatinumFrom: 0,
+      streamGoldFrom: 0,
+      streamSilverFrom: 0,
+      streamBronzeFrom: 0,
       hiddenTrophiesFrom: 0,
       completionFrom: 0,
       pointsFrom: 0,
+      streamPointsFrom: 0,
     },
   });
 

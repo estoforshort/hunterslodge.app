@@ -68,11 +68,18 @@ export const runUpdate = async (updateId: number) => {
       earnedGold: update.fullUpdate ? 0 : update.earnedGoldFrom,
       earnedSilver: update.fullUpdate ? 0 : update.earnedSilverFrom,
       earnedBronze: update.fullUpdate ? 0 : update.earnedBronzeFrom,
+      streamPlatinum: update.fullUpdate ? 0 : update.earnedPlatinumFrom,
+      streamGold: update.fullUpdate ? 0 : update.earnedGoldFrom,
+      streamSilver: update.fullUpdate ? 0 : update.earnedSilverFrom,
+      streamBronze: update.fullUpdate ? 0 : update.earnedBronzeFrom,
       hiddenTrophies: update.fullUpdate ? 0 : update.hiddenTrophiesFrom,
       completion: update.fullUpdate
         ? (0 as unknown as Prisma.Decimal)
         : update.completionFrom,
       points: update.fullUpdate ? 0 : update.pointsFrom,
+      streamPoints: update.fullUpdate
+        ? (0 as unknown as Prisma.Decimal)
+        : update.pointsFrom,
     };
 
     const getProjects = async () => {
@@ -248,16 +255,50 @@ export const runUpdate = async (updateId: number) => {
           profileSummary.earnedGold += changes.trophies.earned.gold;
           profileSummary.earnedSilver += changes.trophies.earned.silver;
           profileSummary.earnedBronze += changes.trophies.earned.bronze;
+
+          if (updatedProject.data.newStreamTrophies) {
+            profileSummary.streamPlatinum +=
+              updatedProject.data.newStreamTrophies.platinum;
+            profileSummary.streamGold +=
+              updatedProject.data.newStreamTrophies.gold;
+            profileSummary.streamSilver +=
+              updatedProject.data.newStreamTrophies.silver;
+            profileSummary.streamBronze +=
+              updatedProject.data.newStreamTrophies.bronze;
+          }
+
           profileSummary.points = (Math.round(
             (Number(profileSummary.points) +
               Number(changes.points) +
               Number.EPSILON) *
               100,
           ) / 100) as unknown as Prisma.Decimal;
+
+          profileSummary.streamPoints = (Math.round(
+            (Number(profileSummary.streamPoints) +
+              Number(changes.streamPoints) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
         } else {
+          profileSummary.streamPlatinum +=
+            updatedProject.data.project.streamPlatinum;
+          profileSummary.streamGold += updatedProject.data.project.streamGold;
+          profileSummary.streamSilver +=
+            updatedProject.data.project.streamSilver;
+          profileSummary.streamBronze +=
+            updatedProject.data.project.streamBronze;
+
           profileSummary.points = (Math.round(
             (Number(profileSummary.points) +
               Number(updatedProject.data.project.points) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
+
+          profileSummary.streamPoints = (Math.round(
+            (Number(profileSummary.streamPoints) +
+              Number(updatedProject.data.project.streamPoints) +
               Number.EPSILON) *
               100,
           ) / 100) as unknown as Prisma.Decimal;
@@ -281,16 +322,12 @@ export const runUpdate = async (updateId: number) => {
               data: {
                 platinum:
                   stream.platinum +
-                  updatedProject.data.changes.trophies.earned.platinum,
-                gold:
-                  stream.gold +
-                  updatedProject.data.changes.trophies.earned.gold,
+                  updatedProject.data.newStreamTrophies.platinum,
+                gold: stream.gold + updatedProject.data.newStreamTrophies.gold,
                 silver:
-                  stream.silver +
-                  updatedProject.data.changes.trophies.earned.silver,
+                  stream.silver + updatedProject.data.newStreamTrophies.silver,
                 bronze:
-                  stream.bronze +
-                  updatedProject.data.changes.trophies.earned.bronze,
+                  stream.bronze + updatedProject.data.newStreamTrophies.bronze,
               },
             });
           }
@@ -340,9 +377,14 @@ export const runUpdate = async (updateId: number) => {
         earnedGold: profileSummary.earnedGold,
         earnedSilver: profileSummary.earnedSilver,
         earnedBronze: profileSummary.earnedBronze,
+        streamPlatinum: profileSummary.streamPlatinum,
+        streamGold: profileSummary.streamGold,
+        streamSilver: profileSummary.streamSilver,
+        streamBronze: profileSummary.streamBronze,
         hiddenTrophies: profileSummary.hiddenTrophies,
         completion: profileSummary.completion,
         points: profileSummary.points,
+        streamPoints: profileSummary.streamPoints,
         lastFullUpdateAt: update.fullUpdate
           ? dayjs().format()
           : update.profile.lastFullUpdateAt,
@@ -509,9 +551,14 @@ export const runUpdate = async (updateId: number) => {
         earnedGoldTo: profileSummary.earnedGold,
         earnedSilverTo: profileSummary.earnedSilver,
         earnedBronzeTo: profileSummary.earnedBronze,
+        streamPlatinumTo: profileSummary.streamPlatinum,
+        streamGoldTo: profileSummary.streamGold,
+        streamSilverTo: profileSummary.streamSilver,
+        streamBronzeTo: profileSummary.streamBronze,
         hiddenTrophiesTo: profileSummary.hiddenTrophies,
         completionTo: profileSummary.completion,
         pointsTo: profileSummary.points,
+        streamPointsTo: profileSummary.streamPoints,
       },
     });
 

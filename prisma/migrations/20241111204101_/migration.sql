@@ -103,10 +103,16 @@ CREATE TABLE `Profile` (
     `earnedGold` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedSilver` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronze` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinum` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGold` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilver` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronze` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `hiddenTrophies` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(19, 2) NOT NULL DEFAULT 0,
+    `streamPoints` DECIMAL(19, 2) NOT NULL DEFAULT 0,
     `lastFullUpdateAt` DATETIME(3) NULL,
+    `streamPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `regionalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `globalPosition` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -209,12 +215,22 @@ CREATE TABLE `Update` (
     `earnedSilverTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronzeFrom` MEDIUMINT UNSIGNED NOT NULL,
     `earnedBronzeTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinumFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamPlatinumTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGoldFrom` MEDIUMINT UNSIGNED NOT NULL,
+    `streamGoldTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilverFrom` MEDIUMINT UNSIGNED NOT NULL,
+    `streamSilverTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronzeFrom` MEDIUMINT UNSIGNED NOT NULL,
+    `streamBronzeTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `hiddenTrophiesFrom` MEDIUMINT UNSIGNED NOT NULL,
     `hiddenTrophiesTo` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `completionFrom` DECIMAL(5, 2) NOT NULL,
     `completionTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `pointsFrom` DECIMAL(19, 2) NOT NULL,
     `pointsTo` DECIMAL(19, 2) NOT NULL DEFAULT 0,
+    `streamPointsFrom` DECIMAL(19, 2) NOT NULL,
+    `streamPointsTo` DECIMAL(19, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -403,11 +419,16 @@ CREATE TABLE `Project` (
     `earnedGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronze` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinum` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronze` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `firstTrophyEarnedAt` DATETIME(3) NULL,
     `lastTrophyEarnedAt` DATETIME(3) NULL,
     `progress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `streamPoints` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `completion` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -438,11 +459,16 @@ CREATE TABLE `ProjectGroup` (
     `earnedGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronze` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinum` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronze` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `firstTrophyEarnedAt` DATETIME(3) NULL,
     `lastTrophyEarnedAt` DATETIME(3) NULL,
     `progress` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `value` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `streamPoints` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `completion` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -480,10 +506,20 @@ CREATE TABLE `ProjectChange` (
     `earnedSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronzeFrom` SMALLINT UNSIGNED NOT NULL,
     `earnedBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `streamPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGoldFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamGoldTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilverFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronzeFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `progressFrom` TINYINT UNSIGNED NOT NULL,
     `progressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `pointsFrom` DECIMAL(14, 2) NOT NULL,
     `pointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `streamPointsFrom` DECIMAL(14, 2) NOT NULL,
+    `streamPointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -504,10 +540,20 @@ CREATE TABLE `ProjectGroupChange` (
     `earnedSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronzeFrom` SMALLINT UNSIGNED NOT NULL,
     `earnedBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamPlatinumFrom` TINYINT UNSIGNED NOT NULL,
+    `streamPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamGoldFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamGoldTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamSilverFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamSilverTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `streamBronzeFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamBronzeTo` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `progressFrom` TINYINT UNSIGNED NOT NULL,
     `progressTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `pointsFrom` DECIMAL(14, 2) NOT NULL,
     `pointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
+    `streamPointsFrom` DECIMAL(14, 2) NOT NULL,
+    `streamPointsTo` DECIMAL(14, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -643,6 +689,18 @@ CREATE TABLE `ProfileRegionPositionChange` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ProfileStreamPositionChange` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `profileId` SMALLINT UNSIGNED NOT NULL,
+    `streamPositionFrom` SMALLINT UNSIGNED NOT NULL,
+    `streamPositionTo` SMALLINT UNSIGNED NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `ProfileRegionalPositionChange` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `profileId` SMALLINT UNSIGNED NOT NULL,
@@ -655,7 +713,7 @@ CREATE TABLE `ProfileRegionalPositionChange` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ProfielGlobalPositionChange` (
+CREATE TABLE `ProfileGlobalPositionChange` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `globalPositionFrom` SMALLINT UNSIGNED NOT NULL,
@@ -832,7 +890,10 @@ ALTER TABLE `ProfileRegionChange` ADD CONSTRAINT `ProfileRegionChange_regionId_f
 ALTER TABLE `ProfileRegionPositionChange` ADD CONSTRAINT `ProfileRegionPositionChange_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `ProfileRegion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `ProfileStreamPositionChange` ADD CONSTRAINT `ProfileStreamPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `ProfileRegionalPositionChange` ADD CONSTRAINT `ProfileRegionalPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `ProfielGlobalPositionChange` ADD CONSTRAINT `ProfielGlobalPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `ProfileGlobalPositionChange` ADD CONSTRAINT `ProfileGlobalPositionChange_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

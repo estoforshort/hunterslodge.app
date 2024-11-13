@@ -1,6 +1,6 @@
 export const runRankings = async () => {
   try {
-    const [regions, profiles] = await Promise.all([
+    const [regions, profiles, streamers] = await Promise.all([
       prisma.profileRegion.findMany({
         select: {
           id: true,
@@ -23,6 +23,20 @@ export const runRankings = async () => {
         },
         orderBy: {
           points: "desc",
+        },
+      }),
+      prisma.profile.findMany({
+        select: {
+          id: true,
+          hiddenTrophies: true,
+          streamPoints: true,
+          streamPosition: true,
+        },
+        where: {
+          streamPoints: { gt: 0 },
+        },
+        orderBy: {
+          streamPoints: "desc",
         },
       }),
     ]);
@@ -84,6 +98,46 @@ export const runRankings = async () => {
                 create: {
                   globalPositionFrom: profile.globalPosition,
                   globalPositionTo: 0,
+                },
+              },
+            },
+          });
+        }
+      }
+    }
+
+    let streamPosition = 1;
+
+    for (let s = 0, sl = streamers.length; s < sl; s++) {
+      const streamer = streamers[s];
+
+      if (!streamer.hiddenTrophies) {
+        if (streamer.streamPosition !== streamPosition) {
+          await prisma.profile.update({
+            where: { id: streamer.id },
+            data: {
+              streamPosition: streamPosition,
+              streamPositionChanges: {
+                create: {
+                  streamPositionFrom: streamer.streamPosition,
+                  streamPositionTo: streamPosition,
+                },
+              },
+            },
+          });
+        }
+
+        streamPosition += 1;
+      } else {
+        if (streamer.streamPosition) {
+          await prisma.profile.update({
+            where: { id: streamer.id },
+            data: {
+              streamPosition: 0,
+              streamPositionChanges: {
+                create: {
+                  streamPositionFrom: streamer.streamPosition,
+                  streamPositionTo: 0,
                 },
               },
             },
