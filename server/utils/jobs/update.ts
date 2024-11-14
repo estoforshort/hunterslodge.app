@@ -42,6 +42,7 @@ export const runUpdate = async (updateId: number) => {
         hiddenTrophiesFrom: true,
         completionFrom: true,
         pointsFrom: true,
+        streamPointsFrom: true,
       },
       where: { id: updateId },
     });
@@ -83,7 +84,7 @@ export const runUpdate = async (updateId: number) => {
       points: update.fullUpdate ? 0 : update.pointsFrom,
       streamPoints: update.fullUpdate
         ? (0 as unknown as Prisma.Decimal)
-        : update.pointsFrom,
+        : update.streamPointsFrom,
     };
 
     const getProjects = async () => {
