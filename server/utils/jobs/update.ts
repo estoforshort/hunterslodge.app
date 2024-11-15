@@ -363,10 +363,6 @@ export const runUpdate = async (updateId: number) => {
       return;
     }
 
-    if (!update.fullUpdate) {
-      calculateCompletion();
-    }
-
     await prisma.profile.update({
       where: { id: update.profile.id },
       data: {
