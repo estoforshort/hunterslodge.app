@@ -299,6 +299,7 @@ model Update {
 
   changes ProjectChange[]
 
+  @@index([profileId, type])
   @@index([profileId, status])
   @@index([status])
 }

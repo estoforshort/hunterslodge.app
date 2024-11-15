@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import Fuse from "fuse.js";
 import dayjs from "dayjs";
 import { z } from "zod";
