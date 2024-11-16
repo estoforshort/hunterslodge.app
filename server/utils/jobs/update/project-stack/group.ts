@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 
 type Data = {
   updateId: number;
-  stackChangeId: number;
+  stackChangeId: string;
   profilesCount: number;
   profile: {
     id: number;

@@ -580,7 +580,7 @@ CREATE TABLE `ProjectTrophyChange` (
 
 -- CreateTable
 CREATE TABLE `StackChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `stackId` VARCHAR(36) NOT NULL,
     `definedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
     `definedPlatinumTo` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -610,7 +610,7 @@ CREATE TABLE `StackChange` (
 
 -- CreateTable
 CREATE TABLE `StackGroupChange` (
-    `stackChangeId` INTEGER UNSIGNED NOT NULL,
+    `stackChangeId` CHAR(36) NOT NULL,
     `stackId` VARCHAR(36) NOT NULL,
     `groupId` CHAR(3) NOT NULL,
     `definedPlatinumFrom` TINYINT UNSIGNED NOT NULL,
@@ -637,7 +637,7 @@ CREATE TABLE `StackGroupChange` (
 
 -- CreateTable
 CREATE TABLE `StackTrophyChange` (
-    `stackChangeId` INTEGER UNSIGNED NOT NULL,
+    `stackChangeId` CHAR(36) NOT NULL,
     `stackId` VARCHAR(36) NOT NULL,
     `groupId` CHAR(3) NOT NULL,
     `trophyId` SMALLINT UNSIGNED NOT NULL,
@@ -657,7 +657,7 @@ CREATE TABLE `StackTrophyChange` (
 
 -- CreateTable
 CREATE TABLE `ProfileRegionChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `regionId` CHAR(2) NOT NULL,
     `rankedProfilesFrom` SMALLINT UNSIGNED NOT NULL,
     `rankedProfilesTo` SMALLINT UNSIGNED NOT NULL,
@@ -681,7 +681,7 @@ CREATE TABLE `ProfileRegionChange` (
 
 -- CreateTable
 CREATE TABLE `ProfileRegionPositionChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `regionId` CHAR(2) NOT NULL,
     `positionFrom` TINYINT UNSIGNED NOT NULL,
     `positionTo` TINYINT UNSIGNED NOT NULL,
@@ -693,7 +693,7 @@ CREATE TABLE `ProfileRegionPositionChange` (
 
 -- CreateTable
 CREATE TABLE `ProfileStreamPositionChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `streamPositionFrom` SMALLINT UNSIGNED NOT NULL,
     `streamPositionTo` SMALLINT UNSIGNED NOT NULL,
@@ -705,7 +705,7 @@ CREATE TABLE `ProfileStreamPositionChange` (
 
 -- CreateTable
 CREATE TABLE `ProfileRegionalPositionChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `regionalPositionFrom` SMALLINT UNSIGNED NOT NULL,
     `regionalPositionTo` SMALLINT UNSIGNED NOT NULL,
@@ -717,7 +717,7 @@ CREATE TABLE `ProfileRegionalPositionChange` (
 
 -- CreateTable
 CREATE TABLE `ProfileGlobalPositionChange` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` CHAR(36) NOT NULL,
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `globalPositionFrom` SMALLINT UNSIGNED NOT NULL,
     `globalPositionTo` SMALLINT UNSIGNED NOT NULL,

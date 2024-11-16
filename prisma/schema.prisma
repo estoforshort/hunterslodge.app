@@ -820,7 +820,7 @@ model StackTrophyChange {
 }
 
 model ProfileRegionChange {
-  id Int @id @default(autoincrement()) @db.UnsignedInt
+  id String @id @default(uuid()) @db.Char(36)
 
   regionId      String        @db.Char(2)
   profileRegion ProfileRegion @relation(fields: [regionId], references: [id])
@@ -844,7 +844,7 @@ model ProfileRegionChange {
 }
 
 model ProfileRegionPositionChange {
-  id Int @id @default(autoincrement()) @db.UnsignedInt
+  id String @id @default(uuid()) @db.Char(36)
 
   regionId      String        @db.Char(2)
   profileRegion ProfileRegion @relation(fields: [regionId], references: [id])
@@ -856,7 +856,7 @@ model ProfileRegionPositionChange {
 }
 
 model ProfileStreamPositionChange {
-  id Int @id @default(autoincrement()) @db.UnsignedInt
+  id String @id @default(uuid()) @db.Char(36)
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(fields: [profileId], references: [id])
@@ -868,7 +868,7 @@ model ProfileStreamPositionChange {
 }
 
 model ProfileRegionalPositionChange {
-  id Int @id @default(autoincrement()) @db.UnsignedInt
+  id String @id @default(uuid()) @db.Char(36)
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(fields: [profileId], references: [id])
@@ -880,7 +880,7 @@ model ProfileRegionalPositionChange {
 }
 
 model ProfileGlobalPositionChange {
-  id Int @id @default(autoincrement()) @db.UnsignedInt
+  id String @id @default(uuid()) @db.Char(36)
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(fields: [profileId], references: [id])
