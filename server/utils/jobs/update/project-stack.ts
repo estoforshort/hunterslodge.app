@@ -7,6 +7,7 @@ import type { Prisma } from "@prisma/client";
 
 type Data = {
   updateId: number;
+  profilesCount: number;
   profile: {
     id: number;
     accountId: string;
@@ -60,6 +61,7 @@ export const updateProjectAndStack = async (data: Data) => {
 
     if (
       !findProjectWithStack ||
+      findProjectWithStack.stack.profilesCount !== data.profilesCount ||
       findProjectWithStack.earnedPlatinum !==
         data.project.earnedTrophies.platinum ||
       findProjectWithStack.earnedGold !== data.project.earnedTrophies.gold ||
@@ -215,7 +217,9 @@ export const updateProjectAndStack = async (data: Data) => {
         firstTrophyEarnedAt: stack.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stack.lastTrophyEarnedAt,
         psnRate: 0 as unknown as Prisma.Decimal,
+        profilesCount: data.profilesCount,
         timesStarted: timesStarted,
+        rarity: 0 as unknown as Prisma.Decimal,
         timesCompleted: 0,
         avgProgress: 0,
         value: 0 as unknown as Prisma.Decimal,
@@ -249,6 +253,7 @@ export const updateProjectAndStack = async (data: Data) => {
             definedBronzeFrom: stack.definedBronze,
             psnRateFrom: stack.psnRate,
             timesStartedFrom: stack.timesStarted,
+            rarityFrom: stack.rarity,
             timesCompletedFrom: stack.timesCompleted,
             avgProgressFrom: stack.avgProgress,
             valueFrom: stack.value,
@@ -266,6 +271,7 @@ export const updateProjectAndStack = async (data: Data) => {
         const updatedGroup = await updateProjectAndStackGroup({
           updateId: data.updateId,
           stackChangeId: createStackChange.id,
+          profilesCount: data.profilesCount,
           profile: data.profile,
           game: {
             id: stack.gameId,
@@ -376,11 +382,6 @@ export const updateProjectAndStack = async (data: Data) => {
           }
         }
 
-        stackData.psnRate = (Number(stackData.psnRate) +
-          Number(
-            updatedGroup.data.stackGroup.psnRate,
-          )) as unknown as Prisma.Decimal;
-
         stackData.value = (Math.round(
           (Number(stackData.value) +
             Number(updatedGroup.data.stackGroup.value) +
@@ -447,6 +448,21 @@ export const updateProjectAndStack = async (data: Data) => {
         stackData.psnRate = avgPsnRate._avg.psnRate;
       }
 
+      stackData.rarity = (Math.round(
+        (data.profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
+      ) / 100) as unknown as Prisma.Decimal;
+
+      const rarityLoss =
+        (Number(stackData.psnRate) / 100) * Number(stackData.rarity);
+
+      stackData.rarity = (Math.round(
+        (data.profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
+      ) / 100) as unknown as Prisma.Decimal;
+
+      stackData.rarity = (Math.round(
+        (Number(stackData.rarity) - rarityLoss + Number.EPSILON) * 100,
+      ) / 100) as unknown as Prisma.Decimal;
+
       stackData.timesCompleted = timesCompleted;
 
       if (avgProgress._avg.progress) {
@@ -469,6 +485,7 @@ export const updateProjectAndStack = async (data: Data) => {
           definedBronzeTo: updateStack.definedBronze,
           psnRateTo: updateStack.psnRate,
           timesStartedTo: updateStack.timesStarted,
+          rarityTo: updateStack.rarity,
           timesCompletedTo: updateStack.timesCompleted,
           avgProgressTo: updateStack.avgProgress,
           valueTo: updateStack.value,

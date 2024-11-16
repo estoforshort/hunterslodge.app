@@ -5,6 +5,7 @@ import type { Prisma, TrophyType } from "@prisma/client";
 type Data = {
   updateId: number;
   stackChangeId: number;
+  profilesCount: number;
   profile: {
     id: number;
     completion: number;
@@ -17,7 +18,6 @@ type Data = {
   };
   stack: {
     id: string;
-    timesStarted: number;
   };
   trophy: {
     trophyId: number;
@@ -74,8 +74,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         data.trophy.trophyEarnedRate,
       ) as unknown as Prisma.Decimal,
       timesEarned: stackTrophy.timesEarned,
-      rate: stackTrophy.rate,
-      ratio: stackTrophy.ratio,
+      rarity: stackTrophy.rarity,
       value: stackTrophy.value,
     };
 
@@ -83,22 +82,21 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       stackTrophyData.timesEarned += 1;
     }
 
-    stackTrophyData.rate = (Math.round(
-      ((100 * stackTrophyData.timesEarned) / data.stack.timesStarted +
-        Number.EPSILON) *
-        100,
-    ) / 100) as unknown as Prisma.Decimal;
-
     if (stackTrophyData.timesEarned) {
-      stackTrophyData.ratio = (Math.round(
-        (data.stack.timesStarted / stackTrophyData.timesEarned +
-          Number.EPSILON) *
+      stackTrophyData.rarity = (Math.round(
+        (data.profilesCount / stackTrophyData.timesEarned + Number.EPSILON) *
           100,
       ) / 100) as unknown as Prisma.Decimal;
     } else {
-      stackTrophyData.ratio = data.stack
-        .timesStarted as unknown as Prisma.Decimal;
+      stackTrophyData.rarity = data.profilesCount as unknown as Prisma.Decimal;
     }
+
+    const rarityLoss =
+      (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.rarity);
+
+    stackTrophyData.rarity = (Math.round(
+      (Number(stackTrophyData.rarity) - rarityLoss + Number.EPSILON) * 100,
+    ) / 100) as unknown as Prisma.Decimal;
 
     switch (data.trophy.trophyType) {
       case "platinum": {
@@ -131,7 +129,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.value);
 
       stackTrophyData.value = (Math.round(
-        (Number(stackTrophyData.ratio) *
+        (Number(stackTrophyData.rarity) *
           (Number(stackTrophyData.value) - valueLoss) +
           Number.EPSILON) *
           100,
@@ -142,7 +140,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       const curve = 0.8 * valueLoss;
 
       stackTrophyData.value = (Math.round(
-        (Number(stackTrophyData.ratio) *
+        (Number(stackTrophyData.rarity) *
           (Number(stackTrophyData.value) - curve) +
           Number.EPSILON) *
           100,
@@ -153,7 +151,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       const curve = 0.4 * valueLoss;
 
       stackTrophyData.value = (Math.round(
-        (Number(stackTrophyData.ratio) *
+        (Number(stackTrophyData.rarity) *
           (Number(stackTrophyData.value) - curve) +
           Number.EPSILON) *
           100,
@@ -164,14 +162,14 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       const curve = 0.2 * valueLoss;
 
       stackTrophyData.value = (Math.round(
-        (Number(stackTrophyData.ratio) *
+        (Number(stackTrophyData.rarity) *
           (Number(stackTrophyData.value) - curve) +
           Number.EPSILON) *
           100,
       ) / 100) as unknown as Prisma.Decimal;
     } else {
       stackTrophyData.value = (Math.round(
-        (Number(stackTrophyData.ratio) * Number(stackTrophyData.value) +
+        (Number(stackTrophyData.rarity) * Number(stackTrophyData.value) +
           Number.EPSILON) *
           100,
       ) / 100) as unknown as Prisma.Decimal;
@@ -278,10 +276,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   psnRateTo: stackTrophyData.psnRate,
                   timesEarnedFrom: stackTrophy.timesEarned,
                   timesEarnedTo: stackTrophyData.timesEarned,
-                  rateFrom: stackTrophy.rate,
-                  rateTo: stackTrophyData.rate,
-                  ratioFrom: stackTrophy.ratio,
-                  ratioTo: stackTrophyData.ratio,
+                  rarityFrom: stackTrophy.rarity,
+                  rarityTo: stackTrophyData.rarity,
                   valueFrom: stackTrophy.value,
                   valueTo: stackTrophyData.value,
                 },
@@ -348,10 +344,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                       psnRateTo: stackTrophyData.psnRate,
                       timesEarnedFrom: stackTrophy.timesEarned,
                       timesEarnedTo: stackTrophyData.timesEarned,
-                      rateFrom: stackTrophy.rate,
-                      rateTo: stackTrophyData.rate,
-                      ratioFrom: stackTrophy.ratio,
-                      ratioTo: stackTrophyData.ratio,
+                      rarityFrom: stackTrophy.rarity,
+                      rarityTo: stackTrophyData.rarity,
                       valueFrom: stackTrophy.value,
                       valueTo: stackTrophyData.value,
                     },
@@ -384,10 +378,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                     psnRateTo: stackTrophyData.psnRate,
                     timesEarnedFrom: stackTrophy.timesEarned,
                     timesEarnedTo: stackTrophyData.timesEarned,
-                    rateFrom: stackTrophy.rate,
-                    rateTo: stackTrophyData.rate,
-                    ratioFrom: stackTrophy.ratio,
-                    ratioTo: stackTrophyData.ratio,
+                    rarityFrom: stackTrophy.rarity,
+                    rarityTo: stackTrophyData.rarity,
                     valueFrom: stackTrophy.value,
                     valueTo: stackTrophyData.value,
                   },
@@ -443,8 +435,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
     if (
       Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate) ||
       stackTrophyData.timesEarned !== stackTrophy.timesEarned ||
-      Number(stackTrophyData.rate) !== Number(stackTrophy.rate) ||
-      Number(stackTrophyData.ratio) !== Number(stackTrophy.ratio) ||
+      Number(stackTrophyData.rarity) !== Number(stackTrophy.rarity) ||
       Number(stackTrophyData.value) !== Number(stackTrophy.value)
     ) {
       return {
@@ -467,10 +458,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   psnRateTo: stackTrophyData.psnRate,
                   timesEarnedFrom: stackTrophy.timesEarned,
                   timesEarnedTo: stackTrophyData.timesEarned,
-                  rateFrom: stackTrophy.rate,
-                  rateTo: stackTrophyData.rate,
-                  ratioFrom: stackTrophy.ratio,
-                  ratioTo: stackTrophyData.ratio,
+                  rarityFrom: stackTrophy.rarity,
+                  rarityTo: stackTrophyData.rarity,
                   valueFrom: stackTrophy.value,
                   valueTo: stackTrophyData.value,
                 },

@@ -151,7 +151,10 @@ export const runUpdate = async (updateId: number) => {
       return projects.reverse();
     };
 
-    const projects = await getProjects();
+    const [projects, profilesCount] = await Promise.all([
+      getProjects(),
+      prisma.profile.count(),
+    ]);
 
     if (!updateSuccessful || !projects.length) {
       await prisma.update.update({
@@ -197,6 +200,7 @@ export const runUpdate = async (updateId: number) => {
       if (project.progress) {
         const updatedProject = await updateProjectAndStack({
           updateId: update.id,
+          profilesCount,
           profile: {
             id: update.profile.id,
             accountId: update.profile.accountId,

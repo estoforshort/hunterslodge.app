@@ -6,6 +6,7 @@ import type { Prisma } from "@prisma/client";
 type Data = {
   updateId: number;
   stackChangeId: number;
+  profilesCount: number;
   profile: {
     id: number;
     accountId: string;
@@ -62,6 +63,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
 
     if (
       !findProjectGroupWithStackGroupAndGameGroup ||
+      findProjectGroupWithStackGroupAndGameGroup.stackGroup.profilesCount !==
+        data.profilesCount ||
       findProjectGroupWithStackGroupAndGameGroup.earnedPlatinum !==
         data.group.earnedTrophies.platinum ||
       findProjectGroupWithStackGroupAndGameGroup.earnedGold !==
@@ -203,6 +206,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         firstTrophyEarnedAt: stackGroup.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stackGroup.lastTrophyEarnedAt,
         psnRate: 0 as unknown as Prisma.Decimal,
+        profilesCount: data.profilesCount,
         timesCompleted: stackGroup.timesCompleted,
         avgProgress: 0,
         value: 0 as unknown as Prisma.Decimal,
@@ -250,8 +254,9 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         const trophy = trophies.data.trophies[t];
 
         const updatedTrophy = await updateProjectAndStackTrophy({
-          stackChangeId: data.stackChangeId,
           updateId: data.updateId,
+          stackChangeId: data.stackChangeId,
+          profilesCount: data.profilesCount,
           profile: {
             id: data.profile.id,
             completion: data.profile.completion,
@@ -264,7 +269,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           },
           stack: {
             id: data.stack.id,
-            timesStarted: data.stack.timesStarted,
           },
           trophy,
         });
