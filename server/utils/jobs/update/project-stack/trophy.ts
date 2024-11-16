@@ -70,7 +70,9 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
     const stackTrophyData = {
       firstEarnedAt: stackTrophy.firstEarnedAt,
       lastEarnedAt: stackTrophy.lastEarnedAt,
-      psnRate: data.trophy.trophyEarnedRate as unknown as Prisma.Decimal,
+      psnRate: Number(
+        data.trophy.trophyEarnedRate,
+      ) as unknown as Prisma.Decimal,
       timesEarned: stackTrophy.timesEarned,
       rate: stackTrophy.rate,
       ratio: stackTrophy.ratio,
@@ -79,23 +81,23 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
 
     if (data.trophy.earned && !findProjectTrophy) {
       stackTrophyData.timesEarned += 1;
+    }
 
-      stackTrophyData.rate = (Math.round(
-        ((100 * stackTrophyData.timesEarned) / data.stack.timesStarted +
+    stackTrophyData.rate = (Math.round(
+      ((100 * stackTrophyData.timesEarned) / data.stack.timesStarted +
+        Number.EPSILON) *
+        100,
+    ) / 100) as unknown as Prisma.Decimal;
+
+    if (stackTrophyData.timesEarned) {
+      stackTrophyData.ratio = (Math.round(
+        (data.stack.timesStarted / stackTrophyData.timesEarned +
           Number.EPSILON) *
           100,
       ) / 100) as unknown as Prisma.Decimal;
-
-      if (stackTrophyData.timesEarned) {
-        stackTrophyData.ratio = (Math.round(
-          (data.stack.timesStarted / stackTrophyData.timesEarned +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-      } else {
-        stackTrophyData.ratio = data.stack
-          .timesStarted as unknown as Prisma.Decimal;
-      }
+    } else {
+      stackTrophyData.ratio = data.stack
+        .timesStarted as unknown as Prisma.Decimal;
     }
 
     switch (data.trophy.trophyType) {
@@ -118,17 +120,62 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       }
 
       case "bronze": {
-        const valueLoss = (Number(stackTrophy.psnRate) / 100) * 15;
+        const valueLoss = (Number(stackTrophyData.psnRate) / 100) * 15;
         stackTrophyData.value = (15 - valueLoss) as unknown as Prisma.Decimal;
         break;
       }
     }
 
-    stackTrophyData.value = (Math.round(
-      (Number(stackTrophyData.ratio) * Number(stackTrophyData.value) +
-        Number.EPSILON) *
-        100,
-    ) / 100) as unknown as Prisma.Decimal;
+    if (Number(stackTrophyData.psnRate) >= 50) {
+      const valueLoss =
+        (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.value);
+
+      stackTrophyData.value = (Math.round(
+        (Number(stackTrophyData.ratio) *
+          (Number(stackTrophyData.value) - valueLoss) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+    } else if (Number(stackTrophyData.psnRate) >= 20) {
+      const valueLoss =
+        (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.value);
+      const curve = 0.8 * valueLoss;
+
+      stackTrophyData.value = (Math.round(
+        (Number(stackTrophyData.ratio) *
+          (Number(stackTrophyData.value) - curve) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+    } else if (Number(stackTrophyData.psnRate) >= 15) {
+      const valueLoss =
+        (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.value);
+      const curve = 0.4 * valueLoss;
+
+      stackTrophyData.value = (Math.round(
+        (Number(stackTrophyData.ratio) *
+          (Number(stackTrophyData.value) - curve) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+    } else if (Number(stackTrophyData.psnRate) >= 5) {
+      const valueLoss =
+        (Number(stackTrophyData.psnRate) / 100) * Number(stackTrophyData.value);
+      const curve = 0.2 * valueLoss;
+
+      stackTrophyData.value = (Math.round(
+        (Number(stackTrophyData.ratio) *
+          (Number(stackTrophyData.value) - curve) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+    } else {
+      stackTrophyData.value = (Math.round(
+        (Number(stackTrophyData.ratio) * Number(stackTrophyData.value) +
+          Number.EPSILON) *
+          100,
+      ) / 100) as unknown as Prisma.Decimal;
+    }
 
     let streamTrophy = false;
     let streamId = null;
@@ -395,6 +442,9 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
 
     if (
       Number(stackTrophyData.psnRate) !== Number(stackTrophy.psnRate) ||
+      stackTrophyData.timesEarned !== stackTrophy.timesEarned ||
+      Number(stackTrophyData.rate) !== Number(stackTrophy.rate) ||
+      Number(stackTrophyData.ratio) !== Number(stackTrophy.ratio) ||
       Number(stackTrophyData.value) !== Number(stackTrophy.value)
     ) {
       return {

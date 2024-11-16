@@ -510,7 +510,7 @@ model StackTrophy {
   psnRate       Decimal   @default(0) @db.Decimal(5, 2)
   timesEarned   Int       @default(0) @db.UnsignedSmallInt
   rate          Decimal   @default(0) @db.Decimal(5, 2)
-  ratio         Decimal   @default(1) @db.Decimal(7, 2)
+  ratio         Decimal   @default(0) @db.Decimal(7, 2)
   value         Decimal   @default(0) @db.Decimal(10, 2)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

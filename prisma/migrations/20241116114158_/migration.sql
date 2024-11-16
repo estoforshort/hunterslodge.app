@@ -234,6 +234,7 @@ CREATE TABLE `Update` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `Update_profileId_type_idx`(`profileId`, `type`),
     INDEX `Update_profileId_status_idx`(`profileId`, `status`),
     INDEX `Update_status_idx`(`status`),
     PRIMARY KEY (`id`)
@@ -399,7 +400,7 @@ CREATE TABLE `StackTrophy` (
     `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `timesEarned` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `rate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
-    `ratio` DECIMAL(7, 2) NOT NULL DEFAULT 1,
+    `ratio` DECIMAL(7, 2) NOT NULL DEFAULT 0,
     `value` DECIMAL(10, 2) NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
