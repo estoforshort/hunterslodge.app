@@ -144,6 +144,7 @@ model Profile {
   completion          Decimal   @default(0) @db.Decimal(5, 2)
   points              Decimal   @default(0) @db.Decimal(19, 2)
   streamPoints        Decimal   @default(0) @db.Decimal(19, 2)
+  timeStreamed        Int       @default(0) @db.UnsignedInt
   lastFullUpdateAt    DateTime?
   streamPosition      Int       @default(0) @db.UnsignedSmallInt
   regionalPosition    Int       @default(0) @db.UnsignedSmallInt
@@ -198,15 +199,16 @@ model Stream {
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
 
-  maxViewers Int      @db.UnsignedMediumInt
-  avgViewers Int      @db.UnsignedMediumInt
-  platinum   Int      @default(0) @db.UnsignedSmallInt
-  gold       Int      @default(0) @db.UnsignedMediumInt
-  silver     Int      @default(0) @db.UnsignedMediumInt
-  bronze     Int      @default(0) @db.UnsignedMediumInt
-  endsAt     DateTime
-  createdAt  DateTime
-  updatedAt  DateTime @updatedAt
+  maxViewers   Int      @db.UnsignedMediumInt
+  avgViewers   Int      @db.UnsignedMediumInt
+  platinum     Int      @default(0) @db.UnsignedSmallInt
+  gold         Int      @default(0) @db.UnsignedMediumInt
+  silver       Int      @default(0) @db.UnsignedMediumInt
+  bronze       Int      @default(0) @db.UnsignedMediumInt
+  timeStreamed Int      @default(0) @db.UnsignedInt
+  endsAt       DateTime
+  createdAt    DateTime
+  updatedAt    DateTime @updatedAt
 
   viewers  Viewers[]
   projects StreamsOnProjects[]
@@ -552,6 +554,7 @@ model Project {
   value               Decimal   @default(0) @db.Decimal(14, 2)
   points              Decimal   @default(0) @db.Decimal(14, 2)
   streamPoints        Decimal   @default(0) @db.Decimal(14, 2)
+  timeStreamed        Int       @default(0) @db.UnsignedInt
   completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
