@@ -27,6 +27,10 @@ const orderOptions = [
     name: "Order by points",
     value: "points",
   },
+  {
+    name: "Order by time streamed",
+    value: "timeStreamed",
+  },
 ];
 
 const directionOptions = [
@@ -58,7 +62,11 @@ const { data: projects } = await useFetch(
         v-model="orderBy"
         :options="orderOptions"
         option-attribute="name"
-      />
+      >
+        <template #trailing>
+          <UIcon name="i-heroicons-arrows-up-down-20-solid" class="h-5 w-5" />
+        </template>
+      </USelect>
 
       <USelect
         v-model="direction"
@@ -110,10 +118,46 @@ const { data: projects } = await useFetch(
               <span class="align-middle">{{ project.stack.game.name }}</span>
             </div>
 
-            <div>
+            <div class="flex">
+              <UPopover
+                v-if="project.timeStreamed"
+                mode="hover"
+                :popper="{ placement: 'auto' }"
+              >
+                <span class="me-2 align-middle">
+                  <UIcon
+                    name="i-bi-clock-history"
+                    class="me-1 align-middle text-gray-600 lg:me-2"
+                  />
+                  <span class="hidden align-middle lg:me-2 lg:inline-block">
+                    {{
+                      dayjs
+                        .duration(project.timeStreamed, "seconds")
+                        .format("HH:mm")
+                    }}
+                  </span>
+                </span>
+
+                <template #panel>
+                  <div class="p-2">
+                    <p>
+                      Time streamed:
+                      {{
+                        dayjs
+                          .duration(project.timeStreamed, "seconds")
+                          .format("HH:mm")
+                      }}
+                    </p>
+                  </div>
+                </template>
+              </UPopover>
+
               <UPopover mode="hover" :popper="{ placement: 'auto' }">
                 <span class="align-middle">
-                  <UIcon name="i-bi-clock-history" class="text-gray-600" />
+                  <UIcon
+                    name="i-bi-info-circle"
+                    class="align-middle text-gray-600"
+                  />
                 </span>
 
                 <template #panel>

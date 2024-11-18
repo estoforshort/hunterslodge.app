@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
     "lastTrophyEarnedAt",
     "progress",
     "points",
+    "timeStreamed",
   ] as const;
 
   const querySchema = z.object({
@@ -67,6 +68,7 @@ export default defineEventHandler(async (event) => {
           lastTrophyEarnedAt: true,
           progress: true,
           points: true,
+          timeStreamed: true,
         },
         skip: Math.floor((page - 1) * pageSize),
         take: pageSize,
