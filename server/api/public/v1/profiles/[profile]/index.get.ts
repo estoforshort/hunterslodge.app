@@ -41,6 +41,7 @@ export default defineEventHandler(async (event) => {
       completion: true,
       points: true,
       lastFullUpdateAt: true,
+      streamPosition: true,
       regionalPosition: true,
       globalPosition: true,
       createdAt: true,

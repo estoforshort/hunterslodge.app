@@ -78,15 +78,17 @@ const links = computed(() => [
             </div>
           </div>
 
-          <div class="mt-32 grid grid-cols-2 space-x-6 text-center lg:mt-0">
-            <div>
+          <div class="mt-32 grid grid-cols-3 space-x-6 text-center lg:mt-0">
+            <div v-if="profile.data.streamPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.data.globalPosition) }}
+                {{ ordinal(profile.data.streamPosition) }}
               </p>
-              <p class="text-gray-400 dark:text-gray-500">Global</p>
+              <p class="text-gray-400 dark:text-gray-500">Streamer</p>
             </div>
 
-            <div>
+            <div v-else></div>
+
+            <div v-if="profile.data.regionalPosition">
               <p class="text-lg font-bold">
                 {{ ordinal(profile.data.regionalPosition) }}
               </p>
@@ -94,6 +96,17 @@ const links = computed(() => [
                 {{ profile.data.region.name }}
               </p>
             </div>
+
+            <div v-else></div>
+
+            <div v-if="profile.data.globalPosition">
+              <p class="text-lg font-bold">
+                {{ ordinal(profile.data.globalPosition) }}
+              </p>
+              <p class="text-gray-400 dark:text-gray-500">Global</p>
+            </div>
+
+            <div v-else></div>
           </div>
         </div>
 
