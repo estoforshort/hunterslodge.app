@@ -9,6 +9,7 @@ dayjs.extend(duration);
 
 const route = useRoute();
 const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
+const pageSize = 100;
 
 const orderOptions = [
   {
@@ -47,36 +48,36 @@ const directionOptions = [
 const orderBy = ref("lastTrophyEarnedAt");
 const direction = ref("desc");
 
-const pageSize = 100;
-const totalSize = ref(0);
-
 const { data: projects } = await useFetch(
   `/api/public/v1/profiles/${route.params.hunter}/projects`,
   {
     query: { orderBy, direction, page, pageSize },
     transform: (projects) => {
-      totalSize.value = projects.totalSize;
-
-      return projects.data.map((project) => ({
-        gameId: project.stack.game.id,
-        stackId: project.stack.id,
-        name: project.stack.game.name,
-        platforms: project.stack.game.platforms,
-        definedPlatinum: project.stack.definedPlatinum,
-        definedGold: project.stack.definedGold,
-        definedSilver: project.stack.definedSilver,
-        definedBronze: project.stack.definedBronze,
-        earnedPlatinum: project.earnedPlatinum,
-        earnedGold: project.earnedGold,
-        earnedSilver: project.earnedSilver,
-        earnedBronze: project.earnedBronze,
-        firstTrophyEarnedAt: project.firstTrophyEarnedAt,
-        lastTrophyEarnedAt: project.lastTrophyEarnedAt,
-        avgProgress: project.stack.avgProgress,
-        progress: project.progress,
-        points: project.points,
-        timeStreamed: project.timeStreamed,
-      }));
+      return {
+        data: projects.data.map((project) => ({
+          gameId: project.stack.game.id,
+          stackId: project.stack.id,
+          name: project.stack.game.name,
+          platforms: project.stack.game.platforms,
+          definedPlatinum: project.stack.definedPlatinum,
+          definedGold: project.stack.definedGold,
+          definedSilver: project.stack.definedSilver,
+          definedBronze: project.stack.definedBronze,
+          earnedPlatinum: project.earnedPlatinum,
+          earnedGold: project.earnedGold,
+          earnedSilver: project.earnedSilver,
+          earnedBronze: project.earnedBronze,
+          firstTrophyEarnedAt: project.firstTrophyEarnedAt,
+          lastTrophyEarnedAt: project.lastTrophyEarnedAt,
+          avgProgress: project.stack.avgProgress,
+          progress: project.progress,
+          points: project.points,
+          timeStreamed: project.timeStreamed,
+        })),
+        page: projects.page,
+        pageSize: projects.pageSize,
+        totalSize: projects.totalSize,
+      };
     },
   },
 );
@@ -85,7 +86,7 @@ const config = useRuntimeConfig();
 </script>
 
 <template>
-  <div v-if="projects" id="top">
+  <div id="top">
     <div class="mb-6 grid grid-cols-2 gap-6">
       <USelect
         v-model="orderBy"
@@ -109,7 +110,7 @@ const config = useRuntimeConfig();
     </div>
 
     <div
-      v-for="project in projects"
+      v-for="project in projects?.data"
       :key="project.stackId"
       class="mb-3 last:mb-0"
     >
@@ -352,22 +353,23 @@ const config = useRuntimeConfig();
       </figure>
     </div>
 
-    <template v-if="totalSize > pageSize">
-      <div class="mt-6 flex justify-center">
-        <UPagination
-          v-model="page"
-          :page-count="pageSize"
-          :total="totalSize"
-          :to="
-            (page: number) => ({
-              query: { page },
-              hash: '#top',
-            })
-          "
-          show-first
-          show-last
-        />
-      </div>
-    </template>
+    <div
+      v-if="projects && projects.totalSize > projects.pageSize"
+      class="mt-6 flex justify-center"
+    >
+      <UPagination
+        v-model="page"
+        :page-count="projects.pageSize"
+        :total="projects.totalSize"
+        :to="
+          (page: number) => ({
+            query: { page },
+            hash: '#top',
+          })
+        "
+        show-first
+        show-last
+      />
+    </div>
   </div>
 </template>
