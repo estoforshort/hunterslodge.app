@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const links = [
   {
-    label: "Leaderboard",
+    label: "Hunters",
     to: "/",
   },
 ];

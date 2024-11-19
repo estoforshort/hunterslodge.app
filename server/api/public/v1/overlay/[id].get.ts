@@ -55,6 +55,7 @@ export default defineCachedEventHandler(
                 id: true,
                 game: {
                   select: {
+                    id: true,
                     imageUrl: true,
                   },
                 },
@@ -70,11 +71,6 @@ export default defineCachedEventHandler(
             earnedBronze: true,
             progress: true,
             timeStreamed: true,
-            streams: {
-              select: {
-                timeStreamed: true,
-              },
-            },
           },
         },
         viewers: true,

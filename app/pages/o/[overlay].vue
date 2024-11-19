@@ -19,29 +19,50 @@ const route = useRoute();
 
 const { data: overlay, refresh } = await useFetch(
   `/api/public/v1/overlay/${route.params.overlay}`,
+  {
+    transform: (overlay) => {
+      if (!overlay.data) {
+        return null;
+      }
+
+      return {
+        profile: {
+          onlineId: overlay.data.profile.onlineId,
+          startedProjects: overlay.data.profile.startedProjects,
+          completedProjects: overlay.data.profile.completedProjects,
+          earnedPlatinum: overlay.data.profile.earnedPlatinum,
+          earnedGold: overlay.data.profile.earnedGold,
+          earnedSilver: overlay.data.profile.earnedSilver,
+          earnedBronze: overlay.data.profile.earnedBronze,
+          completion: overlay.data.profile.completion,
+        },
+        project: overlay.data.project
+          ? {
+              id: overlay.data.project.stack.game.id,
+              definedTrophies:
+                overlay.data.project.stack.definedPlatinum +
+                overlay.data.project.stack.definedGold +
+                overlay.data.project.stack.definedSilver +
+                overlay.data.project.stack.definedBronze,
+              earnedTrophies:
+                overlay.data.project.earnedPlatinum +
+                overlay.data.project.earnedGold +
+                overlay.data.project.earnedSilver +
+                overlay.data.project.earnedBronze,
+              progress: overlay.data.project.progress,
+              timeStreamed: overlay.data.project.timeStreamed,
+            }
+          : null,
+      };
+    },
+  },
 );
 
 onMounted(() => {
   setInterval(async () => {
     await refresh();
-    countTimeStreamed();
   }, 10000);
 });
-
-const timeStreamed = ref(0);
-countTimeStreamed();
-
-function countTimeStreamed() {
-  if (overlay.value?.data.project) {
-    let time = 0;
-
-    overlay.value.data.project.streams.forEach((stream) => {
-      time += stream.timeStreamed;
-    });
-
-    return (timeStreamed.value = time);
-  }
-}
 </script>
 
 <template>
@@ -50,38 +71,28 @@ function countTimeStreamed() {
     class="flex max-h-11 min-h-11 justify-between bg-gradient-to-r from-gray-800/80 via-gray-900/90 to-gray-950"
   >
     <div
-      v-if="overlay.data.project"
+      v-if="overlay.project"
       class="flex text-center font-mono text-xl font-semibold text-white"
     >
-      <img :src="overlay.data.project.stack.game.imageUrl" class="me-2 h-11" />
+      <img :src="`/images/games/${overlay.project.id}`" class="me-2 h-11" />
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
 
       <span class="my-auto me-6">
-        {{
-          formatThousands(
-            overlay.data.project.earnedPlatinum +
-              overlay.data.project.earnedGold +
-              overlay.data.project.earnedSilver +
-              overlay.data.project.earnedBronze,
-            ",",
-          )
-        }}/{{
-          formatThousands(
-            overlay.data.project.stack.definedPlatinum +
-              overlay.data.project.stack.definedGold +
-              overlay.data.project.stack.definedSilver +
-              overlay.data.project.stack.definedBronze,
-            ",",
-          )
+        {{ formatThousands(overlay.project.earnedTrophies, ",") }}/{{
+          formatThousands(overlay.project.definedTrophies, ",")
         }}
-        ({{ overlay.data.project.progress }}%)
+        ({{ overlay.project.progress }}%)
       </span>
 
       <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
-      <span class="my-auto">{{
-        dayjs.duration(timeStreamed, "seconds").format("HH:mm")
-      }}</span>
+      <span class="my-auto">
+        {{
+          dayjs
+            .duration(overlay.project.timeStreamed, "seconds")
+            .format("HH:mm")
+        }}
+      </span>
     </div>
 
     <div
@@ -89,7 +100,7 @@ function countTimeStreamed() {
       class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
     >
       <UIcon name="i-bi-playstation" class="my-auto me-2 h-6 w-6" />
-      <span class="my-auto">{{ overlay.data.profile.onlineId }}</span>
+      <span class="my-auto">{{ overlay.profile.onlineId }}</span>
     </div>
 
     <div
@@ -97,31 +108,31 @@ function countTimeStreamed() {
     >
       <UIcon name="i-bi-joystick" class="my-auto me-2 h-5 w-5" />
       <span class="my-auto me-6">
-        {{ formatThousands(overlay.data.profile.completedProjects, ",") }}/{{
-          formatThousands(overlay.data.profile.startedProjects, ",")
+        {{ formatThousands(overlay.profile.completedProjects, ",") }}/{{
+          formatThousands(overlay.profile.startedProjects, ",")
         }}
-        ({{ overlay.data.profile.completion }}%)
+        ({{ overlay.profile.completion }}%)
       </span>
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-sky-300" />
-      <span class="my-auto me-6 text-sky-300">{{
-        formatThousands(overlay.data.profile.earnedPlatinum, ",")
-      }}</span>
+      <span class="my-auto me-6 text-sky-300">
+        {{ formatThousands(overlay.profile.earnedPlatinum, ",") }}
+      </span>
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-yellow-400" />
-      <span class="my-auto me-6 text-yellow-400">{{
-        formatThousands(overlay.data.profile.earnedGold, ",")
-      }}</span>
+      <span class="my-auto me-6 text-yellow-400">
+        {{ formatThousands(overlay.profile.earnedGold, ",") }}
+      </span>
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-gray-300" />
-      <span class="my-auto me-6 text-gray-300">{{
-        formatThousands(overlay.data.profile.earnedSilver, ",")
-      }}</span>
+      <span class="my-auto me-6 text-gray-300">
+        {{ formatThousands(overlay.profile.earnedSilver, ",") }}
+      </span>
 
       <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-orange-500" />
-      <span class="my-auto me-2 text-orange-500">{{
-        formatThousands(overlay.data.profile.earnedBronze, ",")
-      }}</span>
+      <span class="my-auto me-2 text-orange-500">
+        {{ formatThousands(overlay.profile.earnedBronze, ",") }}
+      </span>
     </div>
   </figure>
 </template>

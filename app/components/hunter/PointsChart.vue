@@ -18,14 +18,23 @@ const props = defineProps({
 
 const { data: updates } = await useFetch(
   `/api/public/v1/profiles/${props.profile}/updates`,
+  {
+    transform: (updates) => {
+      return updates.data.map((update) => ({
+        startedAt: update.startedAt,
+        finishedAt: update.finishedAt,
+        pointsTo: update.pointsTo,
+      }));
+    },
+  },
 );
 
 type DataRecord = { x: number; y: number };
 const data = ref<DataRecord[]>([]);
 
 if (updates.value) {
-  for (let u = 0, ul = updates.value.data.length; u < ul; u++) {
-    const update = updates.value.data[u];
+  for (let u = 0, ul = updates.value.length; u < ul; u++) {
+    const update = updates.value[u];
 
     if (update && update.startedAt && update.finishedAt) {
       if (data.value.length === 0) {

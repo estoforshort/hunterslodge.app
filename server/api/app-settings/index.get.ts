@@ -11,7 +11,5 @@ export default defineEventHandler(async (event) => {
     where: { appId: "app" },
   });
 
-  return {
-    data,
-  };
+  return { data };
 });

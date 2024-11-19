@@ -47,16 +47,43 @@ const directionOptions = [
 const orderBy = ref("lastTrophyEarnedAt");
 const direction = ref("desc");
 
+const pageSize = 100;
+const totalSize = ref(0);
+
 const { data: projects } = await useFetch(
-  `/api/public/v1/profiles/${route.params.profile}/projects`,
+  `/api/public/v1/profiles/${route.params.hunter}/projects`,
   {
-    query: { orderBy, direction, page, pageSize: 100 },
+    query: { orderBy, direction, page, pageSize },
+    transform: (projects) => {
+      totalSize.value = projects.totalSize;
+
+      return projects.data.map((project) => ({
+        gameId: project.stack.game.id,
+        stackId: project.stack.id,
+        name: project.stack.game.name,
+        platforms: project.stack.game.platforms,
+        definedPlatinum: project.stack.definedPlatinum,
+        definedGold: project.stack.definedGold,
+        definedSilver: project.stack.definedSilver,
+        definedBronze: project.stack.definedBronze,
+        earnedPlatinum: project.earnedPlatinum,
+        earnedGold: project.earnedGold,
+        earnedSilver: project.earnedSilver,
+        earnedBronze: project.earnedBronze,
+        firstTrophyEarnedAt: project.firstTrophyEarnedAt,
+        lastTrophyEarnedAt: project.lastTrophyEarnedAt,
+        avgProgress: project.stack.avgProgress,
+        progress: project.progress,
+        points: project.points,
+        timeStreamed: project.timeStreamed,
+      }));
+    },
   },
 );
 </script>
 
 <template>
-  <div v-if="projects?.data" id="top">
+  <div v-if="projects" id="top">
     <div class="mb-6 grid grid-cols-2 gap-6">
       <USelect
         v-model="orderBy"
@@ -80,8 +107,8 @@ const { data: projects } = await useFetch(
     </div>
 
     <div
-      v-for="project in projects.data"
-      :key="project.stack.id"
+      v-for="project in projects"
+      :key="project.stackId"
       class="mb-3 last:mb-0"
     >
       <figure
@@ -97,7 +124,7 @@ const { data: projects } = await useFetch(
         <div class="flex bg-gray-200 dark:bg-gray-800">
           <div class="my-auto max-w-20">
             <img
-              :src="`/images/games/${project.stack.game.id}`"
+              :src="`/images/games/${project.gameId}`"
               class="min-h-20 min-w-20 object-contain"
             />
           </div>
@@ -107,7 +134,7 @@ const { data: projects } = await useFetch(
           <div class="flex justify-between">
             <div>
               <UBadge
-                v-for="platform in project.stack.game.platforms"
+                v-for="platform in project.platforms"
                 :key="platform.platformId"
                 color="gray"
                 variant="solid"
@@ -115,7 +142,7 @@ const { data: projects } = await useFetch(
                 class="me-1 align-middle"
                 >{{ platform.platformId.toUpperCase() }}</UBadge
               >
-              <span class="align-middle">{{ project.stack.game.name }}</span>
+              <span class="align-middle">{{ project.name }}</span>
             </div>
 
             <div class="flex">
@@ -210,7 +237,7 @@ const { data: projects } = await useFetch(
           <div class="mb-1 mt-1 flex flex-col justify-between lg:flex-row">
             <div class="mb-3 flex flex-row lg:mb-0">
               <span
-                v-if="project.stack.definedPlatinum"
+                v-if="project.definedPlatinum"
                 class="me-4 text-sky-500 dark:text-sky-300"
               >
                 <UIcon name="i-bi-trophy" class="me-1 align-middle" />
@@ -220,11 +247,11 @@ const { data: projects } = await useFetch(
               </span>
 
               <span
-                v-if="project.stack.definedGold"
+                v-if="project.definedGold"
                 class="me-4 text-yellow-600 dark:text-yellow-400"
               >
                 <UTooltip
-                  :text="`Out of ${project.stack.definedGold}`"
+                  :text="`Out of ${project.definedGold}`"
                   class="align-middle"
                   :popper="{ placement: 'top', arrow: true }"
                 >
@@ -238,11 +265,11 @@ const { data: projects } = await useFetch(
               </span>
 
               <span
-                v-if="project.stack.definedSilver"
+                v-if="project.definedSilver"
                 class="me-4 text-gray-500 dark:text-gray-300"
               >
                 <UTooltip
-                  :text="`Out of ${project.stack.definedSilver}`"
+                  :text="`Out of ${project.definedSilver}`"
                   class="align-middle"
                   :popper="{ placement: 'top', arrow: true }"
                 >
@@ -256,11 +283,11 @@ const { data: projects } = await useFetch(
               </span>
 
               <span
-                v-if="project.stack.definedBronze"
+                v-if="project.definedBronze"
                 class="me-4 text-orange-600 dark:text-orange-500"
               >
                 <UTooltip
-                  :text="`Out of ${project.stack.definedBronze}`"
+                  :text="`Out of ${project.definedBronze}`"
                   class="align-middle"
                   :popper="{ placement: 'top', arrow: true }"
                 >
@@ -282,9 +309,9 @@ const { data: projects } = await useFetch(
                 }}</span>
               </span>
 
-              <span v-if="project.progress >= project.stack.avgProgress">
+              <span v-if="project.progress >= project.avgProgress">
                 <UTooltip
-                  :text="`${project.progress - project.stack.avgProgress}% above average`"
+                  :text="`${project.progress - project.avgProgress}% above average`"
                   class="align-middle"
                   :popper="{ placement: 'top', arrow: true }"
                 >
@@ -296,7 +323,7 @@ const { data: projects } = await useFetch(
 
               <span v-else>
                 <UTooltip
-                  :text="`${project.stack.avgProgress - project.progress}% below average`"
+                  :text="`${project.avgProgress - project.progress}% below average`"
                   class="align-middle"
                   :popper="{ placement: 'top', arrow: true }"
                 >
@@ -312,9 +339,7 @@ const { data: projects } = await useFetch(
             <UProgress
               :value="project.progress"
               :color="
-                project.progress >= project.stack.avgProgress
-                  ? 'green'
-                  : 'yellow'
+                project.progress >= project.avgProgress ? 'green' : 'yellow'
               "
               size="xs"
             />
@@ -323,12 +348,12 @@ const { data: projects } = await useFetch(
       </figure>
     </div>
 
-    <template v-if="projects.totalSize > projects.pageSize">
+    <template v-if="totalSize > pageSize">
       <div class="mt-6 flex justify-center">
         <UPagination
           v-model="page"
-          :page-count="projects.pageSize"
-          :total="projects.totalSize"
+          :page-count="pageSize"
+          :total="totalSize"
           :to="
             (page: number) => ({
               query: { page },

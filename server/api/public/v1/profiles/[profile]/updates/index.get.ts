@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 100;
 
-  const profile = await prisma.profile.findFirst({
+  const data = await prisma.profile.findFirst({
     select: {
       id: true,
       updates: {
@@ -53,12 +53,22 @@ export default defineEventHandler(async (event) => {
           earnedSilverTo: true,
           earnedBronzeFrom: true,
           earnedBronzeTo: true,
+          streamPlatinumFrom: true,
+          streamPlatinumTo: true,
+          streamGoldFrom: true,
+          streamGoldTo: true,
+          streamSilverFrom: true,
+          streamSilverTo: true,
+          streamBronzeFrom: true,
+          streamBronzeTo: true,
           hiddenTrophiesFrom: true,
           hiddenTrophiesTo: true,
           completionFrom: true,
           completionTo: true,
           pointsFrom: true,
           pointsTo: true,
+          streamPointsFrom: true,
+          streamPointsTo: true,
           createdAt: true,
         },
         skip: Math.floor((page - 1) * pageSize),
@@ -71,14 +81,14 @@ export default defineEventHandler(async (event) => {
     where: { user: { username: params.profile } },
   });
 
-  const updatesCount = await prisma.update.count({
-    where: { profileId: profile?.id ?? 0 },
+  const totalSize = await prisma.update.count({
+    where: { profileId: data?.id ?? 0 },
   });
 
   return {
-    data: profile?.updates ?? [],
+    data: data?.updates ?? [],
     page,
     pageSize,
-    totalSize: updatesCount,
+    totalSize,
   };
 });

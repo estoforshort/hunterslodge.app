@@ -5,6 +5,14 @@ const { data: overlay, refresh } = await useFetch("/api/overlay");
 
 const { data: projects } = await useFetch(
   `/api/public/v1/profiles/${user.value?.username}/projects`,
+  {
+    transform: (projects) => {
+      return projects.data.map((project) => ({
+        id: project.stack.id,
+        name: project.stack.game.name,
+      }));
+    },
+  },
 );
 
 const config = useRuntimeConfig();
@@ -50,11 +58,11 @@ const automaticProjectUpdates = ref(
   overlay.value?.data?.updateProject ?? false,
 );
 
-const project = ref(projects.value?.data[0]);
+const project = ref(projects.value![0]);
 
 if (overlay.value?.data?.project) {
-  project.value = projects.value?.data.find(
-    (p) => p.stack.id === overlay.value?.data?.project?.stack.id,
+  project.value = projects.value?.find(
+    (p) => p.id === overlay.value?.data?.project?.stack.id,
   );
 }
 
@@ -65,7 +73,7 @@ async function updateOverlay() {
     await $fetch("/api/overlay", {
       method: "PUT",
       body: {
-        stackId: project.value?.stack.id,
+        stackId: project.value?.id,
         showProject: showProject.value,
         updateProject: automaticProjectUpdates.value,
         updateTrophies: automaticTrophyUpdates.value,
@@ -137,22 +145,22 @@ async function updateOverlay() {
             />
           </div>
 
-          <div v-if="projects?.data" class="pt-4">
+          <div v-if="projects" class="pt-4">
             <USelectMenu
               v-model="project"
-              :options="projects.data"
+              :options="projects"
               searchable
               searchable-placeholder="Search a project..."
-              :search-attributes="['stack.game.name']"
+              :search-attributes="['name']"
               clear-search-on-close
               :disabled="!showProject || automaticProjectUpdates || loading"
               @update:model-value="updateOverlay"
             >
               <template #label>
-                {{ project?.stack.game.name }}
+                {{ project?.name }}
               </template>
               <template #option="{ option }">
-                {{ option.stack.game.name }}
+                {{ option.name }}
               </template>
             </USelectMenu>
           </div>

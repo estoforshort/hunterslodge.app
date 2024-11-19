@@ -14,10 +14,17 @@ export default defineEventHandler(async (event) => {
     "earnedGold",
     "earnedSilver",
     "earnedBronze",
+    "streamPlatinum",
+    "streamGold",
+    "streamSilver",
+    "streamBronze",
     "hiddenTrophies",
     "completion",
     "points",
+    "streamPoints",
+    "timeStreamed",
     "lastFullUpdateAt",
+    "streamPosition",
     "regionalPosition",
     "globalPosition",
     "createdAt",
@@ -28,6 +35,7 @@ export default defineEventHandler(async (event) => {
     pageSize: z.number({ coerce: true }).positive().int().max(100).optional(),
     orderBy: z.enum(orderBy).optional(),
     direction: z.enum(["asc", "desc"]).optional(),
+    onlyStreamers: z.boolean({ coerce: true }).optional(),
   });
 
   const query = await getValidatedQuery(event, querySchema.parse);
@@ -35,7 +43,7 @@ export default defineEventHandler(async (event) => {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 100;
 
-  const [count, data] = await Promise.all([
+  const [totalSize, data] = await Promise.all([
     prisma.profile.count({
       where: {
         lastFullUpdateAt: { not: null },
@@ -54,7 +62,12 @@ export default defineEventHandler(async (event) => {
             isFounder: true,
           },
         },
-        regionId: true,
+        region: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         accountId: true,
         onlineId: true,
         imageUrl: true,
@@ -70,21 +83,29 @@ export default defineEventHandler(async (event) => {
         earnedGold: true,
         earnedSilver: true,
         earnedBronze: true,
+        streamPlatinum: true,
+        streamGold: true,
+        streamSilver: true,
+        streamBronze: true,
         hiddenTrophies: true,
         completion: true,
         points: true,
+        streamPoints: true,
+        timeStreamed: true,
         lastFullUpdateAt: true,
+        streamPosition: true,
         regionalPosition: true,
         globalPosition: true,
         createdAt: true,
       },
       where: {
         lastFullUpdateAt: { not: null },
+        streamPoints: { gte: query.onlyStreamers ? 0.01 : 0 },
       },
       skip: Math.floor((page - 1) * pageSize),
       take: pageSize,
       orderBy: {
-        [query.orderBy ?? "globalPosition"]: query.direction ?? "asc",
+        [query.orderBy ?? "points"]: query.direction ?? "desc",
       },
     }),
   ]);
@@ -93,6 +114,6 @@ export default defineEventHandler(async (event) => {
     data,
     page,
     pageSize,
-    totalSize: count,
+    totalSize,
   };
 });

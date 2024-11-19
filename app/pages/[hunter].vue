@@ -10,11 +10,38 @@ dayjs.extend(duration);
 const route = useRoute();
 
 const { data: profile } = await useFetch(
-  `/api/public/v1/profiles/${route.params.profile}`,
+  `/api/public/v1/profiles/${route.params.hunter}`,
+  {
+    transform: (profile) => {
+      if (!profile.data) {
+        return null;
+      }
+
+      return {
+        id: profile.data.user.id,
+        username: profile.data.user.username,
+        displayName: profile.data.user.displayName,
+        region: {
+          name: profile.data.region.name,
+        },
+        startedProjects: profile.data.startedProjects,
+        completedProjects: profile.data.completedProjects,
+        earnedPlatinum: profile.data.earnedPlatinum,
+        earnedGold: profile.data.earnedGold,
+        earnedSilver: profile.data.earnedSilver,
+        earnedBronze: profile.data.earnedBronze,
+        completion: profile.data.completion,
+        points: profile.data.points,
+        streamPosition: profile.data.streamPosition,
+        regionalPosition: profile.data.regionalPosition,
+        globalPosition: profile.data.globalPosition,
+      };
+    },
+  },
 );
 
 useSeoMeta({
-  title: profile.value?.data?.user.displayName,
+  title: profile.value?.displayName,
 });
 
 const links = computed(() => [
@@ -22,7 +49,7 @@ const links = computed(() => [
     {
       label: "Projects",
       icon: "i-bi-joystick",
-      to: `/${profile.value?.data?.user.username}`,
+      to: `/${profile.value?.username}`,
       exact: true,
     },
   ],
@@ -30,7 +57,7 @@ const links = computed(() => [
     {
       label: "Updates",
       icon: "i-heroicons-arrow-path",
-      to: `/${profile.value?.data?.user.username}/updates`,
+      to: `/${profile.value?.username}/updates`,
     },
   ],
 ]);
@@ -40,7 +67,7 @@ const links = computed(() => [
   <UPage>
     <UPageBody>
       <div
-        v-if="profile?.data"
+        v-if="profile"
         class="mt-24 rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-800 dark:bg-gray-900"
       >
         <div class="grid grid-cols-1 md:grid-cols-3">
@@ -49,20 +76,20 @@ const links = computed(() => [
           >
             <div>
               <p class="text-lg font-bold">
-                {{ formatThousands(profile.data.startedProjects, ",") }}
+                {{ formatThousands(profile.startedProjects, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Projects</p>
             </div>
 
             <div>
               <p class="text-lg font-bold">
-                {{ formatThousands(profile.data.completedProjects, ",") }}
+                {{ formatThousands(profile.completedProjects, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Completions</p>
             </div>
 
             <div>
-              <p class="text-lg font-bold">{{ profile.data.completion }}%</p>
+              <p class="text-lg font-bold">{{ profile.completion }}%</p>
               <p class="text-gray-400 dark:text-gray-500">Completion</p>
             </div>
           </div>
@@ -71,37 +98,34 @@ const links = computed(() => [
             <div
               class="absolute inset-x-0 top-0 mx-auto -mt-24 flex h-48 w-48 items-center justify-center rounded-full shadow-2xl"
             >
-              <img
-                :src="`/images/users/${profile.data.user.id}`"
-                class="rounded-full"
-              />
+              <img :src="`/images/users/${profile.id}`" class="rounded-full" />
             </div>
           </div>
 
           <div class="mt-32 grid grid-cols-3 space-x-6 text-center lg:mt-0">
-            <div v-if="profile.data.streamPosition">
+            <div v-if="profile.streamPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.data.streamPosition) }}
+                {{ ordinal(profile.streamPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Streamer</p>
             </div>
 
             <div v-else></div>
 
-            <div v-if="profile.data.regionalPosition">
+            <div v-if="profile.regionalPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.data.regionalPosition) }}
+                {{ ordinal(profile.regionalPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">
-                {{ profile.data.region.name }}
+                {{ profile.region.name }}
               </p>
             </div>
 
             <div v-else></div>
 
-            <div v-if="profile.data.globalPosition">
+            <div v-if="profile.globalPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.data.globalPosition) }}
+                {{ ordinal(profile.globalPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Global</p>
             </div>
@@ -112,43 +136,43 @@ const links = computed(() => [
 
         <div class="mt-20 pb-6 text-center">
           <h1 class="text-4xl font-medium">
-            {{ profile.data.user.displayName }}
+            {{ profile.displayName }}
           </h1>
 
           <p class="mt-4">
             <NuxtLink
-              :to="`https://twitch.tv/${profile.data.user.username}`"
+              :to="`https://twitch.tv/${profile.username}`"
               target="_blank"
             >
-              twitch.tv/{{ profile.data.user.username }}
+              twitch.tv/{{ profile.username }}
             </NuxtLink>
           </p>
 
           <div class="mt-8 grid grid-cols-2 gap-6 lg:grid-cols-4">
             <UCard>
               <p class="text-lg font-bold text-sky-500 dark:text-sky-300">
-                {{ formatThousands(profile.data.earnedPlatinum, ",") }}
+                {{ formatThousands(profile.earnedPlatinum, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Platinum</p>
             </UCard>
 
             <UCard>
               <p class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                {{ formatThousands(profile.data.earnedGold, ",") }}
+                {{ formatThousands(profile.earnedGold, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Gold</p>
             </UCard>
 
             <UCard>
               <p class="text-lg font-bold text-gray-500 dark:text-gray-300">
-                {{ formatThousands(profile.data.earnedSilver, ",") }}
+                {{ formatThousands(profile.earnedSilver, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Silver</p>
             </UCard>
 
             <UCard>
               <p class="text-lg font-bold text-orange-600 dark:text-orange-500">
-                {{ formatThousands(profile.data.earnedBronze, ",") }}
+                {{ formatThousands(profile.earnedBronze, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Bronze</p>
             </UCard>
@@ -163,19 +187,16 @@ const links = computed(() => [
             <div class="absolute p-6">
               <p class="text-gray-400 dark:text-gray-500">Points</p>
               <p class="text-lg font-bold">
-                {{ formatThousands(profile.data.points, ",") }}
+                {{ formatThousands(profile.points, ",") }}
               </p>
             </div>
-            <ProfilePointsChart :profile="profile.data.user.username" />
+
+            <HunterPointsChart :profile="profile.username" />
           </UCard>
         </div>
       </div>
 
-      <UHorizontalNavigation
-        v-if="profile?.data"
-        :links="links"
-        class="mt-12"
-      />
+      <UHorizontalNavigation v-if="profile" :links="links" class="mt-12" />
 
       <UCard>
         <NuxtPage />

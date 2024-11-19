@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
 
-  const overlay = await prisma.overlay.findFirst({
+  const data = await prisma.overlay.findFirst({
     select: {
       id: true,
       project: {
@@ -25,7 +25,5 @@ export default defineEventHandler(async (event) => {
     where: { profile: { userId: session.user.id } },
   });
 
-  return {
-    data: overlay,
-  };
+  return { data };
 });

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const profile = await prisma.profile.findFirst({
+  const data = await prisma.profile.findFirst({
     select: {
       user: {
         select: {
@@ -25,6 +25,9 @@ export default defineEventHandler(async (event) => {
           name: true,
         },
       },
+      accountId: true,
+      onlineId: true,
+      imageUrl: true,
       firstTrophyEarnedAt: true,
       lastTrophyEarnedAt: true,
       startedProjects: true,
@@ -37,9 +40,15 @@ export default defineEventHandler(async (event) => {
       earnedGold: true,
       earnedSilver: true,
       earnedBronze: true,
+      streamPlatinum: true,
+      streamGold: true,
+      streamSilver: true,
+      streamBronze: true,
       hiddenTrophies: true,
       completion: true,
       points: true,
+      streamPoints: true,
+      timeStreamed: true,
       lastFullUpdateAt: true,
       streamPosition: true,
       regionalPosition: true,
@@ -53,7 +62,5 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  return {
-    data: profile,
-  };
+  return { data };
 });
