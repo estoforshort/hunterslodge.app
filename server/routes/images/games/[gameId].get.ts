@@ -7,9 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const findImage = await prisma.gameImage.findUnique({
-    where: { gameId: params.gameId },
-  });
+  const findImage = await getGameImage(params.gameId);
 
   if (!findImage) {
     throw createError({
@@ -18,5 +16,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return findImage.image;
+  return Buffer.from(findImage.image);
 });

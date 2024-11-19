@@ -80,6 +80,8 @@ const { data: projects } = await useFetch(
     },
   },
 );
+
+const config = useRuntimeConfig();
 </script>
 
 <template>
@@ -123,9 +125,11 @@ const { data: projects } = await useFetch(
       >
         <div class="flex bg-gray-200 dark:bg-gray-800">
           <div class="my-auto max-w-20">
-            <img
-              :src="`/images/games/${project.gameId}`"
+            <NuxtImg
+              :src="`${config.public.baseUrl}/images/games/${project.gameId}`"
+              width="80"
               class="min-h-20 min-w-20 object-contain"
+              placeholder
             />
           </div>
         </div>

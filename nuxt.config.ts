@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "nuxt-auth-utils",
     "nuxt-authorization",
+    "@nuxt/image",
   ],
   runtimeConfig: {
     oauth: {
@@ -30,5 +31,8 @@ export default defineNuxtConfig({
   routeRules: {
     "/api/public/**": { cors: true },
     "/p": { redirect: "/" },
+  },
+  image: {
+    domains: ["localhost:3000", "hunterslodge.app"],
   },
 });
