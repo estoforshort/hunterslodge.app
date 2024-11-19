@@ -29,6 +29,10 @@ const orderOptions = [
     value: "points",
   },
   {
+    name: "Order by stream points",
+    value: "streamPoints",
+  },
+  {
     name: "Order by time streamed",
     value: "timeStreamed",
   },
@@ -72,6 +76,7 @@ const { data: projects } = await useFetch(
           avgProgress: project.stack.avgProgress,
           progress: project.progress,
           points: project.points,
+          streamPoints: project.streamPoints,
           timeStreamed: project.timeStreamed,
         })),
         page: projects.page,
@@ -159,7 +164,7 @@ const config = useRuntimeConfig();
                 <span class="me-2 align-middle">
                   <UIcon
                     name="i-bi-clock-history"
-                    class="me-1 align-middle text-gray-600 lg:me-2"
+                    class="me-1 align-middle lg:me-2"
                   />
                   <span class="hidden align-middle lg:me-2 lg:inline-block">
                     {{
@@ -172,7 +177,7 @@ const config = useRuntimeConfig();
 
                 <template #panel>
                   <div class="p-2">
-                    <p>
+                    <p class="text-sm">
                       Time streamed:
                       {{
                         dayjs
@@ -186,18 +191,12 @@ const config = useRuntimeConfig();
 
               <UPopover mode="hover" :popper="{ placement: 'auto' }">
                 <span class="align-middle">
-                  <UIcon
-                    name="i-bi-info-circle"
-                    class="align-middle text-gray-600"
-                  />
+                  <UIcon name="i-bi-info-circle" class="align-middle" />
                 </span>
 
                 <template #panel>
                   <div class="p-2">
-                    <p
-                      v-if="project.progress !== 100"
-                      class="text-sm font-light"
-                    >
+                    <p v-if="project.progress !== 100" class="text-sm">
                       Started
                       {{
                         dayjs
@@ -211,7 +210,7 @@ const config = useRuntimeConfig();
                       ago
                     </p>
 
-                    <p v-else class="text-sm font-light">
+                    <p v-else class="text-sm">
                       Completed in
                       {{
                         dayjs
@@ -221,7 +220,7 @@ const config = useRuntimeConfig();
                               dayjs(project.firstTrophyEarnedAt).unix(),
                           })
                           .humanize()
-                      }}
+                      }},
                       {{
                         dayjs
                           .duration({
@@ -309,9 +308,36 @@ const config = useRuntimeConfig();
             <div class="flex flex-row justify-between">
               <span class="align-middle">
                 <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
-                <span class="me-4 align-middle">{{
-                  formatThousands(Number(project.points), { separator: "," })
-                }}</span>
+                <UTooltip
+                  text="Stream/total points"
+                  class="align-middle"
+                  :popper="{ placement: 'top', arrow: true }"
+                >
+                  <span
+                    v-if="Number(project.streamPoints)"
+                    class="me-4 align-middle"
+                  >
+                    {{
+                      formatThousands(Number(project.streamPoints), {
+                        separator: ",",
+                      })
+                    }}
+                    /
+                    {{
+                      formatThousands(Number(project.points), {
+                        separator: ",",
+                      })
+                    }}
+                  </span>
+
+                  <span v-else class="me-4 align-middle">
+                    {{
+                      formatThousands(Number(project.points), {
+                        separator: ",",
+                      })
+                    }}
+                  </span>
+                </UTooltip>
               </span>
 
               <span v-if="project.progress >= project.avgProgress">
