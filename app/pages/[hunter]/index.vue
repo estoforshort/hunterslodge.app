@@ -244,10 +244,18 @@ const config = useRuntimeConfig();
                 v-if="project.definedPlatinum"
                 class="me-4 text-sky-500 dark:text-sky-300"
               >
-                <UIcon name="i-bi-trophy" class="me-1 align-middle" />
-                <span class="align-middle">
-                  {{ project.earnedPlatinum }}
-                </span>
+                <UTooltip
+                  :text="`Out of ${project.definedPlatinum}`"
+                  class="align-middle"
+                  :popper="{ placement: 'top', arrow: true }"
+                >
+                  <span class="align-middle">
+                    <UIcon name="i-bi-trophy" class="me-1 align-middle" />
+                    <span class="align-middle">
+                      {{ project.earnedPlatinum }}
+                    </span>
+                  </span>
+                </UTooltip>
               </span>
 
               <span

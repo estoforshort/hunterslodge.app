@@ -68,7 +68,7 @@ onMounted(() => {
 <template>
   <figure
     v-if="overlay"
-    class="flex max-h-11 min-h-11 justify-between bg-gradient-to-r from-gray-800/80 via-gray-900/90 to-gray-950"
+    class="flex max-h-11 min-h-11 justify-between bg-gradient-to-r from-gray-950 via-gray-800/80 to-gray-950"
   >
     <div
       v-if="overlay.project"
@@ -76,7 +76,13 @@ onMounted(() => {
     >
       <img :src="`/images/games/${overlay.project.id}`" class="me-2 h-11" />
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
+      <UIcon
+        v-if="overlay.project.progress === 100"
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5"
+      />
+
+      <UIcon v-else name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
 
       <span class="my-auto me-6">
         {{ formatThousands(overlay.project.earnedTrophies, ",") }}/{{
@@ -114,22 +120,34 @@ onMounted(() => {
         ({{ overlay.profile.completion }}%)
       </span>
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-sky-300" />
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-sky-300"
+      />
       <span class="my-auto me-6 text-sky-300">
         {{ formatThousands(overlay.profile.earnedPlatinum, ",") }}
       </span>
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-yellow-400" />
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-yellow-400"
+      />
       <span class="my-auto me-6 text-yellow-400">
         {{ formatThousands(overlay.profile.earnedGold, ",") }}
       </span>
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-gray-300" />
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-gray-300"
+      />
       <span class="my-auto me-6 text-gray-300">
         {{ formatThousands(overlay.profile.earnedSilver, ",") }}
       </span>
 
-      <UIcon name="i-bi-trophy" class="my-auto me-2 h-5 w-5 text-orange-500" />
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-orange-500"
+      />
       <span class="my-auto me-2 text-orange-500">
         {{ formatThousands(overlay.profile.earnedBronze, ",") }}
       </span>
