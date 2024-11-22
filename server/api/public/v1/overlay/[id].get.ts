@@ -17,7 +17,13 @@ export default defineCachedEventHandler(
         profile: {
           select: {
             id: true,
-            userId: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+              },
+            },
             accountId: true,
             onlineId: true,
             imageUrl: true,
@@ -45,6 +51,9 @@ export default defineCachedEventHandler(
             points: true,
             streamPoints: true,
             timeStreamed: true,
+            streamPosition: true,
+            regionalPosition: true,
+            globalPosition: true,
             lastFullUpdateAt: true,
           },
         },
@@ -73,6 +82,7 @@ export default defineCachedEventHandler(
             timeStreamed: true,
           },
         },
+        style: true,
         viewers: true,
         lastLiveAt: true,
         updateProject: true,
@@ -89,7 +99,7 @@ export default defineCachedEventHandler(
     }
 
     const twitchStream = await twitch.streams.getStreamByUserId(
-      findOverlay.profile.userId,
+      findOverlay.profile.user.id,
     );
 
     if (twitchStream) {

@@ -26,7 +26,9 @@ const { data: overlay, refresh } = await useFetch(
       }
 
       return {
+        style: overlay.data.style,
         profile: {
+          displayName: overlay.data.profile.user.displayName,
           onlineId: overlay.data.profile.onlineId,
           startedProjects: overlay.data.profile.startedProjects,
           completedProjects: overlay.data.profile.completedProjects,
@@ -34,7 +36,13 @@ const { data: overlay, refresh } = await useFetch(
           earnedGold: overlay.data.profile.earnedGold,
           earnedSilver: overlay.data.profile.earnedSilver,
           earnedBronze: overlay.data.profile.earnedBronze,
+          streamPlatinum: overlay.data.profile.streamPlatinum,
+          streamGold: overlay.data.profile.streamGold,
+          streamSilver: overlay.data.profile.streamSilver,
+          streamBronze: overlay.data.profile.streamBronze,
           completion: overlay.data.profile.completion,
+          streamPoints: overlay.data.profile.streamPoints,
+          streamPosition: overlay.data.profile.streamPosition,
         },
         project: overlay.data.project
           ? {
@@ -105,11 +113,27 @@ onMounted(() => {
       v-else
       class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
     >
-      <UIcon name="i-bi-playstation" class="my-auto me-2 h-6 w-6" />
-      <span class="my-auto">{{ overlay.profile.onlineId }}</span>
+      <UIcon
+        v-if="overlay.style === 'default'"
+        name="i-bi-playstation"
+        class="my-auto me-2 h-6 w-6"
+      />
+      <UIcon
+        v-if="overlay.style === 'streamer'"
+        name="i-bi-twitch"
+        class="my-auto me-2 h-6 w-6"
+      />
+
+      <span v-if="overlay.style === 'default'" class="my-auto">
+        {{ overlay.profile.onlineId }}
+      </span>
+      <span v-if="overlay.style === 'streamer'" class="my-auto">
+        {{ overlay.profile.displayName }}
+      </span>
     </div>
 
     <div
+      v-if="overlay.style === 'default'"
       class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
     >
       <UIcon name="i-bi-joystick" class="my-auto me-2 h-5 w-5" />
@@ -150,6 +174,53 @@ onMounted(() => {
       />
       <span class="my-auto me-2 text-orange-500">
         {{ formatThousands(overlay.profile.earnedBronze, ",") }}
+      </span>
+    </div>
+
+    <div
+      v-if="overlay.style === 'streamer'"
+      class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
+    >
+      <UIcon
+        v-if="overlay.profile.streamPosition"
+        name="i-bi-p-circle-fill"
+        class="my-auto me-2 h-5 w-5"
+      />
+      <span v-if="overlay.profile.streamPosition" class="my-auto me-6">
+        {{ formatThousands(overlay.profile.streamPoints, ",") }}
+        ({{ ordinal(overlay.profile.streamPosition) }})
+      </span>
+
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-sky-300"
+      />
+      <span class="my-auto me-6 text-sky-300">
+        {{ formatThousands(overlay.profile.streamPlatinum, ",") }}
+      </span>
+
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-yellow-400"
+      />
+      <span class="my-auto me-6 text-yellow-400">
+        {{ formatThousands(overlay.profile.streamGold, ",") }}
+      </span>
+
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-gray-300"
+      />
+      <span class="my-auto me-6 text-gray-300">
+        {{ formatThousands(overlay.profile.streamSilver, ",") }}
+      </span>
+
+      <UIcon
+        name="i-bi-trophy-fill"
+        class="my-auto me-2 h-5 w-5 text-orange-500"
+      />
+      <span class="my-auto me-2 text-orange-500">
+        {{ formatThousands(overlay.profile.streamBronze, ",") }}
       </span>
     </div>
   </figure>

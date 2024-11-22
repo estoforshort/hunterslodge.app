@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
+      style: true,
       showProject: true,
       updateProject: true,
       updateTrophies: true,

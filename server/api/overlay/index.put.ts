@@ -5,8 +5,11 @@ export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
   await authorize(event, manageOverlay);
 
+  const style = ["default", "streamer"] as const;
+
   const bodySchema = z.object({
     stackId: z.string().min(1).optional(),
+    style: z.enum(style),
     showProject: z.boolean(),
     updateProject: z.boolean(),
     updateTrophies: z.boolean(),
@@ -89,6 +92,7 @@ export default defineEventHandler(async (event) => {
         id: overlay.id,
       },
       data: {
+        style: body.style,
         showProject: body.showProject,
         updateProject: body.updateProject,
         updateTrophies: body.updateTrophies,

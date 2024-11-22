@@ -66,6 +66,19 @@ if (overlay.value?.data?.project) {
   );
 }
 
+const styles = [
+  {
+    id: "default",
+    label: "Default style",
+  },
+  {
+    id: "streamer",
+    label: "Streamers leaderboard style",
+  },
+];
+
+const style = ref(styles.find((s) => s.id === overlay.value?.data?.style));
+
 async function updateOverlay() {
   try {
     loading.value = true;
@@ -74,6 +87,7 @@ async function updateOverlay() {
       method: "PUT",
       body: {
         stackId: project.value?.id,
+        style: style.value?.id,
         showProject: showProject.value,
         updateProject: automaticProjectUpdates.value,
         updateTrophies: automaticTrophyUpdates.value,
@@ -163,6 +177,16 @@ async function updateOverlay() {
                 {{ option.name }}
               </template>
             </USelectMenu>
+          </div>
+
+          <div class="pt-4">
+            <USelectMenu
+              v-model="style"
+              :options="styles"
+              option-attribute="label"
+              :disabled="loading"
+              @update:model-value="updateOverlay"
+            />
           </div>
 
           <div class="pt-4">

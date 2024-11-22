@@ -141,6 +141,7 @@ CREATE TABLE `ProfileImage` (
 CREATE TABLE `Overlay` (
     `id` VARCHAR(36) NOT NULL,
     `profileId` SMALLINT UNSIGNED NOT NULL,
+    `style` ENUM('default', 'streamer') NOT NULL DEFAULT 'default',
     `viewers` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `mature` BOOLEAN NOT NULL DEFAULT false,
     `language` CHAR(2) NULL,
