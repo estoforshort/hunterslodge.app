@@ -42,6 +42,7 @@ const { data: overlay, refresh } = await useFetch(
           streamBronze: overlay.data.profile.streamBronze,
           completion: overlay.data.profile.completion,
           streamPoints: overlay.data.profile.streamPoints,
+          timeStreamed: overlay.data.profile.timeStreamed,
           streamPosition: overlay.data.profile.streamPosition,
         },
         project: overlay.data.project
@@ -57,7 +58,13 @@ const { data: overlay, refresh } = await useFetch(
                 overlay.data.project.earnedGold +
                 overlay.data.project.earnedSilver +
                 overlay.data.project.earnedBronze,
+              earnedStreamTrophies:
+                overlay.data.project.streamPlatinum +
+                overlay.data.project.streamGold +
+                overlay.data.project.streamSilver +
+                overlay.data.project.streamBronze,
               progress: overlay.data.project.progress,
+              streamPoints: overlay.data.project.streamPoints,
               timeStreamed: overlay.data.project.timeStreamed,
             }
           : null,
@@ -92,11 +99,28 @@ onMounted(() => {
 
       <UIcon v-else name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
 
-      <span class="my-auto me-6">
+      <span v-if="overlay.style === 'default'" class="my-auto me-6">
         {{ formatThousands(overlay.project.earnedTrophies, ",") }}/{{
           formatThousands(overlay.project.definedTrophies, ",")
         }}
         ({{ overlay.project.progress }}%)
+      </span>
+
+      <span v-if="overlay.style === 'streamer'" class="my-auto me-6">
+        {{ formatThousands(overlay.project.earnedStreamTrophies, ",") }}/{{
+          formatThousands(overlay.project.earnedTrophies, ",")
+        }}/{{ formatThousands(overlay.project.definedTrophies, ",") }} ({{
+          overlay.project.progress
+        }}%)
+      </span>
+
+      <UIcon
+        v-if="overlay.style === 'streamer'"
+        name="i-bi-p-circle-fill"
+        class="my-auto me-2 h-5 w-5"
+      />
+      <span v-if="overlay.style === 'streamer'" class="my-auto me-6">
+        {{ formatThousands(overlay.project.streamPoints, ",") }}
       </span>
 
       <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
@@ -181,6 +205,15 @@ onMounted(() => {
       v-if="overlay.style === 'streamer'"
       class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
     >
+      <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
+      <span class="my-auto me-6">
+        {{
+          dayjs
+            .duration(overlay.profile.timeStreamed, "seconds")
+            .format("HH:mm")
+        }}
+      </span>
+
       <UIcon
         v-if="overlay.profile.streamPosition"
         name="i-bi-p-circle-fill"
