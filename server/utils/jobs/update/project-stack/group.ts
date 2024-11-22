@@ -10,7 +10,6 @@ type Data = {
   profile: {
     id: number;
     accountId: string;
-    completion: number;
     createdAt: Date;
   };
   game: {
@@ -75,8 +74,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data.group.earnedTrophies.bronze ||
       Number(findProjectGroupWithStackGroupAndGameGroup.value) !==
         Number(findProjectGroupWithStackGroupAndGameGroup.stackGroup.value) ||
-      findProjectGroupWithStackGroupAndGameGroup.completion !==
-        data.profile.completion ||
       findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedPlatinum !==
         findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
           .definedPlatinum ||
@@ -195,7 +192,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         value: 0 as unknown as Prisma.Decimal,
         points: 0 as unknown as Prisma.Decimal,
         streamPoints: 0 as unknown as Prisma.Decimal,
-        completion: data.profile.completion,
       };
 
       const stackGroupData = {
@@ -205,7 +201,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         definedBronze: gameGroup.definedBronze,
         firstTrophyEarnedAt: stackGroup.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stackGroup.lastTrophyEarnedAt,
-        psnRate: 0 as unknown as Prisma.Decimal,
+        quality: 0 as unknown as Prisma.Decimal,
         profilesCount: data.profilesCount,
         timesCompleted: stackGroup.timesCompleted,
         avgProgress: 0,
@@ -242,7 +238,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               definedGoldFrom: stackGroup.definedGold,
               definedSilverFrom: stackGroup.definedSilver,
               definedBronzeFrom: stackGroup.definedBronze,
-              psnRateFrom: stackGroup.psnRate,
+              qualityFrom: stackGroup.quality,
               timesCompletedFrom: stackGroup.timesCompleted,
               avgProgressFrom: stackGroup.avgProgress,
               valueFrom: stackGroup.value,
@@ -259,17 +255,11 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           profilesCount: data.profilesCount,
           profile: {
             id: data.profile.id,
-            completion: data.profile.completion,
             createdAt: data.profile.createdAt,
           },
           gameId: data.game.id,
-          group: {
-            id: gameGroup.id,
-            progress: data.group.progress,
-          },
-          stack: {
-            id: data.stack.id,
-          },
+          groupId: gameGroup.id,
+          stackId: data.stack.id,
           trophy,
         });
 
@@ -393,8 +383,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           }
         }
 
-        stackGroupData.psnRate = (Number(stackGroupData.psnRate) +
-          Number(stackTrophy.psnRate)) as unknown as Prisma.Decimal;
+        stackGroupData.quality = (Number(stackGroupData.quality) +
+          Number(stackTrophy.quality)) as unknown as Prisma.Decimal;
 
         stackGroupData.value = (Math.round(
           (Number(stackGroupData.value) +
@@ -444,8 +434,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         },
       });
 
-      stackGroupData.psnRate = (Math.round(
-        (Number(stackGroupData.psnRate) / trophies.data.trophies.length +
+      stackGroupData.quality = (Math.round(
+        (Number(stackGroupData.quality) / trophies.data.trophies.length +
           Number.EPSILON) *
           100,
       ) / 100) as unknown as Prisma.Decimal;
@@ -495,7 +485,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           definedGoldTo: updateStackGroup.definedGold,
           definedSilverTo: updateStackGroup.definedSilver,
           definedBronzeTo: updateStackGroup.definedBronze,
-          psnRateTo: updateStackGroup.psnRate,
+          qualityTo: updateStackGroup.quality,
           timesCompletedTo: updateStackGroup.timesCompleted,
           avgProgressTo: updateStackGroup.avgProgress,
           valueTo: updateStackGroup.value,

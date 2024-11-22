@@ -455,7 +455,7 @@ model Stack {
   definedBronze       Int       @default(0) @db.UnsignedSmallInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  quality             Decimal   @default(0) @db.Decimal(5, 2)
   profilesCount       Int       @default(0) @db.UnsignedSmallInt
   timesStarted        Int       @default(0) @db.UnsignedSmallInt
   rarity              Decimal   @default(0) @db.Decimal(7, 2)
@@ -486,7 +486,7 @@ model StackGroup {
   definedBronze       Int       @default(0) @db.UnsignedTinyInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
+  quality             Decimal   @default(0) @db.Decimal(5, 2)
   profilesCount       Int       @default(0) @db.UnsignedSmallInt
   timesCompleted      Int       @default(0) @db.UnsignedSmallInt
   avgProgress         Int       @default(0) @db.UnsignedTinyInt
@@ -512,7 +512,7 @@ model StackTrophy {
 
   firstEarnedAt DateTime?
   lastEarnedAt  DateTime?
-  psnRate       Decimal   @default(0) @db.Decimal(5, 2)
+  quality       Decimal   @default(0) @db.Decimal(5, 2)
   timesEarned   Int       @default(0) @db.UnsignedSmallInt
   rarity        Decimal   @default(0) @db.Decimal(7, 2)
   value         Decimal   @default(0) @db.Decimal(10, 2)
@@ -555,7 +555,6 @@ model Project {
   points              Decimal   @default(0) @db.Decimal(14, 2)
   streamPoints        Decimal   @default(0) @db.Decimal(14, 2)
   timeStreamed        Int       @default(0) @db.UnsignedInt
-  completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -604,7 +603,6 @@ model ProjectGroup {
   value               Decimal   @default(0) @db.Decimal(14, 2)
   points              Decimal   @default(0) @db.Decimal(14, 2)
   streamPoints        Decimal   @default(0) @db.Decimal(14, 2)
-  completion          Int       @default(0) @db.UnsignedTinyInt
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -749,8 +747,8 @@ model StackChange {
   definedSilverTo     Int      @default(0) @db.UnsignedSmallInt
   definedBronzeFrom   Int      @db.UnsignedSmallInt
   definedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
-  psnRateFrom         Decimal  @db.Decimal(5, 2)
-  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
+  qualityFrom         Decimal  @db.Decimal(5, 2)
+  qualityTo           Decimal  @default(0) @db.Decimal(5, 2)
   timesStartedFrom    Int      @db.UnsignedSmallInt
   timesStartedTo      Int      @default(0) @db.UnsignedSmallInt
   rarityFrom          Decimal  @db.Decimal(7, 2)
@@ -783,8 +781,8 @@ model StackGroupChange {
   definedSilverTo     Int      @default(0) @db.UnsignedTinyInt
   definedBronzeFrom   Int      @db.UnsignedTinyInt
   definedBronzeTo     Int      @default(0) @db.UnsignedTinyInt
-  psnRateFrom         Decimal  @db.Decimal(5, 2)
-  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
+  qualityFrom         Decimal  @db.Decimal(5, 2)
+  qualityTo           Decimal  @default(0) @db.Decimal(5, 2)
   timesCompletedFrom  Int      @db.UnsignedSmallInt
   timesCompletedTo    Int      @default(0) @db.UnsignedSmallInt
   avgProgressFrom     Int      @db.UnsignedTinyInt
@@ -808,8 +806,8 @@ model StackTrophyChange {
   trophyId    Int         @db.UnsignedSmallInt
   StackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
 
-  psnRateFrom     Decimal  @db.Decimal(5, 2)
-  psnRateTo       Decimal  @default(0) @db.Decimal(5, 2)
+  qualityFrom     Decimal  @db.Decimal(5, 2)
+  qualityTo       Decimal  @default(0) @db.Decimal(5, 2)
   timesEarnedFrom Int      @db.UnsignedSmallInt
   timesEarnedTo   Int      @default(0) @db.UnsignedSmallInt
   rarityFrom      Decimal  @db.Decimal(7, 2)

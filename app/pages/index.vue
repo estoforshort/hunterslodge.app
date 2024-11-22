@@ -15,7 +15,6 @@ const { data: hunters } = await useFetch("/api/public/v1/profiles", {
       earnedGold: hunter.earnedGold,
       earnedSilver: hunter.earnedSilver,
       earnedBronze: hunter.earnedBronze,
-      completion: `${hunter.completion}%`,
       points: formatThousands(hunter.points, ","),
     }));
   },
@@ -45,10 +44,6 @@ const columns = [
   {
     key: "earnedBronze",
     label: "Bronze",
-  },
-  {
-    key: "completion",
-    label: "Completion",
   },
   {
     key: "points",

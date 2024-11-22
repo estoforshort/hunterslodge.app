@@ -71,39 +71,22 @@ export const runRankings = async () => {
     for (let p = 0, pl = profiles.length; p < pl; p++) {
       const profile = profiles[p];
 
-      if (!profile.hiddenTrophies) {
-        if (profile.globalPosition !== profileGlobalPosition) {
-          await prisma.profile.update({
-            where: { id: profile.id },
-            data: {
-              globalPosition: profileGlobalPosition,
-              globalPositionChanges: {
-                create: {
-                  globalPositionFrom: profile.globalPosition,
-                  globalPositionTo: profileGlobalPosition,
-                },
+      if (profile.globalPosition !== profileGlobalPosition) {
+        await prisma.profile.update({
+          where: { id: profile.id },
+          data: {
+            globalPosition: profileGlobalPosition,
+            globalPositionChanges: {
+              create: {
+                globalPositionFrom: profile.globalPosition,
+                globalPositionTo: profileGlobalPosition,
               },
             },
-          });
-        }
-
-        profileGlobalPosition += 1;
-      } else {
-        if (profile.globalPosition) {
-          await prisma.profile.update({
-            where: { id: profile.id },
-            data: {
-              globalPosition: 0,
-              globalPositionChanges: {
-                create: {
-                  globalPositionFrom: profile.globalPosition,
-                  globalPositionTo: 0,
-                },
-              },
-            },
-          });
-        }
+          },
+        });
       }
+
+      profileGlobalPosition += 1;
     }
 
     let streamPosition = 1;
@@ -111,39 +94,22 @@ export const runRankings = async () => {
     for (let s = 0, sl = streamers.length; s < sl; s++) {
       const streamer = streamers[s];
 
-      if (!streamer.hiddenTrophies) {
-        if (streamer.streamPosition !== streamPosition) {
-          await prisma.profile.update({
-            where: { id: streamer.id },
-            data: {
-              streamPosition: streamPosition,
-              streamPositionChanges: {
-                create: {
-                  streamPositionFrom: streamer.streamPosition,
-                  streamPositionTo: streamPosition,
-                },
+      if (streamer.streamPosition !== streamPosition) {
+        await prisma.profile.update({
+          where: { id: streamer.id },
+          data: {
+            streamPosition: streamPosition,
+            streamPositionChanges: {
+              create: {
+                streamPositionFrom: streamer.streamPosition,
+                streamPositionTo: streamPosition,
               },
             },
-          });
-        }
-
-        streamPosition += 1;
-      } else {
-        if (streamer.streamPosition) {
-          await prisma.profile.update({
-            where: { id: streamer.id },
-            data: {
-              streamPosition: 0,
-              streamPositionChanges: {
-                create: {
-                  streamPositionFrom: streamer.streamPosition,
-                  streamPositionTo: 0,
-                },
-              },
-            },
-          });
-        }
+          },
+        });
       }
+
+      streamPosition += 1;
     }
 
     return;

@@ -190,8 +190,6 @@ export const runUpdate = async (updateId: number) => {
           profileSummary.earnedBronze += project.earnedTrophies.bronze;
         }
       }
-
-      calculateCompletion();
     }
 
     for (let p = 0, pl = projects.length; p < pl; p++) {
@@ -204,7 +202,6 @@ export const runUpdate = async (updateId: number) => {
           profile: {
             id: update.profile.id,
             accountId: update.profile.accountId,
-            completion: Math.floor(Number(profileSummary.completion)),
             createdAt: update.profile.createdAt,
           },
           project,
@@ -367,6 +364,8 @@ export const runUpdate = async (updateId: number) => {
       return;
     }
 
+    calculateCompletion();
+
     await prisma.profile.update({
       where: { id: update.profile.id },
       data: {
@@ -449,57 +448,40 @@ export const runUpdate = async (updateId: number) => {
       ) {
         const profile = profileRegion.profiles[prp];
 
-        if (!profile.hiddenTrophies) {
-          profileRegionData.rankedProfiles += 1;
-          profileRegionData.earnedPlatinum += profile.earnedPlatinum;
-          profileRegionData.earnedGold += profile.earnedGold;
-          profileRegionData.earnedSilver += profile.earnedSilver;
-          profileRegionData.earnedBronze += profile.earnedBronze;
-          profileRegionData.completion = (Math.round(
-            (Number(profileRegionData.completion) +
-              Number(profile.completion) +
-              Number.EPSILON) *
-              100,
-          ) / 100) as unknown as Prisma.Decimal;
-          profileRegionData.points = (Math.round(
-            (Number(profileRegionData.points) +
-              Number(profile.points) +
-              Number.EPSILON) *
-              100,
-          ) / 100) as unknown as Prisma.Decimal;
+        profileRegionData.rankedProfiles += 1;
+        profileRegionData.earnedPlatinum += profile.earnedPlatinum;
+        profileRegionData.earnedGold += profile.earnedGold;
+        profileRegionData.earnedSilver += profile.earnedSilver;
+        profileRegionData.earnedBronze += profile.earnedBronze;
+        profileRegionData.completion = (Math.round(
+          (Number(profileRegionData.completion) +
+            Number(profile.completion) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
+        profileRegionData.points = (Math.round(
+          (Number(profileRegionData.points) +
+            Number(profile.points) +
+            Number.EPSILON) *
+            100,
+        ) / 100) as unknown as Prisma.Decimal;
 
-          if (profile.regionalPosition !== regionalPosition) {
-            await prisma.profile.update({
-              where: { id: profile.id },
-              data: {
-                regionalPosition: regionalPosition,
-                regionalPostionChanges: {
-                  create: {
-                    regionalPositionFrom: profile.regionalPosition,
-                    regionalPositionTo: regionalPosition,
-                  },
+        if (profile.regionalPosition !== regionalPosition) {
+          await prisma.profile.update({
+            where: { id: profile.id },
+            data: {
+              regionalPosition: regionalPosition,
+              regionalPostionChanges: {
+                create: {
+                  regionalPositionFrom: profile.regionalPosition,
+                  regionalPositionTo: regionalPosition,
                 },
               },
-            });
-          }
-
-          regionalPosition += 1;
-        } else {
-          if (profile.regionalPosition) {
-            await prisma.profile.update({
-              where: { id: profile.id },
-              data: {
-                regionalPosition: 0,
-                regionalPostionChanges: {
-                  create: {
-                    regionalPositionFrom: profile.regionalPosition,
-                    regionalPositionTo: 0,
-                  },
-                },
-              },
-            });
-          }
+            },
+          });
         }
+
+        regionalPosition += 1;
       }
 
       profileRegionData.completion = (Math.round(

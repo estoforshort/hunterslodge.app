@@ -11,7 +11,6 @@ type Data = {
   profile: {
     id: number;
     accountId: string;
-    completion: number;
     createdAt: Date;
   };
   project: {
@@ -71,7 +70,6 @@ export const updateProjectAndStack = async (data: Data) => {
         data.project.earnedTrophies.bronze ||
       Number(findProjectWithStack.value) !==
         Number(findProjectWithStack.stack.value) ||
-      findProjectWithStack.completion !== data.profile.completion ||
       findProjectWithStack.stack.definedPlatinum !==
         data.project.definedTrophies.platinum ||
       findProjectWithStack.stack.definedGold !==
@@ -206,7 +204,6 @@ export const updateProjectAndStack = async (data: Data) => {
         value: 0 as unknown as Prisma.Decimal,
         points: 0 as unknown as Prisma.Decimal,
         streamPoints: 0 as unknown as Prisma.Decimal,
-        completion: data.profile.completion,
       };
 
       const stackData = {
@@ -216,7 +213,7 @@ export const updateProjectAndStack = async (data: Data) => {
         definedBronze: data.project.definedTrophies.bronze,
         firstTrophyEarnedAt: stack.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stack.lastTrophyEarnedAt,
-        psnRate: 0 as unknown as Prisma.Decimal,
+        quality: 0 as unknown as Prisma.Decimal,
         profilesCount: data.profilesCount,
         timesStarted: timesStarted,
         rarity: 0 as unknown as Prisma.Decimal,
@@ -251,7 +248,7 @@ export const updateProjectAndStack = async (data: Data) => {
             definedGoldFrom: stack.definedGold,
             definedSilverFrom: stack.definedSilver,
             definedBronzeFrom: stack.definedBronze,
-            psnRateFrom: stack.psnRate,
+            qualityFrom: stack.quality,
             timesStartedFrom: stack.timesStarted,
             rarityFrom: stack.rarity,
             timesCompletedFrom: stack.timesCompleted,
@@ -428,10 +425,10 @@ export const updateProjectAndStack = async (data: Data) => {
         },
       });
 
-      const [avgPsnRate, timesCompleted, avgProgress] = await Promise.all([
+      const [avgQuality, timesCompleted, avgProgress] = await Promise.all([
         prisma.stackTrophy.aggregate({
           _avg: {
-            psnRate: true,
+            quality: true,
           },
           where: { stackId: stack.id },
         }),
@@ -444,23 +441,12 @@ export const updateProjectAndStack = async (data: Data) => {
         }),
       ]);
 
-      if (avgPsnRate._avg.psnRate) {
-        stackData.psnRate = avgPsnRate._avg.psnRate;
+      if (avgQuality._avg.quality) {
+        stackData.quality = avgQuality._avg.quality;
       }
 
       stackData.rarity = (Math.round(
         (data.profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
-      ) / 100) as unknown as Prisma.Decimal;
-
-      const rarityLoss =
-        (Number(stackData.psnRate) / 100) * Number(stackData.rarity);
-
-      stackData.rarity = (Math.round(
-        (data.profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
-      ) / 100) as unknown as Prisma.Decimal;
-
-      stackData.rarity = (Math.round(
-        (Number(stackData.rarity) - rarityLoss + Number.EPSILON) * 100,
       ) / 100) as unknown as Prisma.Decimal;
 
       stackData.timesCompleted = timesCompleted;
@@ -483,7 +469,7 @@ export const updateProjectAndStack = async (data: Data) => {
           definedGoldTo: updateStack.definedGold,
           definedSilverTo: updateStack.definedSilver,
           definedBronzeTo: updateStack.definedBronze,
-          psnRateTo: updateStack.psnRate,
+          qualityTo: updateStack.quality,
           timesStartedTo: updateStack.timesStarted,
           rarityTo: updateStack.rarity,
           timesCompletedTo: updateStack.timesCompleted,
