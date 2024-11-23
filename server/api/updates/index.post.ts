@@ -125,6 +125,18 @@ export default defineEventHandler(async (event) => {
     };
   }
 
+  if (
+    !dayjs().isAfter(dayjs(profile.lastCheckedAt).add(15, "minutes")) ||
+    !dayjs().isAfter(dayjs(profile.lastFullUpdateAt).add(15, "minutes"))
+  ) {
+    return {
+      data: {
+        success: false,
+        message: "Updates are currently on cooldown",
+      },
+    };
+  }
+
   const psnProfile = await psn.profile({
     accountId: profile.accountId,
   });
