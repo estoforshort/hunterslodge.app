@@ -1,10 +1,9 @@
 <script setup lang="ts">
-const { user } = useUserSession();
-
-const { data: overlay, refresh } = await useFetch("/api/overlay");
+const { data: overlay, refresh } = await useFetch("/api/overlays");
+const { data: profile } = await useFetch("/api/profiles");
 
 const { data: projects } = await useFetch(
-  `/api/public/v1/profiles/${user.value?.username}/projects`,
+  `/api/public/v1/profiles/${profile.value?.data?.id ?? 0}/projects`,
   {
     transform: (projects) => {
       return projects.data.map((project) => ({
@@ -17,7 +16,9 @@ const { data: projects } = await useFetch(
 
 const config = useRuntimeConfig();
 
-const overlayUrl = ref(`${config.public.baseUrl}/o/${overlay.value?.data?.id}`);
+const overlayUrl = ref(
+  `${config.public.baseUrl}/overlays/${overlay.value?.data?.id}`,
+);
 
 const loading = ref(false);
 const toast = useToast();
@@ -26,13 +27,13 @@ async function getNewOverlay() {
   try {
     loading.value = true;
 
-    const newOverlay = await $fetch("/api/overlay", {
+    const newOverlay = await $fetch("/api/overlays", {
       method: "POST",
     });
 
     await refresh();
 
-    overlayUrl.value = `${config.public.baseUrl}/o/${overlay.value?.data?.id}`;
+    overlayUrl.value = `${config.public.baseUrl}/overlays/${overlay.value?.data?.id}`;
 
     toast.add({
       description: newOverlay.data.message,
@@ -58,7 +59,7 @@ const automaticProjectUpdates = ref(
   overlay.value?.data?.updateProject ?? false,
 );
 
-const project = ref(projects.value![0]);
+const project = ref(projects.value ? projects.value![0] : null);
 
 if (overlay.value?.data?.project) {
   project.value = projects.value?.find(
@@ -73,17 +74,21 @@ const styles = [
   },
   {
     id: "streamer",
-    label: "Streamers leaderboard style",
+    label: "Streamers leaderboard",
   },
 ];
 
-const style = ref(styles.find((s) => s.id === overlay.value?.data?.style));
+const style = ref(
+  overlay.value?.data
+    ? styles.find((s) => s.id === overlay.value?.data?.style)
+    : styles[0],
+);
 
 async function updateOverlay() {
   try {
     loading.value = true;
 
-    await $fetch("/api/overlay", {
+    await $fetch("/api/overlays", {
       method: "PUT",
       body: {
         stackId: project.value?.id,
@@ -123,7 +128,7 @@ async function updateOverlay() {
     class="px-4 py-6"
   >
     <UCard>
-      <div v-if="!user?.isLinked">
+      <div v-if="!profile?.data">
         You need to link your PSN to use this feature.
       </div>
 
@@ -161,7 +166,7 @@ async function updateOverlay() {
 
           <div v-if="projects" class="pt-4">
             <USelectMenu
-              v-model="project"
+              v-model="project!"
               :options="projects"
               searchable
               searchable-placeholder="Search a project..."

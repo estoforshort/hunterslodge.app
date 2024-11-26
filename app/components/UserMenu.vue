@@ -36,14 +36,14 @@ const items = computed(() => [
     {
       label: "Settings",
       icon: "i-heroicons-cog",
-      to: "/p/settings",
+      to: "/settings",
     },
   ],
   [
     {
       label: "Administrate",
       icon: "i-heroicons-bolt",
-      to: "/p/admin",
+      to: "/admin",
       class: user.value?.isAdmin ? "" : "hidden",
     },
     {

@@ -11,7 +11,7 @@ import {
 
 const props = defineProps({
   profile: {
-    type: String,
+    type: Number,
     required: true,
   },
 });

@@ -2,7 +2,7 @@
 const links = [
   {
     label: "Hunters",
-    to: "/",
+    to: "/hunters",
   },
 ];
 </script>

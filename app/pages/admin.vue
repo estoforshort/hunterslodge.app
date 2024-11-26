@@ -8,7 +8,7 @@ const links = [
     {
       label: "Overview",
       icon: "i-heroicons-squares-2x2",
-      to: "/p/admin",
+      to: "/admin",
       exact: true,
     },
   ],
@@ -16,7 +16,7 @@ const links = [
     {
       label: "Settings",
       icon: "i-heroicons-adjustments-horizontal",
-      to: "/p/admin/settings",
+      to: "/admin/settings",
     },
   ],
 ];

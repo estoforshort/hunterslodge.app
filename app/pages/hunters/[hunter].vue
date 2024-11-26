@@ -18,7 +18,8 @@ const { data: profile } = await useFetch(
       }
 
       return {
-        id: profile.data.user.id,
+        id: profile.data.id,
+        userId: profile.data.user.id,
         username: profile.data.user.username,
         displayName: profile.data.user.displayName,
         region: {
@@ -49,7 +50,7 @@ const links = computed(() => [
     {
       label: "Projects",
       icon: "i-bi-joystick",
-      to: `/${profile.value?.username}`,
+      to: `/hunters/${profile.value?.id}`,
       exact: true,
     },
   ],
@@ -57,7 +58,7 @@ const links = computed(() => [
     {
       label: "Updates",
       icon: "i-heroicons-arrow-path",
-      to: `/${profile.value?.username}/updates`,
+      to: `/hunters/${profile.value?.id}/updates`,
     },
   ],
 ]);
@@ -98,7 +99,10 @@ const links = computed(() => [
             <div
               class="absolute inset-x-0 top-0 mx-auto -mt-24 flex h-48 w-48 items-center justify-center rounded-full shadow-2xl"
             >
-              <img :src="`/images/users/${profile.id}`" class="rounded-full" />
+              <img
+                :src="`/images/users/${profile.userId}`"
+                class="rounded-full"
+              />
             </div>
           </div>
 
@@ -191,7 +195,7 @@ const links = computed(() => [
               </p>
             </div>
 
-            <HunterPointsChart :profile="profile.username" />
+            <HuntersHunterPointsChart :profile="profile.id" />
           </UCard>
         </div>
       </div>

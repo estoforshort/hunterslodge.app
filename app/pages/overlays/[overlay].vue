@@ -18,7 +18,7 @@ useSeoMeta({
 const route = useRoute();
 
 const { data: overlay, refresh } = await useFetch(
-  `/api/public/v1/overlay/${route.params.overlay}`,
+  `/api/public/v1/overlays/${route.params.overlay}`,
   {
     transform: (overlay) => {
       if (!overlay.data) {
@@ -76,7 +76,7 @@ const { data: overlay, refresh } = await useFetch(
 onMounted(() => {
   setInterval(async () => {
     await refresh();
-  }, 10000);
+  }, 5000);
 });
 </script>
 
@@ -225,34 +225,50 @@ onMounted(() => {
       </span>
 
       <UIcon
+        v-if="overlay.profile.streamPlatinum"
         name="i-bi-trophy-fill"
         class="my-auto me-2 h-5 w-5 text-sky-300"
       />
-      <span class="my-auto me-6 text-sky-300">
+      <span
+        v-if="overlay.profile.streamPlatinum"
+        class="my-auto me-6 text-sky-300"
+      >
         {{ formatThousands(overlay.profile.streamPlatinum, ",") }}
       </span>
 
       <UIcon
+        v-if="overlay.profile.streamGold"
         name="i-bi-trophy-fill"
         class="my-auto me-2 h-5 w-5 text-yellow-400"
       />
-      <span class="my-auto me-6 text-yellow-400">
+      <span
+        v-if="overlay.profile.streamGold"
+        class="my-auto me-6 text-yellow-400"
+      >
         {{ formatThousands(overlay.profile.streamGold, ",") }}
       </span>
 
       <UIcon
+        v-if="overlay.profile.streamSilver"
         name="i-bi-trophy-fill"
         class="my-auto me-2 h-5 w-5 text-gray-300"
       />
-      <span class="my-auto me-6 text-gray-300">
+      <span
+        v-if="overlay.profile.streamSilver"
+        class="my-auto me-6 text-gray-300"
+      >
         {{ formatThousands(overlay.profile.streamSilver, ",") }}
       </span>
 
       <UIcon
+        v-if="overlay.profile.streamBronze"
         name="i-bi-trophy-fill"
         class="my-auto me-2 h-5 w-5 text-orange-500"
       />
-      <span class="my-auto me-2 text-orange-500">
+      <span
+        v-if="overlay.profile.streamBronze"
+        class="my-auto me-2 text-orange-500"
+      >
         {{ formatThousands(overlay.profile.streamBronze, ",") }}
       </span>
     </div>
