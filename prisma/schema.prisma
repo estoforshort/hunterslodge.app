@@ -525,6 +525,7 @@ model StackTrophy {
 
   firstEarnedAt DateTime?
   lastEarnedAt  DateTime?
+  psnRate       Decimal   @default(0) @db.Decimal(5, 2)
   quality       Decimal   @default(0) @db.Decimal(5, 2)
   timesEarned   Int       @default(0) @db.UnsignedSmallInt
   rarity        Decimal   @default(0) @db.Decimal(7, 2)
@@ -536,7 +537,7 @@ model StackTrophy {
   changes         StackTrophyChange[]
 
   @@id([stackId, groupId, trophyId])
-  @@index([stackId])
+  @@index([stackId, groupId])
   @@index([gameId, trophyId])
 }
 
@@ -625,6 +626,7 @@ model ProjectGroup {
   changes  ProjectGroupChange[]
 
   @@id([profileId, stackId, groupId])
+  @@index([profileId, stackId])
   @@index([stackId, groupId])
 }
 
@@ -653,6 +655,7 @@ model ProjectTrophy {
   changes ProjectTrophyChange[]
 
   @@id([profileId, stackId, groupId, trophyId])
+  @@index([profileId, stackId, groupId])
 }
 
 model ProjectChange {
@@ -827,6 +830,8 @@ model StackTrophyChange {
   trophyId    Int         @db.UnsignedSmallInt
   StackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
 
+  psnRateFrom     Decimal  @db.Decimal(5, 2)
+  psnRateTo       Decimal  @default(0) @db.Decimal(5, 2)
   qualityFrom     Decimal  @db.Decimal(5, 2)
   qualityTo       Decimal  @default(0) @db.Decimal(5, 2)
   timesEarnedFrom Int      @db.UnsignedSmallInt

@@ -403,6 +403,7 @@ CREATE TABLE `StackTrophy` (
     `trophyId` SMALLINT UNSIGNED NOT NULL,
     `firstEarnedAt` DATETIME(3) NULL,
     `lastEarnedAt` DATETIME(3) NULL,
+    `psnRate` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `quality` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `timesEarned` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `rarity` DECIMAL(7, 2) NOT NULL DEFAULT 0,
@@ -410,7 +411,7 @@ CREATE TABLE `StackTrophy` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    INDEX `StackTrophy_stackId_idx`(`stackId`),
+    INDEX `StackTrophy_stackId_groupId_idx`(`stackId`, `groupId`),
     INDEX `StackTrophy_gameId_trophyId_idx`(`gameId`, `trophyId`),
     PRIMARY KEY (`stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -480,6 +481,7 @@ CREATE TABLE `ProjectGroup` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProjectGroup_profileId_stackId_idx`(`profileId`, `stackId`),
     INDEX `ProjectGroup_stackId_groupId_idx`(`stackId`, `groupId`),
     PRIMARY KEY (`profileId`, `stackId`, `groupId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -497,6 +499,7 @@ CREATE TABLE `ProjectTrophy` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProjectTrophy_profileId_stackId_groupId_idx`(`profileId`, `stackId`, `groupId`),
     PRIMARY KEY (`profileId`, `stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -649,6 +652,8 @@ CREATE TABLE `StackTrophyChange` (
     `stackId` VARCHAR(36) NOT NULL,
     `groupId` CHAR(3) NOT NULL,
     `trophyId` SMALLINT UNSIGNED NOT NULL,
+    `psnRateFrom` DECIMAL(5, 2) NOT NULL,
+    `psnRateTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `qualityFrom` DECIMAL(5, 2) NOT NULL,
     `qualityTo` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `timesEarnedFrom` SMALLINT UNSIGNED NOT NULL,

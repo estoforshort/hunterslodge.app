@@ -16,7 +16,7 @@ type Data = {
   trophy: {
     trophyId: number;
     earned: boolean;
-    earnedDateTime: string | undefined;
+    earnedDateTime: string | Date | null | undefined;
     trophyType: TrophyType;
     trophyEarnedRate: string;
   };
@@ -64,6 +64,7 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
     const stackTrophyData = {
       firstEarnedAt: stackTrophy.firstEarnedAt,
       lastEarnedAt: stackTrophy.lastEarnedAt,
+      psnRate: data.trophy.trophyEarnedRate,
       quality: (Math.round(
         (100 - Number(data.trophy.trophyEarnedRate) + Number.EPSILON) * 100,
       ) / 100) as unknown as Prisma.Decimal,
@@ -213,6 +214,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               changes: {
                 create: {
                   stackChangeId: data.stackChangeId,
+                  psnRateFrom: stackTrophy.psnRate,
+                  psnRateTo: stackTrophyData.psnRate,
                   qualityFrom: stackTrophy.quality,
                   qualityTo: stackTrophyData.quality,
                   timesEarnedFrom: stackTrophy.timesEarned,
@@ -285,6 +288,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                   changes: {
                     create: {
                       stackChangeId: data.stackChangeId,
+                      psnRateFrom: stackTrophy.psnRate,
+                      psnRateTo: stackTrophyData.psnRate,
                       qualityFrom: stackTrophy.quality,
                       qualityTo: stackTrophyData.quality,
                       timesEarnedFrom: stackTrophy.timesEarned,
@@ -319,6 +324,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 changes: {
                   create: {
                     stackChangeId: data.stackChangeId,
+                    psnRateFrom: stackTrophy.psnRate,
+                    psnRateTo: stackTrophyData.psnRate,
                     qualityFrom: stackTrophy.quality,
                     qualityTo: stackTrophyData.quality,
                     timesEarnedFrom: stackTrophy.timesEarned,
@@ -399,6 +406,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               changes: {
                 create: {
                   stackChangeId: data.stackChangeId,
+                  psnRateFrom: stackTrophy.psnRate,
+                  psnRateTo: stackTrophyData.psnRate,
                   qualityFrom: stackTrophy.quality,
                   qualityTo: stackTrophyData.quality,
                   timesEarnedFrom: stackTrophy.timesEarned,

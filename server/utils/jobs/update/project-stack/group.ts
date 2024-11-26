@@ -1,7 +1,7 @@
 import { updateProjectAndStackTrophy } from "./trophy";
 import dayjs from "dayjs";
 
-import type { Prisma } from "@prisma/client";
+import type { Prisma, TrophyType } from "@prisma/client";
 
 type Data = {
   updateId: number;
@@ -72,6 +72,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         data.group.earnedTrophies.silver ||
       findProjectGroupWithStackGroupAndGameGroup.earnedBronze !==
         data.group.earnedTrophies.bronze ||
+      findProjectGroupWithStackGroupAndGameGroup.progress !==
+        data.group.progress ||
       Number(findProjectGroupWithStackGroupAndGameGroup.value) !==
         Number(findProjectGroupWithStackGroupAndGameGroup.stackGroup.value) ||
       findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedPlatinum !==
@@ -87,17 +89,107 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
           .definedBronze
     ) {
-      const trophies = await psn.projectGroupTrophies({
-        accountId: data.profile.accountId,
-        npCommunicationId: data.stack.id,
-        trophyGroupId: data.group.trophyGroupId,
-        npServiceName: data.game.service,
-      });
+      const trophies: {
+        trophyId: number;
+        earned: boolean;
+        earnedDateTime: string | Date | null | undefined;
+        trophyType: TrophyType;
+        trophyEarnedRate: string;
+      }[] = [];
 
-      if (!trophies.data) {
-        return {
-          data: null,
-        };
+      let partial = true;
+
+      if (
+        !findProjectGroupWithStackGroupAndGameGroup ||
+        findProjectGroupWithStackGroupAndGameGroup.earnedPlatinum !==
+          data.group.earnedTrophies.platinum ||
+        findProjectGroupWithStackGroupAndGameGroup.earnedGold !==
+          data.group.earnedTrophies.gold ||
+        findProjectGroupWithStackGroupAndGameGroup.earnedSilver !==
+          data.group.earnedTrophies.silver ||
+        findProjectGroupWithStackGroupAndGameGroup.earnedBronze !==
+          data.group.earnedTrophies.bronze ||
+        findProjectGroupWithStackGroupAndGameGroup.progress !==
+          data.group.progress ||
+        findProjectGroupWithStackGroupAndGameGroup.stackGroup
+          .definedPlatinum !==
+          findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
+            .definedPlatinum ||
+        findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedGold !==
+          findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
+            .definedGold ||
+        findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedSilver !==
+          findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
+            .definedSilver ||
+        findProjectGroupWithStackGroupAndGameGroup.stackGroup.definedBronze !==
+          findProjectGroupWithStackGroupAndGameGroup.stackGroup.gameGroup
+            .definedBronze
+      ) {
+        const getTrophiesFromPsn = await psn.projectGroupTrophies({
+          accountId: data.profile.accountId,
+          npCommunicationId: data.stack.id,
+          trophyGroupId: data.group.trophyGroupId,
+          npServiceName: data.game.service,
+        });
+
+        if (!getTrophiesFromPsn.data) {
+          return {
+            data: null,
+          };
+        }
+
+        for (
+          let t = 0, tl = getTrophiesFromPsn.data.trophies.length;
+          t < tl;
+          t++
+        ) {
+          const trophy = getTrophiesFromPsn.data.trophies[t];
+
+          trophies.push({
+            trophyId: trophy.trophyId,
+            earned: trophy.earned,
+            earnedDateTime: trophy.earnedDateTime,
+            trophyType: trophy.trophyType,
+            trophyEarnedRate: trophy.trophyEarnedRate,
+          });
+        }
+
+        partial = false;
+      } else {
+        const getTrophiesFromDatabase = await prisma.projectTrophy.findMany({
+          select: {
+            trophyId: true,
+            stackTrophy: {
+              select: {
+                gameTrophy: {
+                  select: {
+                    type: true,
+                  },
+                },
+                psnRate: true,
+              },
+            },
+            earnedAt: true,
+          },
+          where: {
+            profileId: data.profile.id,
+            stackId: data.stack.id,
+            groupId: data.group.trophyGroupId,
+          },
+          orderBy: { trophyId: "asc" },
+        });
+
+        for (let t = 0, tl = getTrophiesFromDatabase.length; t < tl; t++) {
+          const trophy = getTrophiesFromDatabase[t];
+
+          trophies.push({
+            trophyId: trophy.trophyId,
+            earned: true,
+            earnedDateTime: trophy.earnedAt,
+            trophyType: trophy.stackTrophy.gameTrophy.type,
+            trophyEarnedRate: trophy.stackTrophy.psnRate.toString(),
+          });
+        }
       }
 
       const gameGroup = await prisma.group.findUnique({
@@ -246,8 +338,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           }),
         ]);
 
-      for (let t = 0, tl = trophies.data.trophies.length; t < tl; t++) {
-        const trophy = trophies.data.trophies[t];
+      for (let t = 0, tl = trophies.length; t < tl; t++) {
+        const trophy = trophies[t];
 
         const updatedTrophy = await updateProjectAndStackTrophy({
           updateId: data.updateId,
@@ -400,6 +492,45 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         };
       }
 
+      let trophiesCount = trophies.length;
+
+      if (partial && data.group.progress !== 100) {
+        projectGroupData.value = 0 as unknown as Prisma.Decimal;
+        stackGroupData.quality = 0 as unknown as Prisma.Decimal;
+        stackGroupData.value = 0 as unknown as Prisma.Decimal;
+
+        const stackGroupTrophies = await prisma.stackTrophy.findMany({
+          select: {
+            quality: true,
+            value: true,
+          },
+          where: { stackId: data.stack.id, groupId: data.group.trophyGroupId },
+        });
+
+        trophiesCount = stackGroupTrophies.length;
+
+        for (let sgt = 0, sgtl = stackGroupTrophies.length; sgt < sgtl; sgt++) {
+          projectGroupData.value = (Math.round(
+            (Number(projectGroupData.value) +
+              Number(stackGroupTrophies[sgt].value) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
+
+          stackGroupData.quality = (Number(stackGroupData.quality) +
+            Number(
+              stackGroupTrophies[sgt].quality,
+            )) as unknown as Prisma.Decimal;
+
+          stackGroupData.value = (Math.round(
+            (Number(stackGroupData.value) +
+              Number(stackGroupTrophies[sgt].value) +
+              Number.EPSILON) *
+              100,
+          ) / 100) as unknown as Prisma.Decimal;
+        }
+      }
+
       const updateProjectGroup = await prisma.projectGroup.update({
         where: {
           profileId_stackId_groupId: {
@@ -435,9 +566,7 @@ export const updateProjectAndStackGroup = async (data: Data) => {
       });
 
       stackGroupData.quality = (Math.round(
-        (Number(stackGroupData.quality) / trophies.data.trophies.length +
-          Number.EPSILON) *
-          100,
+        (Number(stackGroupData.quality) / trophiesCount + Number.EPSILON) * 100,
       ) / 100) as unknown as Prisma.Decimal;
 
       if (projectGroup.progress !== 100 && data.group.progress === 100) {

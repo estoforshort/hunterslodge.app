@@ -68,6 +68,7 @@ export const updateProjectAndStack = async (data: Data) => {
         data.project.earnedTrophies.silver ||
       findProjectWithStack.earnedBronze !==
         data.project.earnedTrophies.bronze ||
+      findProjectWithStack.progress !== data.project.progress ||
       Number(findProjectWithStack.value) !==
         Number(findProjectWithStack.stack.value) ||
       findProjectWithStack.stack.definedPlatinum !==
@@ -79,16 +80,97 @@ export const updateProjectAndStack = async (data: Data) => {
       findProjectWithStack.stack.definedBronze !==
         data.project.definedTrophies.bronze
     ) {
-      const projectGroups = await psn.projectGroups({
-        accountId: data.profile.accountId,
-        npCommunicationId: data.project.npCommunicationId,
-        npServiceName: data.project.npServiceName,
-      });
-
-      if (!projectGroups.data) {
-        return {
-          data: null,
+      const projectGroups: {
+        trophyGroupId: string;
+        progress: number;
+        earnedTrophies: {
+          bronze: number;
+          silver: number;
+          gold: number;
+          platinum: number;
         };
+      }[] = [];
+
+      if (
+        !findProjectWithStack ||
+        findProjectWithStack.earnedPlatinum !==
+          data.project.earnedTrophies.platinum ||
+        findProjectWithStack.earnedGold !== data.project.earnedTrophies.gold ||
+        findProjectWithStack.earnedSilver !==
+          data.project.earnedTrophies.silver ||
+        findProjectWithStack.earnedBronze !==
+          data.project.earnedTrophies.bronze ||
+        findProjectWithStack.progress !== data.project.progress ||
+        findProjectWithStack.stack.definedPlatinum !==
+          data.project.definedTrophies.platinum ||
+        findProjectWithStack.stack.definedGold !==
+          data.project.definedTrophies.gold ||
+        findProjectWithStack.stack.definedSilver !==
+          data.project.definedTrophies.silver ||
+        findProjectWithStack.stack.definedBronze !==
+          data.project.definedTrophies.bronze
+      ) {
+        const getGroupsFromPsn = await psn.projectGroups({
+          accountId: data.profile.accountId,
+          npCommunicationId: data.project.npCommunicationId,
+          npServiceName: data.project.npServiceName,
+        });
+
+        if (!getGroupsFromPsn.data) {
+          return {
+            data: null,
+          };
+        }
+
+        for (
+          let g = 0, gl = getGroupsFromPsn.data.trophyGroups.length;
+          g < gl;
+          g++
+        ) {
+          const group = getGroupsFromPsn.data.trophyGroups[g];
+
+          projectGroups.push({
+            trophyGroupId: group.trophyGroupId,
+            progress: group.progress,
+            earnedTrophies: {
+              platinum: group.earnedTrophies.platinum,
+              gold: group.earnedTrophies.gold,
+              silver: group.earnedTrophies.silver,
+              bronze: group.earnedTrophies.bronze,
+            },
+          });
+        }
+      } else {
+        const getGroupsFromDatabase = await prisma.projectGroup.findMany({
+          select: {
+            groupId: true,
+            progress: true,
+            earnedPlatinum: true,
+            earnedGold: true,
+            earnedSilver: true,
+            earnedBronze: true,
+          },
+          where: {
+            profileId: data.profile.id,
+            stackId: data.project.npCommunicationId,
+          },
+          orderBy: { groupId: "asc" },
+        });
+
+        for (let g = 0, gl = getGroupsFromDatabase.length; g < gl; g++) {
+          const group = getGroupsFromDatabase[g];
+
+          projectGroups.push({
+            trophyGroupId: group.groupId,
+            progress: group.progress,
+            earnedTrophies: {
+              platinum: group.earnedPlatinum,
+              gold: group.earnedGold,
+              silver: group.earnedSilver,
+              bronze: group.earnedBronze,
+            },
+          });
+        }
       }
 
       const getStack = async () => {
@@ -258,12 +340,8 @@ export const updateProjectAndStack = async (data: Data) => {
         }),
       ]);
 
-      for (
-        let pg = 0, pgl = projectGroups.data.trophyGroups.length;
-        pg < pgl;
-        pg++
-      ) {
-        const group = projectGroups.data.trophyGroups[pg];
+      for (let pg = 0, pgl = projectGroups.length; pg < pgl; pg++) {
+        const group = projectGroups[pg];
 
         const updatedGroup = await updateProjectAndStackGroup({
           updateId: data.updateId,
