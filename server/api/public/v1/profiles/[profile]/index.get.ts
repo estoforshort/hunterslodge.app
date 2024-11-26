@@ -2,13 +2,14 @@ import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
-    profile: z.string().min(1).max(25),
+    profile: z.number({ coerce: true }).positive().int().max(65535),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const data = await prisma.profile.findFirst({
+  const data = await prisma.profile.findUnique({
     select: {
+      id: true,
       user: {
         select: {
           id: true,
@@ -17,6 +18,8 @@ export default defineEventHandler(async (event) => {
           imageUrl: true,
           isAdmin: true,
           isFounder: true,
+          isLinked: true,
+          createdAt: true,
         },
       },
       region: {
@@ -55,11 +58,7 @@ export default defineEventHandler(async (event) => {
       globalPosition: true,
       createdAt: true,
     },
-    where: {
-      user: {
-        username: params.profile,
-      },
-    },
+    where: { id: params.profile },
   });
 
   return { data };

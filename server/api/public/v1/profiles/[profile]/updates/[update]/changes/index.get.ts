@@ -3,6 +3,7 @@ import { z } from "zod";
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
     profile: z.number({ coerce: true }).positive().int().max(65535),
+    update: z.number({ coerce: true }).positive().int().max(4294967295),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
@@ -22,29 +23,26 @@ export default defineEventHandler(async (event) => {
   const pageSize = query.pageSize ?? 100;
 
   const [data, totalSize] = await Promise.all([
-    prisma.profile.findFirst({
+    prisma.update.findUnique({
       select: {
-        updates: {
+        changes: {
           select: {
-            id: true,
-            status: true,
-            type: true,
-            fullUpdate: true,
-            startedAt: true,
-            progress: true,
-            finishedAt: true,
-            startedProjectsFrom: true,
-            startedProjectsTo: true,
-            completedProjectsFrom: true,
-            completedProjectsTo: true,
-            definedPlatinumFrom: true,
-            definedPlatinumTo: true,
-            definedGoldFrom: true,
-            definedGoldTo: true,
-            definedSilverFrom: true,
-            definedSilverTo: true,
-            definedBronzeFrom: true,
-            definedBronzeTo: true,
+            project: {
+              select: {
+                stack: {
+                  select: {
+                    id: true,
+                    game: {
+                      select: {
+                        id: true,
+                        name: true,
+                        imageUrl: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             earnedPlatinumFrom: true,
             earnedPlatinumTo: true,
             earnedGoldFrom: true,
@@ -61,10 +59,8 @@ export default defineEventHandler(async (event) => {
             streamSilverTo: true,
             streamBronzeFrom: true,
             streamBronzeTo: true,
-            hiddenTrophiesFrom: true,
-            hiddenTrophiesTo: true,
-            completionFrom: true,
-            completionTo: true,
+            progressFrom: true,
+            progressTo: true,
             pointsFrom: true,
             pointsTo: true,
             streamPointsFrom: true,
@@ -78,15 +74,13 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
-      where: { id: params.profile },
+      where: { id: params.update },
     }),
-    prisma.update.count({
-      where: { profileId: params.profile },
-    }),
+    prisma.projectChange.count({ where: { updateId: params.update } }),
   ]);
 
   return {
-    data: data?.updates ?? [],
+    data,
     page,
     pageSize,
     totalSize,

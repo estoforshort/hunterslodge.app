@@ -34,7 +34,7 @@ CREATE TABLE `AppSettings` (
 -- CreateTable
 CREATE TABLE `User` (
     `id` VARCHAR(36) NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `username` VARCHAR(25) NOT NULL,
     `displayName` VARCHAR(50) NOT NULL,
     `imageUrl` VARCHAR(512) NOT NULL,
@@ -61,14 +61,12 @@ CREATE TABLE `UserImage` (
 -- CreateTable
 CREATE TABLE `ProfileRegion` (
     `id` CHAR(2) NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `name` VARCHAR(64) NULL,
-    `rankedProfiles` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedPlatinum` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedGold` INTEGER UNSIGNED NOT NULL DEFAULT 0,
     `earnedSilver` INTEGER UNSIGNED NOT NULL DEFAULT 0,
     `earnedBronze` INTEGER UNSIGNED NOT NULL DEFAULT 0,
-    `completion` DECIMAL(5, 2) NOT NULL DEFAULT 0,
     `points` DECIMAL(24, 2) NOT NULL DEFAULT 0,
     `position` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -80,7 +78,7 @@ CREATE TABLE `ProfileRegion` (
 -- CreateTable
 CREATE TABLE `Profile` (
     `id` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `userId` VARCHAR(36) NOT NULL,
     `regionId` CHAR(2) NOT NULL,
     `accountId` VARCHAR(36) NOT NULL,
@@ -140,6 +138,7 @@ CREATE TABLE `ProfileImage` (
 -- CreateTable
 CREATE TABLE `Overlay` (
     `id` VARCHAR(36) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `style` ENUM('default', 'streamer') NOT NULL DEFAULT 'default',
     `viewers` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
@@ -159,6 +158,7 @@ CREATE TABLE `Overlay` (
 -- CreateTable
 CREATE TABLE `Stream` (
     `id` VARCHAR(36) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `maxViewers` MEDIUMINT UNSIGNED NOT NULL,
     `avgViewers` MEDIUMINT UNSIGNED NOT NULL,
@@ -190,7 +190,7 @@ CREATE TABLE `Viewers` (
 -- CreateTable
 CREATE TABLE `Update` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `status` ENUM('WAITING', 'RUNNING', 'SUCCESSFUL', 'FAILED') NOT NULL,
     `type` ENUM('INITIAL', 'MANUAL', 'OVERLAY', 'AUTOMATIC', 'FORCED') NOT NULL,
@@ -246,7 +246,7 @@ CREATE TABLE `Update` (
 -- CreateTable
 CREATE TABLE `Game` (
     `id` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `hash` CHAR(32) NOT NULL,
     `service` VARCHAR(7) NOT NULL,
     `name` VARCHAR(512) NOT NULL,
@@ -276,7 +276,7 @@ CREATE TABLE `GameImage` (
 -- CreateTable
 CREATE TABLE `Platform` (
     `id` VARCHAR(6) NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -296,7 +296,7 @@ CREATE TABLE `PlatformsOnGames` (
 -- CreateTable
 CREATE TABLE `Group` (
     `gameId` SMALLINT UNSIGNED NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `id` CHAR(3) NOT NULL,
     `name` VARCHAR(512) NOT NULL,
     `imageUrl` VARCHAR(512) NOT NULL,
@@ -325,7 +325,7 @@ CREATE TABLE `GroupImage` (
 CREATE TABLE `Trophy` (
     `gameId` SMALLINT UNSIGNED NOT NULL,
     `groupId` CHAR(3) NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `id` SMALLINT UNSIGNED NOT NULL,
     `type` ENUM('platinum', 'gold', 'silver', 'bronze') NOT NULL,
     `name` VARCHAR(512) NOT NULL,
@@ -420,7 +420,7 @@ CREATE TABLE `Project` (
     `profileId` SMALLINT UNSIGNED NOT NULL,
     `overlayId` VARCHAR(36) NULL,
     `stackId` VARCHAR(36) NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `earnedPlatinum` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     `earnedSilver` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
@@ -440,6 +440,7 @@ CREATE TABLE `Project` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Project_overlayId_key`(`overlayId`),
+    INDEX `Project_profileId_idx`(`profileId`),
     INDEX `Project_stackId_progress_idx`(`stackId`, `progress`),
     PRIMARY KEY (`profileId`, `stackId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -453,6 +454,7 @@ CREATE TABLE `StreamsOnProjects` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `StreamsOnProjects_profileId_stackId_idx`(`profileId`, `stackId`),
     PRIMARY KEY (`streamId`, `profileId`, `stackId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -488,7 +490,7 @@ CREATE TABLE `ProjectTrophy` (
     `stackId` VARCHAR(36) NOT NULL,
     `groupId` CHAR(3) NOT NULL,
     `trophyId` SMALLINT UNSIGNED NOT NULL,
-    `appId` CHAR(3) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `streamId` VARCHAR(36) NULL,
     `earnedAt` DATETIME(3) NULL,
     `points` DECIMAL(10, 2) NOT NULL,
@@ -528,6 +530,8 @@ CREATE TABLE `ProjectChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProjectChange_updateId_idx`(`updateId`),
+    INDEX `ProjectChange_profileId_stackId_idx`(`profileId`, `stackId`),
     PRIMARY KEY (`updateId`, `stackId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -562,6 +566,7 @@ CREATE TABLE `ProjectGroupChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProjectGroupChange_profileId_stackId_groupId_idx`(`profileId`, `stackId`, `groupId`),
     PRIMARY KEY (`updateId`, `stackId`, `groupId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -577,6 +582,7 @@ CREATE TABLE `ProjectTrophyChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProjectTrophyChange_profileId_stackId_groupId_trophyId_idx`(`profileId`, `stackId`, `groupId`, `trophyId`),
     PRIMARY KEY (`updateId`, `stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -661,8 +667,6 @@ CREATE TABLE `StackTrophyChange` (
 CREATE TABLE `ProfileRegionChange` (
     `id` CHAR(36) NOT NULL,
     `regionId` CHAR(2) NOT NULL,
-    `rankedProfilesFrom` SMALLINT UNSIGNED NOT NULL,
-    `rankedProfilesTo` SMALLINT UNSIGNED NOT NULL,
     `earnedPlatinumFrom` MEDIUMINT UNSIGNED NOT NULL,
     `earnedPlatinumTo` MEDIUMINT UNSIGNED NOT NULL,
     `earnedGoldFrom` INTEGER UNSIGNED NOT NULL,
@@ -671,13 +675,12 @@ CREATE TABLE `ProfileRegionChange` (
     `earnedSilverTo` INTEGER UNSIGNED NOT NULL,
     `earnedBronzeFrom` INTEGER UNSIGNED NOT NULL,
     `earnedBronzeTo` INTEGER UNSIGNED NOT NULL,
-    `completionFrom` DECIMAL(5, 2) NOT NULL,
-    `completionTo` DECIMAL(5, 2) NOT NULL,
     `pointsFrom` DECIMAL(24, 2) NOT NULL,
     `pointsTo` DECIMAL(24, 2) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `ProfileRegionChange_regionId_idx`(`regionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -757,7 +760,13 @@ ALTER TABLE `Profile` ADD CONSTRAINT `Profile_regionId_fkey` FOREIGN KEY (`regio
 ALTER TABLE `ProfileImage` ADD CONSTRAINT `ProfileImage_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Overlay` ADD CONSTRAINT `Overlay_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Overlay` ADD CONSTRAINT `Overlay_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Stream` ADD CONSTRAINT `Stream_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Stream` ADD CONSTRAINT `Stream_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -842,6 +851,9 @@ ALTER TABLE `ProjectGroup` ADD CONSTRAINT `ProjectGroup_profileId_stackId_fkey` 
 
 -- AddForeignKey
 ALTER TABLE `ProjectGroup` ADD CONSTRAINT `ProjectGroup_stackId_groupId_fkey` FOREIGN KEY (`stackId`, `groupId`) REFERENCES `StackGroup`(`stackId`, `groupId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `Profile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProjectTrophy` ADD CONSTRAINT `ProjectTrophy_profileId_stackId_groupId_fkey` FOREIGN KEY (`profileId`, `stackId`, `groupId`) REFERENCES `ProjectGroup`(`profileId`, `stackId`, `groupId`) ON DELETE CASCADE ON UPDATE CASCADE;

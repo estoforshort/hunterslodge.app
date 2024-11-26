@@ -398,12 +398,10 @@ export const runUpdate = async (updateId: number) => {
     const profileRegion = await prisma.profileRegion.findUnique({
       select: {
         id: true,
-        rankedProfiles: true,
         earnedPlatinum: true,
         earnedGold: true,
         earnedSilver: true,
         earnedBronze: true,
-        completion: true,
         points: true,
         profiles: {
           select: {
@@ -429,12 +427,10 @@ export const runUpdate = async (updateId: number) => {
     });
 
     const profileRegionData = {
-      rankedProfiles: 0,
       earnedPlatinum: 0,
       earnedGold: 0,
       earnedSilver: 0,
       earnedBronze: 0,
-      completion: 0 as unknown as Prisma.Decimal,
       points: 0 as unknown as Prisma.Decimal,
     };
 
@@ -448,17 +444,10 @@ export const runUpdate = async (updateId: number) => {
       ) {
         const profile = profileRegion.profiles[prp];
 
-        profileRegionData.rankedProfiles += 1;
         profileRegionData.earnedPlatinum += profile.earnedPlatinum;
         profileRegionData.earnedGold += profile.earnedGold;
         profileRegionData.earnedSilver += profile.earnedSilver;
         profileRegionData.earnedBronze += profile.earnedBronze;
-        profileRegionData.completion = (Math.round(
-          (Number(profileRegionData.completion) +
-            Number(profile.completion) +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
         profileRegionData.points = (Math.round(
           (Number(profileRegionData.points) +
             Number(profile.points) +
@@ -484,27 +473,16 @@ export const runUpdate = async (updateId: number) => {
         regionalPosition += 1;
       }
 
-      profileRegionData.completion = (Math.round(
-        (Number(profileRegionData.completion) /
-          profileRegionData.rankedProfiles +
-          Number.EPSILON) *
-          100,
-      ) / 100) as unknown as Prisma.Decimal;
-
       await prisma.profileRegion.update({
         where: { id: profileRegion.id },
         data: {
-          rankedProfiles: profileRegionData.rankedProfiles,
           earnedPlatinum: profileRegionData.earnedPlatinum,
           earnedGold: profileRegionData.earnedGold,
           earnedSilver: profileRegionData.earnedSilver,
           earnedBronze: profileRegionData.earnedBronze,
-          completion: profileRegionData.completion,
           points: profileRegionData.points,
           changes: {
             create: {
-              rankedProfilesFrom: profileRegion.rankedProfiles,
-              rankedProfilesTo: profileRegionData.rankedProfiles,
               earnedPlatinumFrom: profileRegion.earnedPlatinum,
               earnedPlatinumTo: profileRegionData.earnedPlatinum,
               earnedGoldFrom: profileRegion.earnedGold,
@@ -513,8 +491,6 @@ export const runUpdate = async (updateId: number) => {
               earnedSilverTo: profileRegionData.earnedSilver,
               earnedBronzeFrom: profileRegion.earnedBronze,
               earnedBronzeTo: profileRegionData.earnedBronze,
-              completionFrom: profileRegion.completion,
-              completionTo: profileRegionData.completion,
               pointsFrom: profileRegion.points,
               pointsTo: profileRegionData.points,
             },

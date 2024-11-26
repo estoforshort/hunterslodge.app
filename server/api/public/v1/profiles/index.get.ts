@@ -43,12 +43,7 @@ export default defineEventHandler(async (event) => {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 100;
 
-  const [totalSize, data] = await Promise.all([
-    prisma.profile.count({
-      where: {
-        lastFullUpdateAt: { not: null },
-      },
-    }),
+  const [data, totalSize] = await Promise.all([
     prisma.profile.findMany({
       select: {
         id: true,
@@ -60,6 +55,8 @@ export default defineEventHandler(async (event) => {
             imageUrl: true,
             isAdmin: true,
             isFounder: true,
+            isLinked: true,
+            createdAt: true,
           },
         },
         region: {
@@ -106,6 +103,12 @@ export default defineEventHandler(async (event) => {
       take: pageSize,
       orderBy: {
         [query.orderBy ?? "points"]: query.direction ?? "desc",
+      },
+    }),
+    prisma.profile.count({
+      where: {
+        lastFullUpdateAt: { not: null },
+        streamPoints: { gte: query.onlyStreamers ? 0.01 : 0 },
       },
     }),
   ]);

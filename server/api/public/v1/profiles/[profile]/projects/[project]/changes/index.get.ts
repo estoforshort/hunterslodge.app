@@ -3,6 +3,7 @@ import { z } from "zod";
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
     profile: z.number({ coerce: true }).positive().int().max(65535),
+    project: z.string().min(1).max(36),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
@@ -22,29 +23,10 @@ export default defineEventHandler(async (event) => {
   const pageSize = query.pageSize ?? 100;
 
   const [data, totalSize] = await Promise.all([
-    prisma.profile.findFirst({
+    prisma.project.findUnique({
       select: {
-        updates: {
+        changes: {
           select: {
-            id: true,
-            status: true,
-            type: true,
-            fullUpdate: true,
-            startedAt: true,
-            progress: true,
-            finishedAt: true,
-            startedProjectsFrom: true,
-            startedProjectsTo: true,
-            completedProjectsFrom: true,
-            completedProjectsTo: true,
-            definedPlatinumFrom: true,
-            definedPlatinumTo: true,
-            definedGoldFrom: true,
-            definedGoldTo: true,
-            definedSilverFrom: true,
-            definedSilverTo: true,
-            definedBronzeFrom: true,
-            definedBronzeTo: true,
             earnedPlatinumFrom: true,
             earnedPlatinumTo: true,
             earnedGoldFrom: true,
@@ -61,10 +43,8 @@ export default defineEventHandler(async (event) => {
             streamSilverTo: true,
             streamBronzeFrom: true,
             streamBronzeTo: true,
-            hiddenTrophiesFrom: true,
-            hiddenTrophiesTo: true,
-            completionFrom: true,
-            completionTo: true,
+            progressFrom: true,
+            progressTo: true,
             pointsFrom: true,
             pointsTo: true,
             streamPointsFrom: true,
@@ -78,15 +58,20 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
-      where: { id: params.profile },
+      where: {
+        profileId_stackId: {
+          profileId: params.profile,
+          stackId: params.project,
+        },
+      },
     }),
-    prisma.update.count({
-      where: { profileId: params.profile },
+    prisma.projectChange.count({
+      where: { profileId: params.profile, stackId: params.project },
     }),
   ]);
 
   return {
-    data: data?.updates ?? [],
+    data: data?.changes ?? [],
     page,
     pageSize,
     totalSize,

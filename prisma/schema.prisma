@@ -22,6 +22,8 @@ model App {
   users          User[]
   profileRegions ProfileRegion[]
   profiles       Profile[]
+  overlays       Overlay[]
+  streams        Stream[]
   updates        Update[]
   games          Game[]
   platforms      Platform[]
@@ -56,7 +58,7 @@ model AppSettings {
 model User {
   id String @id @db.VarChar(36)
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   username    String   @unique @db.VarChar(25)
@@ -84,16 +86,14 @@ model UserImage {
 model ProfileRegion {
   id String @id @db.Char(2)
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   name           String?  @db.VarChar(64)
-  rankedProfiles Int      @default(0) @db.UnsignedSmallInt
   earnedPlatinum Int      @default(0) @db.UnsignedMediumInt
   earnedGold     Int      @default(0) @db.UnsignedInt
   earnedSilver   Int      @default(0) @db.UnsignedInt
   earnedBronze   Int      @default(0) @db.UnsignedInt
-  completion     Decimal  @default(0) @db.Decimal(5, 2)
   points         Decimal  @default(0) @db.Decimal(24, 2)
   position       Int      @default(0) @db.UnsignedTinyInt
   createdAt      DateTime @default(now())
@@ -107,7 +107,7 @@ model ProfileRegion {
 model Profile {
   id Int @id @default(autoincrement()) @db.UnsignedSmallInt
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   userId String @unique @db.VarChar(36)
@@ -157,6 +157,7 @@ model Profile {
   streams                Stream[]
   updates                Update[]
   projects               Project[]
+  trophies               ProjectTrophy[]
   streamPositionChanges  ProfileStreamPositionChange[]
   regionalPostionChanges ProfileRegionalPositionChange[]
   globalPositionChanges  ProfileGlobalPositionChange[]
@@ -182,6 +183,9 @@ enum OverlayStyle {
 model Overlay {
   id String @id @default(uuid()) @db.VarChar(36)
 
+  appId String @default("app") @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
   profileId Int     @unique @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
 
@@ -201,6 +205,9 @@ model Overlay {
 
 model Stream {
   id String @id @db.VarChar(36)
+
+  appId String @default("app") @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
@@ -254,7 +261,7 @@ enum UpdateType {
 model Update {
   id Int @id @default(autoincrement()) @db.UnsignedInt
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   profileId Int     @db.UnsignedSmallInt
@@ -315,7 +322,7 @@ model Update {
 model Game {
   id Int @id @default(autoincrement()) @db.UnsignedSmallInt
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   hash            String   @unique @db.Char(32)
@@ -349,7 +356,7 @@ model GameImage {
 model Platform {
   id String @id @db.VarChar(6)
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   createdAt DateTime @default(now())
@@ -375,7 +382,7 @@ model Group {
   gameId Int  @db.UnsignedSmallInt
   game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   id              String   @db.Char(3)
@@ -419,7 +426,7 @@ model Trophy {
   groupId String @db.Char(3)
   group   Group  @relation(fields: [gameId, groupId], references: [gameId, id], onDelete: Cascade)
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   id          Int        @db.UnsignedSmallInt
@@ -543,7 +550,7 @@ model Project {
   stackId String @db.VarChar(36)
   stack   Stack  @relation(fields: [stackId], references: [id])
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   earnedPlatinum      Int       @default(0) @db.UnsignedTinyInt
@@ -569,6 +576,7 @@ model Project {
   changes ProjectChange[]
 
   @@id([profileId, stackId])
+  @@index([profileId])
   @@index([stackId, progress])
 }
 
@@ -585,6 +593,7 @@ model StreamsOnProjects {
   updatedAt    DateTime @updatedAt
 
   @@id([streamId, profileId, stackId])
+  @@index([profileId, stackId])
 }
 
 model ProjectGroup {
@@ -620,7 +629,9 @@ model ProjectGroup {
 }
 
 model ProjectTrophy {
-  profileId    Int          @db.UnsignedSmallInt
+  profileId Int     @db.UnsignedSmallInt
+  profile   Profile @relation(fields: [profileId], references: [id])
+
   stackId      String       @db.VarChar(36)
   groupId      String       @db.Char(3)
   projectGroup ProjectGroup @relation(fields: [profileId, stackId, groupId], references: [profileId, stackId, groupId], onDelete: Cascade)
@@ -628,7 +639,7 @@ model ProjectTrophy {
   trophyId    Int         @db.UnsignedSmallInt
   stackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
 
-  appId String @db.Char(3)
+  appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
   streamId String? @db.VarChar(36)
@@ -650,7 +661,7 @@ model ProjectChange {
 
   profileId Int     @db.UnsignedSmallInt
   stackId   String  @db.VarChar(36)
-  Project   Project @relation(fields: [profileId, stackId], references: [profileId, stackId], onDelete: Cascade)
+  project   Project @relation(fields: [profileId, stackId], references: [profileId, stackId], onDelete: Cascade)
 
   earnedPlatinumFrom Int      @db.UnsignedTinyInt
   earnedPlatinumTo   Int      @default(0) @db.UnsignedTinyInt
@@ -680,6 +691,8 @@ model ProjectChange {
   groupChanges ProjectGroupChange[]
 
   @@id([updateId, stackId])
+  @@index([updateId])
+  @@index([profileId, stackId])
 }
 
 model ProjectGroupChange {
@@ -719,6 +732,7 @@ model ProjectGroupChange {
   trophyChanges ProjectTrophyChange[]
 
   @@id([updateId, stackId, groupId])
+  @@index([profileId, stackId, groupId])
 }
 
 model ProjectTrophyChange {
@@ -737,6 +751,7 @@ model ProjectTrophyChange {
   updatedAt  DateTime @updatedAt
 
   @@id([updateId, stackId, groupId, trophyId])
+  @@index([profileId, stackId, groupId, trophyId])
 }
 
 model StackChange {
@@ -832,8 +847,6 @@ model ProfileRegionChange {
   regionId      String        @db.Char(2)
   profileRegion ProfileRegion @relation(fields: [regionId], references: [id])
 
-  rankedProfilesFrom Int      @db.UnsignedSmallInt
-  rankedProfilesTo   Int      @db.UnsignedSmallInt
   earnedPlatinumFrom Int      @db.UnsignedMediumInt
   earnedPlatinumTo   Int      @db.UnsignedMediumInt
   earnedGoldFrom     Int      @db.UnsignedInt
@@ -842,12 +855,12 @@ model ProfileRegionChange {
   earnedSilverTo     Int      @db.UnsignedInt
   earnedBronzeFrom   Int      @db.UnsignedInt
   earnedBronzeTo     Int      @db.UnsignedInt
-  completionFrom     Decimal  @db.Decimal(5, 2)
-  completionTo       Decimal  @db.Decimal(5, 2)
   pointsFrom         Decimal  @db.Decimal(24, 2)
   pointsTo           Decimal  @db.Decimal(24, 2)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+
+  @@index([regionId])
 }
 
 model ProfileRegionPositionChange {

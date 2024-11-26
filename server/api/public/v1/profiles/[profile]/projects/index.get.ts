@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
-    profile: z.string().min(1).max(25),
+    profile: z.number({ coerce: true }).positive().int().max(65535),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
@@ -28,68 +28,68 @@ export default defineEventHandler(async (event) => {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 100;
 
-  const data = await prisma.profile.findFirst({
-    select: {
-      id: true,
-      projects: {
-        select: {
-          stack: {
-            select: {
-              id: true,
-              game: {
-                select: {
-                  id: true,
-                  name: true,
-                  imageUrl: true,
-                  platforms: {
-                    select: {
-                      platformId: true,
+  const [data, totalSize] = await Promise.all([
+    prisma.profile.findUnique({
+      select: {
+        projects: {
+          select: {
+            stack: {
+              select: {
+                id: true,
+                game: {
+                  select: {
+                    id: true,
+                    name: true,
+                    imageUrl: true,
+                    platforms: {
+                      select: {
+                        platformId: true,
+                      },
                     },
                   },
                 },
+                definedPlatinum: true,
+                definedGold: true,
+                definedSilver: true,
+                definedBronze: true,
+                firstTrophyEarnedAt: true,
+                lastTrophyEarnedAt: true,
+                quality: true,
+                timesStarted: true,
+                rarity: true,
+                timesCompleted: true,
+                avgProgress: true,
+                value: true,
               },
-              definedPlatinum: true,
-              definedGold: true,
-              definedSilver: true,
-              definedBronze: true,
-              firstTrophyEarnedAt: true,
-              lastTrophyEarnedAt: true,
-              quality: true,
-              timesStarted: true,
-              rarity: true,
-              timesCompleted: true,
-              avgProgress: true,
-              value: true,
             },
+            earnedPlatinum: true,
+            earnedGold: true,
+            earnedSilver: true,
+            earnedBronze: true,
+            streamPlatinum: true,
+            streamGold: true,
+            streamSilver: true,
+            streamBronze: true,
+            firstTrophyEarnedAt: true,
+            lastTrophyEarnedAt: true,
+            progress: true,
+            points: true,
+            streamPoints: true,
+            timeStreamed: true,
           },
-          earnedPlatinum: true,
-          earnedGold: true,
-          earnedSilver: true,
-          earnedBronze: true,
-          streamPlatinum: true,
-          streamGold: true,
-          streamSilver: true,
-          streamBronze: true,
-          firstTrophyEarnedAt: true,
-          lastTrophyEarnedAt: true,
-          progress: true,
-          points: true,
-          streamPoints: true,
-          timeStreamed: true,
-        },
-        skip: Math.floor((page - 1) * pageSize),
-        take: pageSize,
-        orderBy: {
-          [query.orderBy ?? "lastTrophyEarnedAt"]: query.direction ?? "desc",
+          skip: Math.floor((page - 1) * pageSize),
+          take: pageSize,
+          orderBy: {
+            [query.orderBy ?? "lastTrophyEarnedAt"]: query.direction ?? "desc",
+          },
         },
       },
-    },
-    where: { user: { username: params.profile } },
-  });
-
-  const totalSize = await prisma.project.count({
-    where: { profileId: data?.id ?? 0 },
-  });
+      where: { id: params.profile },
+    }),
+    prisma.project.count({
+      where: { profileId: params.profile },
+    }),
+  ]);
 
   return {
     data: data?.projects ?? [],

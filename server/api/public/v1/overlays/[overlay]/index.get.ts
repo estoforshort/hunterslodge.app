@@ -6,7 +6,7 @@ import { z } from "zod";
 export default defineCachedEventHandler(
   async (event) => {
     const paramsSchema = z.object({
-      id: z.string().length(36),
+      overlay: z.string().length(36),
     });
 
     const params = await getValidatedRouterParams(event, paramsSchema.parse);
@@ -94,7 +94,7 @@ export default defineCachedEventHandler(
         updateProject: true,
         updateTrophies: true,
       },
-      where: { id: params.id },
+      where: { id: params.overlay },
     });
 
     if (!findOverlay) {
