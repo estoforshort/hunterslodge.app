@@ -29,6 +29,9 @@ model App {
   platforms      Platform[]
   groups         Group[]
   trophies       Trophy[]
+  stacks         Stack[]
+  stackGroups    StackGroup[]
+  stackTrophies  StackTrophy[]
   projects       Project[]
   earnedTrophies ProjectTrophy[]
 }
@@ -459,6 +462,9 @@ model TrophyImage {
 model Stack {
   id String @id @db.VarChar(36)
 
+  appId String @default("app") @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
   gameId Int  @db.UnsignedSmallInt
   game   Game @relation(references: [id], fields: [gameId])
 
@@ -486,6 +492,9 @@ model Stack {
 }
 
 model StackGroup {
+  appId String @default("app") @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
   stackId String @db.VarChar(36)
   stack   Stack  @relation(references: [id], fields: [stackId])
 
@@ -515,6 +524,9 @@ model StackGroup {
 }
 
 model StackTrophy {
+  appId String @default("app") @db.Char(3)
+  app   App    @relation(references: [id], fields: [appId])
+
   stackId    String     @db.VarChar(36)
   groupId    String     @db.Char(3)
   stackGroup StackGroup @relation(fields: [stackId, groupId], references: [stackId, groupId])

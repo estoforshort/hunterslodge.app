@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE `Stack` ADD COLUMN `appId` CHAR(3) NOT NULL DEFAULT 'app';
+
+-- AlterTable
+ALTER TABLE `StackGroup` ADD COLUMN `appId` CHAR(3) NOT NULL DEFAULT 'app';
+
+-- AlterTable
+ALTER TABLE `StackTrophy` ADD COLUMN `appId` CHAR(3) NOT NULL DEFAULT 'app';
+
+-- AddForeignKey
+ALTER TABLE `Stack` ADD CONSTRAINT `Stack_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackGroup` ADD CONSTRAINT `StackGroup_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackTrophy` ADD CONSTRAINT `StackTrophy_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
