@@ -406,7 +406,9 @@ export default defineCachedEventHandler(
                   const fetchImage = await fetch(findAvatar.url);
 
                   if (fetchImage.ok) {
-                    const image = Buffer.from(await fetchImage.arrayBuffer());
+                    const image = new Uint8Array(
+                      await fetchImage.arrayBuffer(),
+                    );
 
                     await prisma.profileImage.update({
                       where: {

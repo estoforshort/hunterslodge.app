@@ -25,7 +25,7 @@ export default defineOAuthTwitchEventHandler({
         const fetchImage = await fetch(createUser.imageUrl);
 
         if (fetchImage.ok) {
-          const image = Buffer.from(await fetchImage.arrayBuffer());
+          const image = new Uint8Array(await fetchImage.arrayBuffer());
 
           await prisma.userImage.create({
             data: {
@@ -72,7 +72,7 @@ export default defineOAuthTwitchEventHandler({
         const fetchImage = await fetch(user.profile_image_url);
 
         if (fetchImage.ok) {
-          const image = Buffer.from(await fetchImage.arrayBuffer());
+          const image = new Uint8Array(await fetchImage.arrayBuffer());
 
           await prisma.userImage.update({
             where: {

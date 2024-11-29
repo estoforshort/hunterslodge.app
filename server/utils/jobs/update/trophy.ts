@@ -48,7 +48,7 @@ export const updateTrophy = async (data: Data) => {
       const fetchImage = await fetch(createTrophy.imageUrl);
 
       if (fetchImage.ok) {
-        const image = Buffer.from(await fetchImage.arrayBuffer());
+        const image = new Uint8Array(await fetchImage.arrayBuffer());
 
         await prisma.trophyImage.create({
           data: {

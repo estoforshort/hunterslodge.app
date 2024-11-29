@@ -352,6 +352,7 @@ CREATE TABLE `TrophyImage` (
 -- CreateTable
 CREATE TABLE `Stack` (
     `id` VARCHAR(36) NOT NULL,
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `gameId` SMALLINT UNSIGNED NOT NULL,
     `definedPlatinum` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `definedGold` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
@@ -375,6 +376,7 @@ CREATE TABLE `Stack` (
 
 -- CreateTable
 CREATE TABLE `StackGroup` (
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `stackId` VARCHAR(36) NOT NULL,
     `gameId` SMALLINT UNSIGNED NOT NULL,
     `groupId` CHAR(3) NOT NULL,
@@ -397,6 +399,7 @@ CREATE TABLE `StackGroup` (
 
 -- CreateTable
 CREATE TABLE `StackTrophy` (
+    `appId` CHAR(3) NOT NULL DEFAULT 'app',
     `stackId` VARCHAR(36) NOT NULL,
     `groupId` CHAR(3) NOT NULL,
     `gameId` SMALLINT UNSIGNED NOT NULL,
@@ -819,13 +822,22 @@ ALTER TABLE `Trophy` ADD CONSTRAINT `Trophy_appId_fkey` FOREIGN KEY (`appId`) RE
 ALTER TABLE `TrophyImage` ADD CONSTRAINT `TrophyImage_gameId_groupId_trophyId_fkey` FOREIGN KEY (`gameId`, `groupId`, `trophyId`) REFERENCES `Trophy`(`gameId`, `groupId`, `id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Stack` ADD CONSTRAINT `Stack_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Stack` ADD CONSTRAINT `Stack_gameId_fkey` FOREIGN KEY (`gameId`) REFERENCES `Game`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackGroup` ADD CONSTRAINT `StackGroup_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StackGroup` ADD CONSTRAINT `StackGroup_stackId_fkey` FOREIGN KEY (`stackId`) REFERENCES `Stack`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StackGroup` ADD CONSTRAINT `StackGroup_gameId_groupId_fkey` FOREIGN KEY (`gameId`, `groupId`) REFERENCES `Group`(`gameId`, `id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `StackTrophy` ADD CONSTRAINT `StackTrophy_appId_fkey` FOREIGN KEY (`appId`) REFERENCES `App`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StackTrophy` ADD CONSTRAINT `StackTrophy_stackId_groupId_fkey` FOREIGN KEY (`stackId`, `groupId`) REFERENCES `StackGroup`(`stackId`, `groupId`) ON DELETE RESTRICT ON UPDATE CASCADE;

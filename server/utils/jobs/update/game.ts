@@ -68,7 +68,7 @@ export const updateGame = async (data: Data) => {
             const fetchImage = await fetch(createGame.imageUrl);
 
             if (fetchImage.ok) {
-              const image = Buffer.from(await fetchImage.arrayBuffer());
+              const image = new Uint8Array(await fetchImage.arrayBuffer());
 
               await prisma.gameImage.create({
                 data: {
