@@ -164,7 +164,7 @@ model Profile {
   regionalPostionChanges ProfileRegionalPositionChange[]
   globalPositionChanges  ProfileGlobalPositionChange[]
 
-  @@index([regionId])
+  @@index([regionId, regionalPosition])
   @@index([lastFullUpdateAt])
 }
 

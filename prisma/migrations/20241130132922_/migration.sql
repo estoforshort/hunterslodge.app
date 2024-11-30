@@ -120,7 +120,7 @@ CREATE TABLE `Profile` (
     UNIQUE INDEX `Profile_userId_key`(`userId`),
     UNIQUE INDEX `Profile_accountId_key`(`accountId`),
     UNIQUE INDEX `Profile_onlineId_key`(`onlineId`),
-    INDEX `Profile_regionId_idx`(`regionId`),
+    INDEX `Profile_regionId_regionalPosition_idx`(`regionId`, `regionalPosition`),
     INDEX `Profile_lastFullUpdateAt_idx`(`lastFullUpdateAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
