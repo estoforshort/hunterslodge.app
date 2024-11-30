@@ -619,6 +619,7 @@ CREATE TABLE `StackChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `StackChange_stackId_idx`(`stackId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -646,6 +647,7 @@ CREATE TABLE `StackGroupChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `StackGroupChange_stackId_groupId_idx`(`stackId`, `groupId`),
     PRIMARY KEY (`stackChangeId`, `stackId`, `groupId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -668,6 +670,7 @@ CREATE TABLE `StackTrophyChange` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    INDEX `StackTrophyChange_stackId_groupId_trophyId_idx`(`stackId`, `groupId`, `trophyId`),
     PRIMARY KEY (`stackChangeId`, `stackId`, `groupId`, `trophyId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

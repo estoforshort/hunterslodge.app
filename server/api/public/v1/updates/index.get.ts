@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
       skip: Math.floor((page - 1) * pageSize),
       take: pageSize,
       orderBy: {
-        [query.orderBy ?? "createdAt"]: query.direction ?? "desc",
+        [query.orderBy ?? "createdAt"]: query.direction ?? "asc",
       },
     }),
     prisma.update.count(),

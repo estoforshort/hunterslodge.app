@@ -798,6 +798,8 @@ model StackChange {
   updatedAt           DateTime @updatedAt
 
   groupChanges StackGroupChange[]
+
+  @@index([stackId])
 }
 
 model StackGroupChange {
@@ -830,6 +832,7 @@ model StackGroupChange {
   trophyChanges StackTrophyChange[]
 
   @@id([stackChangeId, stackId, groupId])
+  @@index([stackId, groupId])
 }
 
 model StackTrophyChange {
@@ -855,6 +858,7 @@ model StackTrophyChange {
   updatedAt       DateTime @updatedAt
 
   @@id([stackChangeId, stackId, groupId, trophyId])
+  @@index([stackId, groupId, trophyId])
 }
 
 model ProfileRegionChange {

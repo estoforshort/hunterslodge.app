@@ -2,7 +2,10 @@ import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
-    profile: z.number({ coerce: true }).positive().int().max(65535),
+    game: z.number({ coerce: true }).positive().int().max(65535),
+    stack: z.string().min(1).max(36),
+    group: z.string().length(3),
+    trophy: z.number({ coerce: true }).positive().int().max(65535),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
@@ -22,12 +25,18 @@ export default defineEventHandler(async (event) => {
   const pageSize = query.pageSize ?? 100;
 
   const [data, totalSize] = await Promise.all([
-    prisma.profile.findUnique({
+    prisma.stackTrophy.findUnique({
       select: {
-        regionalPostionChanges: {
+        changes: {
           select: {
-            regionalPositionFrom: true,
-            regionalPositionTo: true,
+            qualityFrom: true,
+            qualityTo: true,
+            timesEarnedFrom: true,
+            timesEarnedTo: true,
+            rarityFrom: true,
+            rarityTo: true,
+            valueFrom: true,
+            valueTo: true,
             createdAt: true,
           },
           skip: Math.floor((page - 1) * pageSize),
@@ -37,15 +46,25 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
-      where: { id: params.profile },
+      where: {
+        stackId_groupId_trophyId: {
+          stackId: params.stack,
+          groupId: params.group,
+          trophyId: params.trophy,
+        },
+      },
     }),
-    prisma.profileRegionalPositionChange.count({
-      where: { profileId: params.profile },
+    prisma.stackTrophyChange.count({
+      where: {
+        stackId: params.stack,
+        groupId: params.group,
+        trophyId: params.trophy,
+      },
     }),
   ]);
 
   return {
-    data: data?.regionalPostionChanges ?? [],
+    data: data?.changes ?? [],
     page,
     pageSize,
     totalSize,

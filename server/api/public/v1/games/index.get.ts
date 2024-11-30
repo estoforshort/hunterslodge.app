@@ -1,12 +1,6 @@
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
-  const paramsSchema = z.object({
-    profile: z.number({ coerce: true }).positive().int().max(65535),
-  });
-
-  const params = await getValidatedRouterParams(event, paramsSchema.parse);
-
   const orderBy = ["createdAt"] as const;
 
   const querySchema = z.object({
@@ -22,30 +16,33 @@ export default defineEventHandler(async (event) => {
   const pageSize = query.pageSize ?? 100;
 
   const [data, totalSize] = await Promise.all([
-    prisma.profile.findUnique({
+    prisma.game.findMany({
       select: {
-        regionalPostionChanges: {
+        id: true,
+        name: true,
+        imageUrl: true,
+        definedPlatinum: true,
+        definedGold: true,
+        definedSilver: true,
+        definedBronze: true,
+        createdAt: true,
+        platforms: {
           select: {
-            regionalPositionFrom: true,
-            regionalPositionTo: true,
-            createdAt: true,
-          },
-          skip: Math.floor((page - 1) * pageSize),
-          take: pageSize,
-          orderBy: {
-            [query.orderBy ?? "createdAt"]: query.direction ?? "asc",
+            platformId: true,
           },
         },
       },
-      where: { id: params.profile },
+      skip: Math.floor((page - 1) * pageSize),
+      take: pageSize,
+      orderBy: {
+        [query.orderBy ?? "createdAt"]: query.direction ?? "asc",
+      },
     }),
-    prisma.profileRegionalPositionChange.count({
-      where: { profileId: params.profile },
-    }),
+    prisma.user.count(),
   ]);
 
   return {
-    data: data?.regionalPostionChanges ?? [],
+    data,
     page,
     pageSize,
     totalSize,

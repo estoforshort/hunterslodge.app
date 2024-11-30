@@ -110,10 +110,10 @@ export default defineEventHandler(async (event) => {
               pointsTo: true,
               createdAt: true,
             },
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: "asc" },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
       },
     },
     where: {
