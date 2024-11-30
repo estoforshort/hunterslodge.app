@@ -378,6 +378,7 @@ model PlatformsOnGames {
   updatedAt DateTime @updatedAt
 
   @@id([gameId, platformId])
+  @@index([platformId])
 }
 
 model Group {
