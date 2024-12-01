@@ -81,7 +81,7 @@ const items = computed(() => [
 
       <template #user="{}">
         <div class="text-left">
-          <p>Signed in as</p>
+          <p>Logged in as</p>
           <p class="truncate font-medium text-gray-900 dark:text-white">
             {{ user?.displayName }}
           </p>
