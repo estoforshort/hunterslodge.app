@@ -59,7 +59,7 @@ const automaticProjectUpdates = ref(
   overlay.value?.data?.updateProject ?? false,
 );
 
-const project = ref(projects.value ? projects.value![0] : null);
+const project = ref(projects.value ? projects.value[0] : null);
 
 if (overlay.value?.data?.project) {
   project.value = projects.value?.find(
@@ -164,9 +164,9 @@ async function updateOverlay() {
             />
           </div>
 
-          <div v-if="projects" class="pt-4">
+          <div v-if="projects && project" class="pt-4">
             <USelectMenu
-              v-model="project!"
+              v-model="project"
               :options="projects"
               searchable
               searchable-placeholder="Search a project..."
