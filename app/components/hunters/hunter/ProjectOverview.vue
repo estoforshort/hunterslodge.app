@@ -73,7 +73,7 @@ if (streamProgress < 1 && streamProgress > 0) {
           ? 'border-primary'
           : project.earnedPlatinum
             ? 'border-sky-500 dark:border-sky-400'
-            : 'border-yellow-500 dark:border-yellow-400'
+            : 'border-gray-200 dark:border-gray-950'
     "
   >
     <div class="flex bg-gray-200 dark:bg-gray-800">
@@ -311,7 +311,7 @@ if (streamProgress < 1 && streamProgress > 0) {
                       ? 'text-primary'
                       : project.earnedPlatinum
                         ? 'text-sky-600 dark:text-sky-400'
-                        : 'text-yellow-600 dark:text-yellow-400'
+                        : ''
                 "
               >
                 {{ project.progress }}%
@@ -339,7 +339,7 @@ if (streamProgress < 1 && streamProgress > 0) {
           <UMeter
             v-else
             :value="project.progress - streamProgress"
-            color="yellow"
+            color="gray"
           />
         </UMeterGroup>
       </div>
