@@ -48,10 +48,15 @@ useSeoMeta({
 const links = computed(() => [
   [
     {
-      label: "Projects",
-      icon: "i-bi-joystick",
+      label: "Overview",
+      icon: "i-bi-list",
       to: `/hunters/${profile.value?.id}`,
       exact: true,
+    },
+    {
+      label: "Projects",
+      icon: "i-bi-joystick",
+      to: `/hunters/${profile.value?.id}/projects`,
     },
   ],
   [
