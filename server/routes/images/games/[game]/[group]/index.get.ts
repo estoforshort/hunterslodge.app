@@ -2,13 +2,19 @@ import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
-    gameId: z.number({ coerce: true }).positive().int().max(65535),
+    game: z.number({ coerce: true }).positive().int().max(65535),
+    group: z.string().length(3),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const findImage = await prisma.gameImage.findUnique({
-    where: { gameId: params.gameId },
+  const findImage = await prisma.groupImage.findUnique({
+    where: {
+      gameId_groupId: {
+        gameId: params.game,
+        groupId: params.group,
+      },
+    },
   });
 
   if (!findImage) {
