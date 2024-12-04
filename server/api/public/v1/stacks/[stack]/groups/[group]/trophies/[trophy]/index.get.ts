@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const paramsSchema = z.object({
     stack: z.string().min(1).max(36),
     group: z.string().length(3),
-    trophy: z.number({ coerce: true }).positive().int().max(65535),
+    trophy: z.number({ coerce: true }).min(0).max(65535).int(),
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
