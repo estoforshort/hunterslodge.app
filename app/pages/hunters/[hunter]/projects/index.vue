@@ -69,7 +69,6 @@ const { data: projects } = await useFetch(
           streamBronze: project.streamBronze,
           firstTrophyEarnedAt: project.firstTrophyEarnedAt,
           lastTrophyEarnedAt: project.lastTrophyEarnedAt,
-          avgProgress: project.stack.avgProgress,
           progress: project.progress,
           points: project.points,
           streamPoints: project.streamPoints,

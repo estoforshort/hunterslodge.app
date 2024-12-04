@@ -8,13 +8,10 @@ dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
 const props = defineProps<{
-  project: {
+  group: {
     gameId: number;
-    stackId: string;
+    groupId: string;
     name: string;
-    platforms: {
-      platformId: string;
-    }[];
     definedPlatinum: number;
     definedGold: number;
     definedSilver: number;
@@ -32,19 +29,18 @@ const props = defineProps<{
     progress: number;
     points: string;
     streamPoints: string;
-    timeStreamed: number;
   };
 }>();
 
 const config = useRuntimeConfig();
 
-const definedGoldPoints = props.project.definedGold * 90;
-const definedSilverPoints = props.project.definedSilver * 30;
-const definedBronzePoints = props.project.definedBronze * 15;
+const definedGoldPoints = props.group.definedGold * 90;
+const definedSilverPoints = props.group.definedSilver * 30;
+const definedBronzePoints = props.group.definedBronze * 15;
 
-const earnedStreamGoldPoints = props.project.streamGold * 90;
-const earnedStreamSilverPoints = props.project.streamSilver * 30;
-const earnedStreamBronzePoints = props.project.streamBronze * 15;
+const earnedStreamGoldPoints = props.group.streamGold * 90;
+const earnedStreamSilverPoints = props.group.streamSilver * 30;
+const earnedStreamBronzePoints = props.group.streamBronze * 15;
 
 const definedPoints =
   definedGoldPoints + definedSilverPoints + definedBronzePoints;
@@ -64,26 +60,24 @@ const route = useRoute();
 
 <template>
   <NuxtLink
-    :to="`/hunters/${route.params.hunter}/projects/${props.project.stackId}`"
+    :to="`/hunters/${route.params.hunter}/projects/${route.params.project}`"
   >
     <figure
       class="flex rounded-lg border-e-8 bg-gradient-to-r from-white via-white to-gray-200 shadow-lg dark:from-gray-900 dark:via-slate-950 dark:to-slate-950"
       :class="
-        project.progress === 100
+        group.progress === 100
           ? streamProgress === 100
             ? 'border-primary'
             : 'border-green-500 dark:border-green-400'
-          : streamProgress === project.progress
-            ? 'border-primary'
-            : project.earnedPlatinum
-              ? 'border-sky-500 dark:border-sky-400'
-              : 'border-gray-200 dark:border-gray-950'
+          : group.earnedPlatinum
+            ? 'border-sky-500 dark:border-sky-400'
+            : 'border-gray-200 dark:border-gray-950'
       "
     >
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/images/games/${project.gameId}`"
+            :src="`${config.public.baseUrl}/images/games/${group.gameId}/${group.groupId}`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder
@@ -94,52 +88,10 @@ const route = useRoute();
       <div class="mx-2 my-2 flex-auto lg:my-auto">
         <div class="flex justify-between">
           <div>
-            <UBadge
-              v-for="platform in project.platforms"
-              :key="platform.platformId"
-              color="gray"
-              variant="solid"
-              size="xs"
-              class="me-1 align-middle"
-              >{{ platform.platformId.toUpperCase() }}</UBadge
-            >
-            <span class="align-middle">{{ project.name }}</span>
+            <span class="align-middle">{{ group.name }}</span>
           </div>
 
-          <div class="flex">
-            <UPopover
-              v-if="project.timeStreamed"
-              mode="hover"
-              :popper="{ placement: 'auto' }"
-            >
-              <span class="me-2 align-middle">
-                <UIcon
-                  name="i-bi-clock-history"
-                  class="me-1 align-middle lg:me-2"
-                />
-                <span class="hidden align-middle lg:me-2 lg:inline-block">
-                  {{
-                    dayjs
-                      .duration(project.timeStreamed, "seconds")
-                      .format("HH:mm")
-                  }}
-                </span>
-              </span>
-
-              <template #panel>
-                <div class="p-2">
-                  <p class="text-sm">
-                    Time streamed:
-                    {{
-                      dayjs
-                        .duration(project.timeStreamed, "seconds")
-                        .format("HH:mm")
-                    }}
-                  </p>
-                </div>
-              </template>
-            </UPopover>
-
+          <div v-if="group.firstTrophyEarnedAt" class="flex">
             <UPopover mode="hover" :popper="{ placement: 'auto' }">
               <span class="align-middle">
                 <UIcon name="i-bi-info-circle" class="align-middle" />
@@ -147,14 +99,14 @@ const route = useRoute();
 
               <template #panel>
                 <div class="p-2">
-                  <p v-if="project.progress !== 100" class="text-sm">
+                  <p v-if="group.progress !== 100" class="text-sm">
                     Started
                     {{
                       dayjs
                         .duration({
                           seconds:
                             dayjs().unix() -
-                            dayjs(project.firstTrophyEarnedAt).unix(),
+                            dayjs(group.firstTrophyEarnedAt).unix(),
                         })
                         .humanize()
                     }}
@@ -167,8 +119,8 @@ const route = useRoute();
                       dayjs
                         .duration({
                           seconds:
-                            dayjs(project.lastTrophyEarnedAt).unix() -
-                            dayjs(project.firstTrophyEarnedAt).unix(),
+                            dayjs(group.lastTrophyEarnedAt).unix() -
+                            dayjs(group.firstTrophyEarnedAt).unix(),
                         })
                         .humanize()
                     }},
@@ -177,7 +129,7 @@ const route = useRoute();
                         .duration({
                           seconds:
                             dayjs().unix() -
-                            dayjs(project.lastTrophyEarnedAt).unix(),
+                            dayjs(group.lastTrophyEarnedAt).unix(),
                         })
                         .humanize()
                     }}
@@ -192,72 +144,72 @@ const route = useRoute();
         <div class="mb-1 mt-1 flex flex-col justify-between lg:flex-row">
           <div class="mb-3 flex flex-row lg:mb-0">
             <span
-              v-if="project.definedPlatinum"
+              v-if="group.definedPlatinum"
               class="me-4 text-sky-500 dark:text-sky-300"
             >
               <UTooltip
-                :text="`Out of ${project.definedPlatinum}`"
+                :text="`Out of ${group.definedPlatinum}`"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="align-middle">
                   <UIcon name="i-bi-trophy" class="me-1 align-middle" />
                   <span class="align-middle">
-                    {{ project.earnedPlatinum }}
+                    {{ group.earnedPlatinum }}
                   </span>
                 </span>
               </UTooltip>
             </span>
 
             <span
-              v-if="project.definedGold"
+              v-if="group.definedGold"
               class="me-4 text-yellow-600 dark:text-yellow-400"
             >
               <UTooltip
-                :text="`Out of ${project.definedGold}`"
+                :text="`Out of ${group.definedGold}`"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="align-middle">
                   <UIcon name="i-bi-trophy" class="me-1 align-middle" />
                   <span class="align-middle">
-                    {{ project.earnedGold }}
+                    {{ group.earnedGold }}
                   </span>
                 </span>
               </UTooltip>
             </span>
 
             <span
-              v-if="project.definedSilver"
+              v-if="group.definedSilver"
               class="me-4 text-gray-500 dark:text-gray-300"
             >
               <UTooltip
-                :text="`Out of ${project.definedSilver}`"
+                :text="`Out of ${group.definedSilver}`"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="align-middle">
                   <UIcon name="i-bi-trophy" class="me-1 align-middle" />
                   <span class="align-middle">
-                    {{ project.earnedSilver }}
+                    {{ group.earnedSilver }}
                   </span>
                 </span>
               </UTooltip>
             </span>
 
             <span
-              v-if="project.definedBronze"
+              v-if="group.definedBronze"
               class="me-4 text-orange-600 dark:text-orange-500"
             >
               <UTooltip
-                :text="`Out of ${project.definedBronze}`"
+                :text="`Out of ${group.definedBronze}`"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="align-middle">
                   <UIcon name="i-bi-trophy" class="me-1 align-middle" />
                   <span class="align-middle">
-                    {{ project.earnedBronze }}
+                    {{ group.earnedBronze }}
                   </span>
                 </span>
               </UTooltip>
@@ -273,17 +225,17 @@ const route = useRoute();
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span
-                  v-if="Number(project.streamPoints)"
+                  v-if="Number(group.streamPoints)"
                   class="me-4 align-middle"
                 >
                   {{
-                    formatThousands(Number(project.streamPoints), {
+                    formatThousands(Number(group.streamPoints), {
                       separator: ",",
                     })
                   }}
                   /
                   {{
-                    formatThousands(Number(project.points), {
+                    formatThousands(Number(group.points), {
                       separator: ",",
                     })
                   }}
@@ -291,7 +243,7 @@ const route = useRoute();
 
                 <span v-else class="me-4 align-middle">
                   {{
-                    formatThousands(Number(project.points), {
+                    formatThousands(Number(group.points), {
                       separator: ",",
                     })
                   }}
@@ -307,18 +259,16 @@ const route = useRoute();
               >
                 <span
                   :class="
-                    project.progress === 100
+                    group.progress === 100
                       ? streamProgress === 100
                         ? 'text-primary'
                         : 'text-green-600 dark:text-green-400'
-                      : streamProgress === project.progress
-                        ? 'text-primary'
-                        : project.earnedPlatinum
-                          ? 'text-sky-600 dark:text-sky-400'
-                          : ''
+                      : group.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
                   "
                 >
-                  {{ project.progress }}%
+                  {{ group.progress }}%
                 </span>
               </UTooltip>
             </span>
@@ -329,20 +279,20 @@ const route = useRoute();
           <UMeterGroup :min="0" :max="100" size="xs" :ui="{ list: 'hidden' }">
             <UMeter :value="streamProgress" color="primary" />
             <UMeter
-              v-if="project.progress === 100"
-              :value="project.progress - streamProgress"
+              v-if="group.progress === 100"
+              :value="group.progress - streamProgress"
               color="green"
             />
 
             <UMeter
-              v-else-if="project.earnedPlatinum"
-              :value="project.progress - streamProgress"
+              v-else-if="group.earnedPlatinum"
+              :value="group.progress - streamProgress"
               color="sky"
             />
 
             <UMeter
               v-else
-              :value="project.progress - streamProgress"
+              :value="group.progress - streamProgress"
               color="gray"
             />
           </UMeterGroup>
