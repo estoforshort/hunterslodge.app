@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
           },
           firstEarnedAt: true,
           lastEarnedAt: true,
+          psnRate: true,
           quality: true,
           timesEarned: true,
           rarity: true,

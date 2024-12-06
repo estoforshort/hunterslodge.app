@@ -60,7 +60,7 @@ const route = useRoute();
 
 <template>
   <NuxtLink
-    :to="`/hunters/${route.params.hunter}/projects/${route.params.project}`"
+    :to="`/hunters/${route.params.hunter}/projects/${route.params.project}/${group.groupId}`"
   >
     <figure
       class="flex rounded-lg border-e-8 bg-gradient-to-r from-white via-white to-gray-200 shadow-lg dark:from-gray-900 dark:via-slate-950 dark:to-slate-950"
