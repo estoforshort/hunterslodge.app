@@ -97,8 +97,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         trophyEarnedRate: string;
       }[] = [];
 
-      let partial = true;
-
       if (
         !findProjectGroupWithStackGroupAndGameGroup ||
         findProjectGroupWithStackGroupAndGameGroup.earnedPlatinum !==
@@ -153,42 +151,62 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             trophyEarnedRate: trophy.trophyEarnedRate,
           });
         }
-
-        partial = false;
       } else {
-        const getTrophiesFromDatabase = await prisma.projectTrophy.findMany({
-          select: {
-            trophyId: true,
-            stackTrophy: {
-              select: {
-                gameTrophy: {
-                  select: {
-                    type: true,
-                  },
+        const [stackGroupTrophies, projectGroupTrophies] = await Promise.all([
+          prisma.stackTrophy.findMany({
+            select: {
+              trophyId: true,
+              gameTrophy: {
+                select: {
+                  type: true,
                 },
-                psnRate: true,
               },
+              psnRate: true,
             },
-            earnedAt: true,
-          },
-          where: {
-            profileId: data.profile.id,
-            stackId: data.stack.id,
-            groupId: data.group.trophyGroupId,
-          },
-          orderBy: { trophyId: "asc" },
-        });
+            where: {
+              stackId: data.stack.id,
+              groupId: data.group.trophyGroupId,
+            },
+            orderBy: { trophyId: "asc" },
+          }),
+          prisma.projectTrophy.findMany({
+            select: {
+              trophyId: true,
+              earnedAt: true,
+            },
+            where: {
+              profileId: data.profile.id,
+              stackId: data.stack.id,
+              groupId: data.group.trophyGroupId,
+            },
+            orderBy: { trophyId: "asc" },
+          }),
+        ]);
 
-        for (let t = 0, tl = getTrophiesFromDatabase.length; t < tl; t++) {
-          const trophy = getTrophiesFromDatabase[t];
+        for (let t = 0, tl = stackGroupTrophies.length; t < tl; t++) {
+          const trophy = stackGroupTrophies[t];
 
-          trophies.push({
-            trophyId: trophy.trophyId,
-            earned: true,
-            earnedDateTime: trophy.earnedAt,
-            trophyType: trophy.stackTrophy.gameTrophy.type,
-            trophyEarnedRate: trophy.stackTrophy.psnRate.toString(),
-          });
+          const earned = projectGroupTrophies.find(
+            (t) => t.trophyId === trophy.trophyId,
+          );
+
+          if (earned) {
+            trophies.push({
+              trophyId: trophy.trophyId,
+              earned: true,
+              earnedDateTime: earned.earnedAt,
+              trophyType: trophy.gameTrophy.type,
+              trophyEarnedRate: trophy.psnRate.toString(),
+            });
+          } else {
+            trophies.push({
+              trophyId: trophy.trophyId,
+              earned: false,
+              earnedDateTime: null,
+              trophyType: trophy.gameTrophy.type,
+              trophyEarnedRate: trophy.psnRate.toString(),
+            });
+          }
         }
       }
 
@@ -492,45 +510,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         };
       }
 
-      let trophiesCount = trophies.length;
-
-      if (partial && data.group.progress !== 100) {
-        projectGroupData.value = 0 as unknown as Prisma.Decimal;
-        stackGroupData.quality = 0 as unknown as Prisma.Decimal;
-        stackGroupData.value = 0 as unknown as Prisma.Decimal;
-
-        const stackGroupTrophies = await prisma.stackTrophy.findMany({
-          select: {
-            quality: true,
-            value: true,
-          },
-          where: { stackId: data.stack.id, groupId: data.group.trophyGroupId },
-        });
-
-        trophiesCount = stackGroupTrophies.length;
-
-        for (let sgt = 0, sgtl = stackGroupTrophies.length; sgt < sgtl; sgt++) {
-          projectGroupData.value = (Math.round(
-            (Number(projectGroupData.value) +
-              Number(stackGroupTrophies[sgt].value) +
-              Number.EPSILON) *
-              100,
-          ) / 100) as unknown as Prisma.Decimal;
-
-          stackGroupData.quality = (Number(stackGroupData.quality) +
-            Number(
-              stackGroupTrophies[sgt].quality,
-            )) as unknown as Prisma.Decimal;
-
-          stackGroupData.value = (Math.round(
-            (Number(stackGroupData.value) +
-              Number(stackGroupTrophies[sgt].value) +
-              Number.EPSILON) *
-              100,
-          ) / 100) as unknown as Prisma.Decimal;
-        }
-      }
-
       const updateProjectGroup = await prisma.projectGroup.update({
         where: {
           profileId_stackId_groupId: {
@@ -566,7 +545,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
       });
 
       stackGroupData.quality = (Math.round(
-        (Number(stackGroupData.quality) / trophiesCount + Number.EPSILON) * 100,
+        (Number(stackGroupData.quality) / trophies.length + Number.EPSILON) *
+          100,
       ) / 100) as unknown as Prisma.Decimal;
 
       if (projectGroup.progress !== 100 && data.group.progress === 100) {
