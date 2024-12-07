@@ -33,6 +33,12 @@ const { data: groups } = await useFetch(
   },
 );
 
+if (groups.value && groups.value.data.length === 1) {
+  await navigateTo(
+    `/hunters/${route.params.hunter}/projects/${route.params.project}/${groups.value.data[0]?.groupId}`,
+  );
+}
+
 const { data: project } = await useFetch(
   `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}`,
 );
@@ -44,10 +50,6 @@ const breadcrumb = computed(() => [
   },
   {
     label: project.value?.data?.stack.game.name ?? "",
-    to: `/hunters/${route.params.hunter}/projects/${route.params.project}`,
-  },
-  {
-    label: "Groups",
   },
 ]);
 </script>

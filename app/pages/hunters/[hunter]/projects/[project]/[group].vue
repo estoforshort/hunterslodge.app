@@ -13,9 +13,21 @@ const { data: project } = await useFetch(
   `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}`,
 );
 
-const { data: group } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}/groups/${route.params.group}`,
+const { data: groups } = await useFetch(
+  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}/groups`,
+  {
+    transform: (groups) => {
+      return {
+        data: groups.data.map((group) => ({
+          groupId: group.stackGroup.gameGroup.id,
+          name: group.stackGroup.gameGroup.name,
+        })),
+      };
+    },
+  },
 );
+
+const group = groups.value?.data.find((g) => g.groupId === route.params.group);
 
 const { data: stackTrophies } = await useFetch(
   `/api/public/v1/stacks/${route.params.project}/groups/${route.params.group}/trophies`,
@@ -42,14 +54,25 @@ const breadcrumb = computed(() => [
     label: "Projects",
     to: `/hunters/${route.params.hunter}/projects`,
   },
-  {
-    label: project.value?.data?.stack.game.name ?? "",
-    to: `/hunters/${route.params.hunter}/projects/${route.params.project}`,
-  },
-  {
-    label: group.value?.data?.stackGroup.gameGroup.name ?? "",
-  },
 ]);
+
+if (groups.value?.data.length === 1) {
+  breadcrumb.value.push({
+    label: project.value?.data?.stack.game.name ?? "",
+    to: ``,
+  });
+} else {
+  breadcrumb.value.push(
+    {
+      label: project.value?.data?.stack.game.name ?? "",
+      to: `/hunters/${route.params.hunter}/projects/${route.params.project}`,
+    },
+    {
+      label: group?.name ?? "",
+      to: ``,
+    },
+  );
+}
 
 const config = useRuntimeConfig();
 </script>
@@ -109,7 +132,7 @@ const config = useRuntimeConfig();
 
             <p class="me-3 align-middle">
               <UTooltip
-                text="Rarity"
+                text="Rarity ratio"
                 class="align-middle"
                 :popper="{ placement: 'left', arrow: true }"
               >
