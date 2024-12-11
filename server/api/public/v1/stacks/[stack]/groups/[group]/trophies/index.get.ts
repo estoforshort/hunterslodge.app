@@ -12,11 +12,11 @@ export default defineEventHandler(async (event) => {
     select: {
       trophies: {
         select: {
+          gameId: true,
+          groupId: true,
           trophyId: true,
           gameTrophy: {
             select: {
-              gameId: true,
-              groupId: true,
               id: true,
               type: true,
               name: true,
@@ -26,7 +26,6 @@ export default defineEventHandler(async (event) => {
           },
           firstEarnedAt: true,
           lastEarnedAt: true,
-          psnRate: true,
           quality: true,
           timesEarned: true,
           rarity: true,

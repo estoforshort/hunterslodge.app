@@ -1,10 +1,10 @@
 export const useTrophyBackground = (trophy: string) => {
   if (trophy === "platinum") {
-    return "bg-gradient-to-r from-white via-white to-sky-400 dark:from-gray-900 dark:via-slate-950 dark:to-sky-700";
+    return "bg-gradient-to-r from-white via-white to-sky-400 dark:from-gray-900 dark:via-slate-950 dark:to-sky-600";
   }
 
   if (trophy === "gold") {
-    return "bg-gradient-to-r from-white via-white to-yellow-400 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-700";
+    return "bg-gradient-to-r from-white via-white to-yellow-400 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-600";
   }
 
   if (trophy === "silver") {

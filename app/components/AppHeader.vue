@@ -4,6 +4,10 @@ const links = [
     label: "Hunters",
     to: "/hunters",
   },
+  {
+    label: "Games",
+    to: "/games",
+  },
 ];
 </script>
 

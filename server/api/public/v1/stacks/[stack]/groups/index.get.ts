@@ -11,10 +11,10 @@ export default defineEventHandler(async (event) => {
     select: {
       groups: {
         select: {
+          gameId: true,
           groupId: true,
           gameGroup: {
             select: {
-              id: true,
               name: true,
               imageUrl: true,
             },

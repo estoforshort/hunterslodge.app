@@ -10,10 +10,10 @@ export default defineEventHandler(async (event) => {
 
   const data = await prisma.stackGroup.findUnique({
     select: {
+      gameId: true,
       groupId: true,
       gameGroup: {
         select: {
-          id: true,
           name: true,
           imageUrl: true,
         },
