@@ -93,7 +93,7 @@ const config = useRuntimeConfig();
       "
     >
       <img
-        :src="`${config.public.baseUrl}/images/games/${trophy.gameTrophy.gameId}/${trophy.gameTrophy.groupId}/${trophy.gameTrophy.id}`"
+        :src="`${config.public.baseUrl}/images/games/${trophy.gameId}/${trophy.groupId}/${trophy.trophyId}`"
         class="mb-auto min-h-20 min-w-20 max-w-20 justify-start object-contain"
       />
 
@@ -109,22 +109,7 @@ const config = useRuntimeConfig();
                 :popper="{ placement: 'left', arrow: true }"
               >
                 <span class="align-middle">
-                  <UIcon
-                    :name="
-                      Number(trophy.psnRate) <= 5
-                        ? 'i-bi-reception-4'
-                        : Number(trophy.psnRate) <= 15
-                          ? 'i-bi-reception-3'
-                          : Number(trophy.psnRate) <= 20
-                            ? 'i-bi-reception-2'
-                            : Number(trophy.psnRate) <= 50
-                              ? 'i-bi-reception-1'
-                              : Number(trophy.psnRate) > 50
-                                ? 'i-bi-reception-0'
-                                : ''
-                    "
-                    class="me-1 align-middle"
-                  />
+                  <UIcon name="i-bi-award-fill" class="me-1 align-middle" />
                   <span class="align-middle"> {{ trophy.quality }}% </span>
                 </span>
               </UTooltip>

@@ -13,6 +13,10 @@ const orderOptions = [
     value: "firstTrophyEarnedAt",
   },
   {
+    name: "Order by quality",
+    value: "quality",
+  },
+  {
     name: "Order by progress",
     value: "progress",
   },
@@ -69,6 +73,7 @@ const { data: projects } = await useFetch(
           streamBronze: project.streamBronze,
           firstTrophyEarnedAt: project.firstTrophyEarnedAt,
           lastTrophyEarnedAt: project.lastTrophyEarnedAt,
+          quality: project.stack.quality,
           progress: project.progress,
           points: project.points,
           streamPoints: project.streamPoints,

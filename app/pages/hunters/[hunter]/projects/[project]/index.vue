@@ -24,6 +24,7 @@ const { data: groups } = await useFetch(
           streamBronze: group.streamBronze,
           firstTrophyEarnedAt: group.firstTrophyEarnedAt,
           lastTrophyEarnedAt: group.lastTrophyEarnedAt,
+          quality: group.stackGroup.quality,
           progress: group.progress,
           points: group.points,
           streamPoints: group.streamPoints,

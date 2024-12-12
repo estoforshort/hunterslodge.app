@@ -57,6 +57,14 @@ const links = computed(() => [
       label: "Projects",
       icon: "i-bi-joystick",
       to: `/hunters/${profile.value?.id}/projects`,
+      active:
+        route.name === "hunters-hunter-projects"
+          ? true
+          : route.name === "hunters-hunter-projects-project"
+            ? true
+            : route.name === "hunters-hunter-projects-project-group"
+              ? true
+              : false,
     },
   ],
   [

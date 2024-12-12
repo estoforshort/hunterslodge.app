@@ -29,6 +29,7 @@ const props = defineProps<{
     streamBronze: number;
     firstTrophyEarnedAt: string | null;
     lastTrophyEarnedAt: string | null;
+    quality: string;
     progress: number;
     points: string;
     streamPoints: string;
@@ -265,6 +266,19 @@ const route = useRoute();
           </div>
 
           <div class="flex flex-row justify-between">
+            <span class="align-middle">
+              <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+              <UTooltip
+                text="Quality"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
+                  {{ project.quality }}
+                </span>
+              </UTooltip>
+            </span>
+
             <span class="align-middle">
               <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
               <UTooltip
