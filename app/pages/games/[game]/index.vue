@@ -30,7 +30,7 @@ const { data: game } = await useFetch(
 
 <template>
   <div v-if="game">
-    <div class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
       <UCard>
         <p class="text-lg font-bold text-sky-500 dark:text-sky-300">
           {{ game.definedPlatinum }}

@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import relativeTime from "dayjs/plugin/relativeTime";
 import formatThousands from "format-thousands";
-import duration from "dayjs/plugin/duration";
-import dayjs from "dayjs";
-
-dayjs.extend(relativeTime);
-dayjs.extend(duration);
 
 const route = useRoute();
 
@@ -22,17 +16,15 @@ const { data: profile } = await useFetch(
         userId: profile.data.user.id,
         username: profile.data.user.username,
         displayName: profile.data.user.displayName,
+        admin: profile.data.user.isAdmin,
+        founder: profile.data.user.isFounder,
         region: {
           name: profile.data.region.name,
         },
         startedProjects: profile.data.startedProjects,
         completedProjects: profile.data.completedProjects,
-        earnedPlatinum: profile.data.earnedPlatinum,
-        earnedGold: profile.data.earnedGold,
-        earnedSilver: profile.data.earnedSilver,
-        earnedBronze: profile.data.earnedBronze,
         completion: profile.data.completion,
-        points: profile.data.points,
+        streamPoints: profile.data.streamPoints,
         streamPosition: profile.data.streamPosition,
         regionalPosition: profile.data.regionalPosition,
         globalPosition: profile.data.globalPosition,
@@ -48,8 +40,8 @@ useSeoMeta({
 const links = computed(() => [
   [
     {
-      label: "Overview",
-      icon: "i-bi-list",
+      label: "Summary",
+      icon: "i-bi-grid",
       to: `/hunters/${profile.value?.id}`,
       exact: true,
     },
@@ -165,59 +157,39 @@ const links = computed(() => [
             </NuxtLink>
           </p>
 
-          <div class="mt-8 grid grid-cols-2 gap-6 lg:grid-cols-4">
-            <UCard>
-              <p class="text-lg font-bold text-sky-500 dark:text-sky-300">
-                {{ formatThousands(profile.earnedPlatinum, ",") }}
-              </p>
-              <p class="text-gray-400 dark:text-gray-500">Platinum</p>
-            </UCard>
+          <div class="mt-2 flex justify-center gap-2">
+            <UBadge
+              v-if="profile.admin"
+              size="md"
+              color="gray"
+              variant="solid"
+              label="Admin"
+            />
 
-            <UCard>
-              <p class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                {{ formatThousands(profile.earnedGold, ",") }}
-              </p>
-              <p class="text-gray-400 dark:text-gray-500">Gold</p>
-            </UCard>
+            <UBadge
+              v-if="profile.founder"
+              size="md"
+              color="gray"
+              variant="solid"
+              label="Founder"
+            />
 
-            <UCard>
-              <p class="text-lg font-bold text-gray-500 dark:text-gray-300">
-                {{ formatThousands(profile.earnedSilver, ",") }}
-              </p>
-              <p class="text-gray-400 dark:text-gray-500">Silver</p>
-            </UCard>
-
-            <UCard>
-              <p class="text-lg font-bold text-orange-600 dark:text-orange-500">
-                {{ formatThousands(profile.earnedBronze, ",") }}
-              </p>
-              <p class="text-gray-400 dark:text-gray-500">Bronze</p>
-            </UCard>
+            <UBadge
+              v-if="Number(profile.streamPoints) > 0"
+              size="md"
+              color="gray"
+              variant="solid"
+              label="Streamer"
+            />
           </div>
-        </div>
-
-        <div class="flex flex-col justify-center">
-          <UCard
-            :ui="{ body: { padding: '!p-0' } }"
-            class="relative overflow-hidden"
-          >
-            <div class="absolute p-6">
-              <p class="text-gray-400 dark:text-gray-500">Points</p>
-              <p class="text-lg font-bold">
-                {{ formatThousands(profile.points, ",") }}
-              </p>
-            </div>
-
-            <HuntersHunterPointsChart :profile="profile.id" />
-          </UCard>
         </div>
       </div>
 
       <UHorizontalNavigation v-if="profile" :links="links" class="mt-12" />
 
-      <UCard>
+      <UPageCard>
         <NuxtPage />
-      </UCard>
+      </UPageCard>
     </UPageBody>
   </UPage>
 </template>
