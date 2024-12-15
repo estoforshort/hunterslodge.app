@@ -4,8 +4,7 @@ declare module "#auth-utils" {
     username: string;
     displayName: string;
     isAdmin: boolean;
-    isFounder: boolean;
-    isLinked: boolean;
+    profileId: number | null;
   }
 }
 export {};

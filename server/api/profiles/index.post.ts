@@ -178,7 +178,7 @@ export default defineEventHandler(async (event) => {
   await setUserSession(event, {
     user: {
       ...session.user,
-      isLinked: true,
+      profileId: createProfile.id,
     },
   });
 

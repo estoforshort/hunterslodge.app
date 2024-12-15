@@ -3,6 +3,18 @@ import fetch from "node-fetch";
 export default defineOAuthTwitchEventHandler({
   async onSuccess(event, { user }) {
     const findUser = await prisma.user.findUnique({
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        imageUrl: true,
+        isAdmin: true,
+        profile: {
+          select: {
+            id: true,
+          },
+        },
+      },
       where: {
         id: user.id,
       },
@@ -44,8 +56,7 @@ export default defineOAuthTwitchEventHandler({
           username: createUser.username,
           displayName: createUser.displayName,
           isAdmin: createUser.isAdmin,
-          isFounder: createUser.isFounder,
-          isLinked: false,
+          profileId: null,
         },
       });
 
@@ -94,8 +105,7 @@ export default defineOAuthTwitchEventHandler({
         username: user.login,
         displayName: user.display_name,
         isAdmin: findUser.isAdmin,
-        isFounder: findUser.isFounder,
-        isLinked: findUser.isLinked,
+        profileId: findUser.profile ? findUser.profile.id : null,
       },
     });
 

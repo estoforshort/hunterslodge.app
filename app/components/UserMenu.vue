@@ -24,31 +24,39 @@ const items = computed(() => [
   [
     {
       label: "Link PSN",
-      icon: "i-heroicons-link",
+      icon: "i-bi-link-45deg",
       click: openLinkPsnModal,
-      class: user.value?.isLinked ? "hidden" : "",
+      class: user.value?.profileId === null ? "" : "hidden",
     },
     {
       label: "Queue update",
-      icon: "i-heroicons-arrow-path",
-      class: user.value?.isLinked ? "" : "hidden",
+      icon: "i-bi-arrow-repeat",
+      class: user.value?.profileId === null ? "hidden" : "",
+    },
+  ],
+  [
+    {
+      label: "My profile",
+      icon: "i-bi-person",
+      to: `/hunters/${user.value?.profileId}`,
+      class: user.value?.profileId === null ? "hidden" : "",
     },
     {
       label: "Settings",
-      icon: "i-heroicons-cog",
+      icon: "i-bi-gear",
       to: "/settings",
     },
   ],
   [
     {
       label: "Administrate",
-      icon: "i-heroicons-bolt",
+      icon: "i-bi-lightning-charge",
       to: "/admin",
       class: user.value?.isAdmin ? "" : "hidden",
     },
     {
       label: "Log out",
-      icon: "i-heroicons-arrow-left-on-rectangle",
+      icon: "i-bi-box-arrow-right",
       click: clear,
     },
   ],
