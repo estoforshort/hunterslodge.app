@@ -1,5 +1,12 @@
 <template>
   <UFooter>
+    <template #left>
+      Created with <UIcon name="i-bi-heart" /> by
+      <NuxtLink to="https://www.patreon.com/estoforshort" target="_blank">
+        EstoForShort
+      </NuxtLink>
+    </template>
+
     <template #right>
       <UColorModeButton />
 

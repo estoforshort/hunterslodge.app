@@ -17,7 +17,6 @@ const config = useRuntimeConfig();
           :src="`${config.public.baseUrl}/logo.png`"
           width="400"
           height="400"
-          placeholder
         />
       </div>
 
@@ -40,7 +39,7 @@ const config = useRuntimeConfig();
 
         <ULandingCard
           class="col-span-4 row-span-2"
-          icon="i-bi-people-fill"
+          icon="i-bi-people"
           :title="stats?.data?.profiles.toString()"
           description="Hunters joined"
         />
@@ -54,7 +53,7 @@ const config = useRuntimeConfig();
 
         <ULandingCard
           class="col-span-4 row-span-2"
-          icon="i-bi-trophy-fill"
+          icon="i-bi-trophy"
           :title="formatThousands(stats?.data?.earnedTrophies, ',')"
           description="Trophies earned"
         />
