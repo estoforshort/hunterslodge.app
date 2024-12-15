@@ -311,7 +311,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         definedBronze: gameGroup.definedBronze,
         firstTrophyEarnedAt: stackGroup.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stackGroup.lastTrophyEarnedAt,
-        psnRate: 0 as unknown as Prisma.Decimal,
         quality: 0 as unknown as Prisma.Decimal,
         profilesCount: data.profilesCount,
         timesCompleted: stackGroup.timesCompleted,
@@ -349,7 +348,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               definedGoldFrom: stackGroup.definedGold,
               definedSilverFrom: stackGroup.definedSilver,
               definedBronzeFrom: stackGroup.definedBronze,
-              psnRateFrom: stackGroup.psnRate,
               qualityFrom: stackGroup.quality,
               timesCompletedFrom: stackGroup.timesCompleted,
               avgProgressFrom: stackGroup.avgProgress,
@@ -495,9 +493,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           }
         }
 
-        stackGroupData.psnRate = (Number(stackGroupData.psnRate) +
-          Number(stackTrophy.psnRate)) as unknown as Prisma.Decimal;
-
         stackGroupData.quality = (Number(stackGroupData.quality) +
           Number(stackTrophy.quality)) as unknown as Prisma.Decimal;
 
@@ -549,11 +544,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         },
       });
 
-      stackGroupData.psnRate = (Math.round(
-        (Number(stackGroupData.psnRate) / trophies.length + Number.EPSILON) *
-          100,
-      ) / 100) as unknown as Prisma.Decimal;
-
       stackGroupData.quality = (Math.round(
         (Number(stackGroupData.quality) / trophies.length + Number.EPSILON) *
           100,
@@ -604,7 +594,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           definedGoldTo: updateStackGroup.definedGold,
           definedSilverTo: updateStackGroup.definedSilver,
           definedBronzeTo: updateStackGroup.definedBronze,
-          psnRateTo: updateStackGroup.psnRate,
           qualityTo: updateStackGroup.quality,
           timesCompletedTo: updateStackGroup.timesCompleted,
           avgProgressTo: updateStackGroup.avgProgress,

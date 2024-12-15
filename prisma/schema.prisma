@@ -68,7 +68,6 @@ model User {
   imageUrl    String   @db.VarChar(512)
   isAdmin     Boolean
   isFounder   Boolean
-  isLinked    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -474,7 +473,6 @@ model Stack {
   definedBronze       Int       @default(0) @db.UnsignedSmallInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
   quality             Decimal   @default(0) @db.Decimal(5, 2)
   profilesCount       Int       @default(0) @db.UnsignedSmallInt
   timesStarted        Int       @default(0) @db.UnsignedSmallInt
@@ -509,7 +507,6 @@ model StackGroup {
   definedBronze       Int       @default(0) @db.UnsignedTinyInt
   firstTrophyEarnedAt DateTime?
   lastTrophyEarnedAt  DateTime?
-  psnRate             Decimal   @default(0) @db.Decimal(5, 2)
   quality             Decimal   @default(0) @db.Decimal(5, 2)
   profilesCount       Int       @default(0) @db.UnsignedSmallInt
   timesCompleted      Int       @default(0) @db.UnsignedSmallInt
@@ -785,8 +782,6 @@ model StackChange {
   definedSilverTo     Int      @default(0) @db.UnsignedSmallInt
   definedBronzeFrom   Int      @db.UnsignedSmallInt
   definedBronzeTo     Int      @default(0) @db.UnsignedSmallInt
-  psnRateFrom         Decimal  @db.Decimal(5, 2)
-  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
   qualityFrom         Decimal  @db.Decimal(5, 2)
   qualityTo           Decimal  @default(0) @db.Decimal(5, 2)
   timesStartedFrom    Int      @db.UnsignedSmallInt
@@ -823,8 +818,6 @@ model StackGroupChange {
   definedSilverTo     Int      @default(0) @db.UnsignedTinyInt
   definedBronzeFrom   Int      @db.UnsignedTinyInt
   definedBronzeTo     Int      @default(0) @db.UnsignedTinyInt
-  psnRateFrom         Decimal  @db.Decimal(5, 2)
-  psnRateTo           Decimal  @default(0) @db.Decimal(5, 2)
   qualityFrom         Decimal  @db.Decimal(5, 2)
   qualityTo           Decimal  @default(0) @db.Decimal(5, 2)
   timesCompletedFrom  Int      @db.UnsignedSmallInt

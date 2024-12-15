@@ -18,7 +18,6 @@ export default defineEventHandler(async (event) => {
           imageUrl: true,
           isAdmin: true,
           isFounder: true,
-          isLinked: true,
           createdAt: true,
         },
       },

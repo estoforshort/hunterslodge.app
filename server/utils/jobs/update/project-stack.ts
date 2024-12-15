@@ -295,7 +295,6 @@ export const updateProjectAndStack = async (data: Data) => {
         definedBronze: data.project.definedTrophies.bronze,
         firstTrophyEarnedAt: stack.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stack.lastTrophyEarnedAt,
-        psnRate: 0 as unknown as Prisma.Decimal,
         quality: 0 as unknown as Prisma.Decimal,
         profilesCount: data.profilesCount,
         timesStarted: timesStarted,
@@ -331,7 +330,6 @@ export const updateProjectAndStack = async (data: Data) => {
             definedGoldFrom: stack.definedGold,
             definedSilverFrom: stack.definedSilver,
             definedBronzeFrom: stack.definedBronze,
-            psnRateFrom: stack.psnRate,
             qualityFrom: stack.quality,
             timesStartedFrom: stack.timesStarted,
             rarityFrom: stack.rarity,
@@ -505,30 +503,24 @@ export const updateProjectAndStack = async (data: Data) => {
         },
       });
 
-      const [avgPsnRateAndQuality, timesCompleted, avgProgress] =
-        await Promise.all([
-          prisma.stackTrophy.aggregate({
-            _avg: {
-              psnRate: true,
-              quality: true,
-            },
-            where: { stackId: stack.id },
-          }),
-          prisma.project.count({ where: { stackId: stack.id, progress: 100 } }),
-          prisma.project.aggregate({
-            _avg: {
-              progress: true,
-            },
-            where: { stackId: stack.id },
-          }),
-        ]);
+      const [avgQuality, timesCompleted, avgProgress] = await Promise.all([
+        prisma.stackTrophy.aggregate({
+          _avg: {
+            quality: true,
+          },
+          where: { stackId: stack.id },
+        }),
+        prisma.project.count({ where: { stackId: stack.id, progress: 100 } }),
+        prisma.project.aggregate({
+          _avg: {
+            progress: true,
+          },
+          where: { stackId: stack.id },
+        }),
+      ]);
 
-      if (avgPsnRateAndQuality._avg.psnRate) {
-        stackData.psnRate = avgPsnRateAndQuality._avg.psnRate;
-      }
-
-      if (avgPsnRateAndQuality._avg.quality) {
-        stackData.quality = avgPsnRateAndQuality._avg.quality;
+      if (avgQuality._avg.quality) {
+        stackData.quality = avgQuality._avg.quality;
       }
 
       stackData.rarity = (Math.round(
@@ -555,7 +547,6 @@ export const updateProjectAndStack = async (data: Data) => {
           definedGoldTo: updateStack.definedGold,
           definedSilverTo: updateStack.definedSilver,
           definedBronzeTo: updateStack.definedBronze,
-          psnRateTo: updateStack.psnRate,
           qualityTo: updateStack.quality,
           timesStartedTo: updateStack.timesStarted,
           rarityTo: updateStack.rarity,

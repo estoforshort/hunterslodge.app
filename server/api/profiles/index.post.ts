@@ -133,15 +133,6 @@ export default defineEventHandler(async (event) => {
     console.error(e);
   }
 
-  await prisma.user.update({
-    where: {
-      id: session.user.id,
-    },
-    data: {
-      isLinked: true,
-    },
-  });
-
   const createUpdate = await prisma.update.create({
     data: {
       appId: "app",
