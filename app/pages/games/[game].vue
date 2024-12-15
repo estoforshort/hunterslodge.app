@@ -23,8 +23,6 @@ useSeoMeta({
   title: game.value?.name,
 });
 
-console.log(route.name);
-
 const links = computed(() => [
   [
     {
