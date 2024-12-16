@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Fuse from "fuse.js";
+
 useSeoMeta({
   title: "Games",
 });
@@ -79,6 +81,94 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
     };
   },
 });
+
+const searchResults = ref<
+  {
+    stackId: string;
+    gameId: number;
+    name: string;
+    platforms: {
+      platformId: string;
+    }[];
+    definedPlatinum: number;
+    definedGold: number;
+    definedSilver: number;
+    definedBronze: number;
+    firstTrophyEarnedAt: string | null;
+    lastTrophyEarnedAt: string | null;
+    quality: string;
+    timesStarted: number;
+    timesCompleted: number;
+    progress: number;
+    value: string;
+  }[]
+>([]);
+
+const searching = ref(false);
+const name = ref("");
+
+async function search() {
+  try {
+    if (!searching.value && name.value.length) {
+      searching.value = true;
+
+      const response = await $fetch("/api/public/v1/stacks/search", {
+        method: "POST",
+        body: { name: name.value },
+      });
+
+      const fuse = new Fuse(response.data, {
+        findAllMatches: true,
+        keys: ["game.name"],
+        threshold: 0.2,
+      });
+
+      const results = fuse.search(name.value);
+
+      searchResults.value = [];
+
+      if (results.length) {
+        for (let r = 0, rc = results.length; r < rc; r++) {
+          const result = results[r]?.item;
+
+          if (result) {
+            searchResults.value.push({
+              stackId: result.id,
+              gameId: result.gameId,
+              name: result.game.name,
+              platforms: result.game.platforms,
+              definedPlatinum: result.definedPlatinum,
+              definedGold: result.definedGold,
+              definedSilver: result.definedSilver,
+              definedBronze: result.definedBronze,
+              firstTrophyEarnedAt: result.firstTrophyEarnedAt,
+              lastTrophyEarnedAt: result.lastTrophyEarnedAt,
+              quality: result.quality,
+              timesStarted: result.timesStarted,
+              timesCompleted: result.timesCompleted,
+              progress: result.avgProgress,
+              value: result.value,
+            });
+          }
+        }
+      }
+
+      searching.value = false;
+      console.log(searchResults.value);
+    }
+  } catch (e) {
+    console.error(e);
+    searching.value = false;
+  }
+}
+
+watch(name, (newName) => {
+  if (newName.trim().length) {
+    search();
+  } else {
+    searchResults.value = [];
+  }
+});
 </script>
 
 <template>
@@ -86,11 +176,13 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
     <UPageBody>
       <UPageCard>
         <div id="top">
-          <div class="mb-6 grid grid-cols-2 gap-6">
+          <UInput v-model="name" placeholder="Search..." class="mb-3" />
+          <div class="mb-6 grid grid-cols-2 gap-3">
             <USelect
               v-model="orderBy"
               :options="orderOptions"
               option-attribute="name"
+              :disabled="name.trim().length > 0"
             >
               <template #trailing>
                 <UIcon
@@ -104,6 +196,7 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
               v-model="direction"
               :options="directionOptions"
               option-attribute="name"
+              :disabled="name.trim().length > 0"
             >
               <template #trailing>
                 <UIcon
@@ -114,16 +207,32 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
             </USelect>
           </div>
 
-          <div
-            v-for="game in games?.data"
-            :key="game.stackId"
-            class="mb-3 last:mb-0"
-          >
-            <GamesGameOverview :game />
+          <div v-if="name.trim().length">
+            <div
+              v-for="game in searchResults"
+              :key="game.stackId"
+              class="mb-3 last:mb-0"
+            >
+              <GamesGameOverview :game />
+            </div>
+          </div>
+
+          <div v-else>
+            <div
+              v-for="game in games?.data"
+              :key="game.stackId"
+              class="mb-3 last:mb-0"
+            >
+              <GamesGameOverview :game />
+            </div>
           </div>
 
           <div
-            v-if="games && games.totalSize > games.pageSize"
+            v-if="
+              name.trim().length === 0 &&
+              games &&
+              games.totalSize > games.pageSize
+            "
             class="mt-6 flex justify-center"
           >
             <UPagination
