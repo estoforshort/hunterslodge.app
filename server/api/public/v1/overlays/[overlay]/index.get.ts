@@ -11,91 +11,97 @@ export default defineCachedEventHandler(
 
     const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-    const findOverlay = await prisma.overlay.findUnique({
-      select: {
-        id: true,
-        profile: {
-          select: {
-            id: true,
-            user: {
-              select: {
-                id: true,
-                username: true,
-                displayName: true,
-              },
-            },
-            accountId: true,
-            onlineId: true,
-            imageUrl: true,
-            platinum: true,
-            gold: true,
-            silver: true,
-            bronze: true,
-            lastCheckedAt: true,
-            startedProjects: true,
-            completedProjects: true,
-            definedPlatinum: true,
-            definedGold: true,
-            definedSilver: true,
-            definedBronze: true,
-            earnedPlatinum: true,
-            earnedGold: true,
-            earnedSilver: true,
-            earnedBronze: true,
-            streamPlatinum: true,
-            streamGold: true,
-            streamSilver: true,
-            streamBronze: true,
-            hiddenTrophies: true,
-            completion: true,
-            points: true,
-            streamPoints: true,
-            timeStreamed: true,
-            streamPosition: true,
-            regionalPosition: true,
-            globalPosition: true,
-            lastFullUpdateAt: true,
-          },
-        },
-        project: {
-          select: {
-            stack: {
-              select: {
-                id: true,
-                game: {
-                  select: {
-                    id: true,
-                    imageUrl: true,
-                  },
+    const [appSettings, findOverlay] = await Promise.all([
+      prisma.appSettings.findUniqueOrThrow({
+        select: { updatesEnabled: true },
+        where: { appId: "app" },
+      }),
+      prisma.overlay.findUnique({
+        select: {
+          id: true,
+          profile: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
                 },
-                definedPlatinum: true,
-                definedGold: true,
-                definedSilver: true,
-                definedBronze: true,
               },
+              accountId: true,
+              onlineId: true,
+              imageUrl: true,
+              platinum: true,
+              gold: true,
+              silver: true,
+              bronze: true,
+              lastCheckedAt: true,
+              startedProjects: true,
+              completedProjects: true,
+              definedPlatinum: true,
+              definedGold: true,
+              definedSilver: true,
+              definedBronze: true,
+              earnedPlatinum: true,
+              earnedGold: true,
+              earnedSilver: true,
+              earnedBronze: true,
+              streamPlatinum: true,
+              streamGold: true,
+              streamSilver: true,
+              streamBronze: true,
+              hiddenTrophies: true,
+              completion: true,
+              points: true,
+              streamPoints: true,
+              timeStreamed: true,
+              streamPosition: true,
+              regionalPosition: true,
+              globalPosition: true,
+              lastFullUpdateAt: true,
             },
-            earnedPlatinum: true,
-            earnedGold: true,
-            earnedSilver: true,
-            earnedBronze: true,
-            streamPlatinum: true,
-            streamGold: true,
-            streamSilver: true,
-            streamBronze: true,
-            progress: true,
-            points: true,
-            streamPoints: true,
-            timeStreamed: true,
           },
+          project: {
+            select: {
+              stack: {
+                select: {
+                  id: true,
+                  game: {
+                    select: {
+                      id: true,
+                      imageUrl: true,
+                    },
+                  },
+                  definedPlatinum: true,
+                  definedGold: true,
+                  definedSilver: true,
+                  definedBronze: true,
+                },
+              },
+              earnedPlatinum: true,
+              earnedGold: true,
+              earnedSilver: true,
+              earnedBronze: true,
+              streamPlatinum: true,
+              streamGold: true,
+              streamSilver: true,
+              streamBronze: true,
+              progress: true,
+              points: true,
+              streamPoints: true,
+              timeStreamed: true,
+            },
+          },
+          style: true,
+          viewers: true,
+          lastLiveAt: true,
+          updateProject: true,
+          updateTrophies: true,
         },
-        style: true,
-        viewers: true,
-        lastLiveAt: true,
-        updateProject: true,
-        updateTrophies: true,
-      },
-      where: { id: params.overlay },
-    });
+        where: { id: params.overlay },
+      }),
+    ]);
 
     if (!findOverlay) {
       throw createError({
@@ -353,7 +359,7 @@ export default defineCachedEventHandler(
         }
       }
 
-      if (findOverlay.updateTrophies) {
+      if (appSettings.updatesEnabled && findOverlay.updateTrophies) {
         if (
           dayjs().isAfter(
             dayjs(findOverlay.profile.lastCheckedAt).add(5, "minutes"),
