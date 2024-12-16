@@ -5,6 +5,10 @@ const links = [
     to: "/hunters",
   },
   {
+    label: "Regions",
+    to: "/regions",
+  },
+  {
     label: "Streamers",
     to: "/streamers",
   },
