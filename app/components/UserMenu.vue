@@ -13,6 +13,38 @@ function openLinkPsnModal() {
   });
 }
 
+const queueing = ref(false);
+const toast = useToast();
+
+async function queueUpdate() {
+  if (queueing.value === false) {
+    queueing.value = true;
+
+    try {
+      const response = await $fetch("/api/updates", { method: "POST" });
+
+      toast.add({
+        description: response.data.message,
+        color: response.data.success ? "green" : "red",
+        actions: [
+          {
+            color: "gray",
+            size: "xs",
+            label: "View updates",
+            click: () =>
+              navigateTo(`/hunters/${user.value?.profileId}/updates`),
+          },
+        ],
+      });
+
+      queueing.value = false;
+    } catch (e) {
+      console.error(e);
+      queueing.value = false;
+    }
+  }
+}
+
 const items = computed(() => [
   [
     {
@@ -31,6 +63,7 @@ const items = computed(() => [
     {
       label: "Queue update",
       icon: "i-bi-arrow-repeat",
+      click: queueUpdate,
       class: user.value?.profileId === null ? "hidden" : "",
     },
   ],
