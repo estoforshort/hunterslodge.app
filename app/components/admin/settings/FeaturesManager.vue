@@ -2,6 +2,7 @@
 const { data: settings } = await useFetch("/api/app-settings");
 
 const features = reactive({
+  overlaysEnabled: settings.value?.data.overlaysEnabled,
   linkingEnabled: settings.value?.data.linkingEnabled,
   updatesEnabled: settings.value?.data.updatesEnabled,
 });
@@ -27,6 +28,7 @@ async function updateFeatures() {
   } catch (e) {
     console.error(e);
 
+    features.overlaysEnabled = settings.value?.data.overlaysEnabled;
     features.linkingEnabled = settings.value?.data.linkingEnabled;
     features.updatesEnabled = settings.value?.data.updatesEnabled;
 
@@ -54,6 +56,22 @@ async function updateFeatures() {
         },
       }"
     >
+      <UFormGroup
+        key="overlays"
+        name="overlays"
+        label="Overlays"
+        description="Enable or disable overlays"
+        :ui="{ container: 'flex' }"
+        class="flex items-center justify-between gap-2 pt-4 first:pt-0"
+      >
+        <UToggle
+          v-model="features.overlaysEnabled"
+          size="md"
+          :disabled="updatingFeatures"
+          @update:model-value="updateFeatures"
+        />
+      </UFormGroup>
+
       <UFormGroup
         key="linking"
         name="linking"

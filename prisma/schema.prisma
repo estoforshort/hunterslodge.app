@@ -51,10 +51,11 @@ model AppSettings {
   appId String @unique @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  linkingEnabled Boolean  @default(false)
-  updatesEnabled Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  overlaysEnabled Boolean  @default(false)
+  linkingEnabled  Boolean  @default(false)
+  updatesEnabled  Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model User {

@@ -4,29 +4,44 @@ export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
   await authorize(event, manageOverlay);
 
-  const profile = await prisma.profile.findUniqueOrThrow({
-    select: {
-      id: true,
-      lastFullUpdateAt: true,
-      overlay: {
-        select: {
-          id: true,
-          project: {
-            select: {
-              stackId: true,
+  const [appSettings, profile] = await Promise.all([
+    prisma.appSettings.findUniqueOrThrow({
+      select: { overlaysEnabled: true },
+      where: { appId: "app" },
+    }),
+    prisma.profile.findUniqueOrThrow({
+      select: {
+        id: true,
+        lastFullUpdateAt: true,
+        overlay: {
+          select: {
+            id: true,
+            project: {
+              select: {
+                stackId: true,
+              },
             },
+            viewers: true,
+            mature: true,
+            language: true,
+            lastLiveAt: true,
+            updateProject: true,
+            updateTrophies: true,
           },
-          viewers: true,
-          mature: true,
-          language: true,
-          lastLiveAt: true,
-          updateProject: true,
-          updateTrophies: true,
         },
       },
-    },
-    where: { userId: session.user.id },
-  });
+      where: { userId: session.user.id },
+    }),
+  ]);
+
+  if (!appSettings.overlaysEnabled) {
+    return {
+      data: {
+        success: false,
+        message: "Overlay creation is currently disabled",
+      },
+    };
+  }
 
   if (!profile.lastFullUpdateAt) {
     return {

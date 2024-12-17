@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
   await authorize(event, updateSettings);
 
   const bodySchema = z.object({
+    overlaysEnabled: z.boolean(),
     linkingEnabled: z.boolean(),
     updatesEnabled: z.boolean(),
   });

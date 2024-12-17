@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
 
   const data = await prisma.appSettings.findUniqueOrThrow({
     select: {
+      overlaysEnabled: true,
       linkingEnabled: true,
       updatesEnabled: true,
     },

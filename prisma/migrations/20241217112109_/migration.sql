@@ -23,6 +23,7 @@ CREATE TABLE `AppTokens` (
 -- CreateTable
 CREATE TABLE `AppSettings` (
     `appId` CHAR(3) NOT NULL,
+    `overlaysEnabled` BOOLEAN NOT NULL DEFAULT false,
     `linkingEnabled` BOOLEAN NOT NULL DEFAULT false,
     `updatesEnabled` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
