@@ -16,6 +16,10 @@ const links = [
     label: "Games",
     to: "/games",
   },
+  {
+    label: "Docs",
+    to: "/docs",
+  },
 ];
 </script>
 

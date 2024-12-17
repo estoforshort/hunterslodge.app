@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     "nuxt-auth-utils",
     "nuxt-authorization",
     "@nuxt/image",
+    "@nuxt/content",
   ],
   runtimeConfig: {
     oauth: {
@@ -29,8 +30,9 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
+    "/api/content.json": { prerender: true },
     "/api/public/**": { cors: true },
-    "/p": { redirect: "/" },
+    "/docs": { redirect: "/docs/getting-started", prerender: false },
   },
   image: {
     domains: ["localhost:3000", "hunterslodge.app"],
