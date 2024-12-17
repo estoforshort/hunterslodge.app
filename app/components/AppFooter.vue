@@ -1,5 +1,18 @@
+<script setup lang="ts">
+const links = [
+  {
+    label: "Privacy Policy",
+    to: "/docs/getting-started/privacy",
+  },
+  {
+    label: "Cookie Policy",
+    to: "/docs/getting-started/cookies",
+  },
+];
+</script>
+
 <template>
-  <UFooter>
+  <UFooter :links>
     <template #left>
       Created with <UIcon name="i-bi-heart" /> by
       <NuxtLink to="https://www.patreon.com/estoforshort" target="_blank">
