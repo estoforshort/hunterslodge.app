@@ -8,6 +8,10 @@ const links = [
     label: "Cookie Policy",
     to: "/docs/getting-started/cookies",
   },
+  {
+    label: "Terms of Service",
+    to: "/docs/getting-started/tos",
+  },
 ];
 </script>
 
