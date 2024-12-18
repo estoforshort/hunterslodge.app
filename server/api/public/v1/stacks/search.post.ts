@@ -7,46 +7,53 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, bodySchema.parse);
 
-  const data = await prisma.stack.findMany({
-    select: {
-      id: true,
-      gameId: true,
-      game: {
+  const gameSearch = defineCachedFunction(
+    async (name: string) => {
+      return await prisma.stack.findMany({
         select: {
-          name: true,
-          imageUrl: true,
-          platforms: {
+          id: true,
+          gameId: true,
+          game: {
             select: {
-              platformId: true,
+              name: true,
+              imageUrl: true,
+              platforms: {
+                select: {
+                  platformId: true,
+                },
+              },
+            },
+          },
+          definedPlatinum: true,
+          definedGold: true,
+          definedSilver: true,
+          definedBronze: true,
+          firstTrophyEarnedAt: true,
+          lastTrophyEarnedAt: true,
+          quality: true,
+          timesStarted: true,
+          rarity: true,
+          timesCompleted: true,
+          avgProgress: true,
+          value: true,
+          createdAt: true,
+        },
+        orderBy: {
+          game: {
+            _relevance: {
+              fields: ["name"],
+              search: name + "*",
+              sort: "desc",
             },
           },
         },
-      },
-      definedPlatinum: true,
-      definedGold: true,
-      definedSilver: true,
-      definedBronze: true,
-      firstTrophyEarnedAt: true,
-      lastTrophyEarnedAt: true,
-      quality: true,
-      timesStarted: true,
-      rarity: true,
-      timesCompleted: true,
-      avgProgress: true,
-      value: true,
-      createdAt: true,
+        take: 100,
+      });
     },
-    orderBy: {
-      game: {
-        _relevance: {
-          fields: ["name"],
-          search: body.name + "*",
-          sort: "desc",
-        },
-      },
-    },
-    take: 100,
-  });
+    { maxAge: 300 },
+  );
+
+  const data = await gameSearch(body.name);
 
   return { data };
 });
