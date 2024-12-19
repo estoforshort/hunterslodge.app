@@ -27,5 +27,5 @@ export default defineCachedEventHandler(
 
     return { data: data?._count ?? null };
   },
-  { maxAge: 900 },
+  { maxAge: 60 },
 );
