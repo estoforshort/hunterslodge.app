@@ -318,14 +318,21 @@ export const updateProjectAndStackGroup = async (data: Data) => {
         value: 0 as unknown as Prisma.Decimal,
       };
 
-      const [createProjectGroupChange, createStackGroupChange] =
-        await Promise.all([
-          prisma.projectGroupChange.create({
+      const getProjectGroupChange = async () => {
+        const findProjectGroupChange =
+          await prisma.projectGroupChange.findUnique({
+            where: {
+              updateId_stackId_groupId: {
+                updateId: data.updateId,
+                stackId: data.stack.id,
+                groupId: projectGroup.groupId,
+              },
+            },
+          });
+
+        if (findProjectGroupChange) {
+          return await prisma.projectGroupChange.update({
             data: {
-              updateId: data.updateId,
-              stackId: data.stack.id,
-              profileId: data.profile.id,
-              groupId: projectGroup.groupId,
               earnedPlatinumFrom: projectGroup.earnedPlatinum,
               earnedGoldFrom: projectGroup.earnedGold,
               earnedSilverFrom: projectGroup.earnedSilver,
@@ -338,7 +345,40 @@ export const updateProjectAndStackGroup = async (data: Data) => {
               pointsFrom: projectGroup.points,
               streamPointsFrom: projectGroup.streamPoints,
             },
-          }),
+            where: {
+              updateId_stackId_groupId: {
+                updateId: data.updateId,
+                stackId: data.stack.id,
+                groupId: projectGroup.groupId,
+              },
+            },
+          });
+        }
+
+        return await prisma.projectGroupChange.create({
+          data: {
+            updateId: data.updateId,
+            stackId: data.stack.id,
+            profileId: data.profile.id,
+            groupId: projectGroup.groupId,
+            earnedPlatinumFrom: projectGroup.earnedPlatinum,
+            earnedGoldFrom: projectGroup.earnedGold,
+            earnedSilverFrom: projectGroup.earnedSilver,
+            earnedBronzeFrom: projectGroup.earnedBronze,
+            streamPlatinumFrom: projectGroup.streamPlatinum,
+            streamGoldFrom: projectGroup.streamGold,
+            streamSilverFrom: projectGroup.streamSilver,
+            streamBronzeFrom: projectGroup.streamBronze,
+            progressFrom: projectGroup.progress,
+            pointsFrom: projectGroup.points,
+            streamPointsFrom: projectGroup.streamPoints,
+          },
+        });
+      };
+
+      const [createProjectGroupChange, createStackGroupChange] =
+        await Promise.all([
+          getProjectGroupChange(),
           prisma.stackGroupChange.create({
             data: {
               stackChangeId: data.stackChangeId,

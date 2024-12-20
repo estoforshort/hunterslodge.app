@@ -7,7 +7,6 @@ import type { Prisma } from "@prisma/client";
 
 type Data = {
   updateId: number;
-  profilesCount: number;
   profile: {
     id: number;
     accountId: string;
@@ -39,15 +38,18 @@ export const updateProjectAndStack = async (data: Data) => {
   try {
     let updateSuccessful = true;
 
-    const findProjectWithStack = await prisma.project.findUnique({
-      where: {
-        profileId_stackId: {
-          profileId: data.profile.id,
-          stackId: data.project.npCommunicationId,
+    const [findProjectWithStack, profilesCount] = await Promise.all([
+      prisma.project.findUnique({
+        where: {
+          profileId_stackId: {
+            profileId: data.profile.id,
+            stackId: data.project.npCommunicationId,
+          },
         },
-      },
-      include: { stack: true },
-    });
+        include: { stack: true },
+      }),
+      prisma.profile.count(),
+    ]);
 
     const newStreamTrophies = {
       platinum: 0,
@@ -60,7 +62,7 @@ export const updateProjectAndStack = async (data: Data) => {
 
     if (
       !findProjectWithStack ||
-      findProjectWithStack.stack.profilesCount !== data.profilesCount ||
+      findProjectWithStack.stack.profilesCount !== profilesCount ||
       findProjectWithStack.earnedPlatinum !==
         data.project.earnedTrophies.platinum ||
       findProjectWithStack.earnedGold !== data.project.earnedTrophies.gold ||
@@ -296,7 +298,7 @@ export const updateProjectAndStack = async (data: Data) => {
         firstTrophyEarnedAt: stack.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stack.lastTrophyEarnedAt,
         quality: 0 as unknown as Prisma.Decimal,
-        profilesCount: data.profilesCount,
+        profilesCount: profilesCount,
         timesStarted: timesStarted,
         rarity: 0 as unknown as Prisma.Decimal,
         timesCompleted: 0,
@@ -304,8 +306,41 @@ export const updateProjectAndStack = async (data: Data) => {
         value: 0 as unknown as Prisma.Decimal,
       };
 
-      const [createProjectChange, createStackChange] = await Promise.all([
-        prisma.projectChange.create({
+      const getProjectChange = async () => {
+        const findProjectChange = await prisma.projectChange.findUnique({
+          where: {
+            updateId_stackId: {
+              updateId: data.updateId,
+              stackId: project.stackId,
+            },
+          },
+        });
+
+        if (findProjectChange) {
+          return await prisma.projectChange.update({
+            data: {
+              earnedPlatinumFrom: project.earnedPlatinum,
+              earnedGoldFrom: project.earnedGold,
+              earnedSilverFrom: project.earnedSilver,
+              earnedBronzeFrom: project.earnedBronze,
+              streamPlatinumFrom: project.streamPlatinum,
+              streamGoldFrom: project.streamGold,
+              streamSilverFrom: project.streamSilver,
+              streamBronzeFrom: project.streamBronze,
+              progressFrom: project.progress,
+              pointsFrom: project.points,
+              streamPointsFrom: project.streamPoints,
+            },
+            where: {
+              updateId_stackId: {
+                updateId: findProjectChange.updateId,
+                stackId: findProjectChange.stackId,
+              },
+            },
+          });
+        }
+
+        return await prisma.projectChange.create({
           data: {
             updateId: data.updateId,
             profileId: project.profileId,
@@ -322,7 +357,11 @@ export const updateProjectAndStack = async (data: Data) => {
             pointsFrom: project.points,
             streamPointsFrom: project.streamPoints,
           },
-        }),
+        });
+      };
+
+      const [createProjectChange, createStackChange] = await Promise.all([
+        getProjectChange(),
         prisma.stackChange.create({
           data: {
             stackId: stack.id,
@@ -346,7 +385,7 @@ export const updateProjectAndStack = async (data: Data) => {
         const updatedGroup = await updateProjectAndStackGroup({
           updateId: data.updateId,
           stackChangeId: createStackChange.id,
-          profilesCount: data.profilesCount,
+          profilesCount: profilesCount,
           profile: data.profile,
           game: {
             id: stack.gameId,
@@ -434,7 +473,7 @@ export const updateProjectAndStack = async (data: Data) => {
         if (updatedGroup.data.stackGroup.firstTrophyEarnedAt) {
           if (
             !stackData.firstTrophyEarnedAt ||
-            dayjs(updatedGroup.data.stackGroup.firstTrophyEarnedAt).isAfter(
+            dayjs(updatedGroup.data.stackGroup.firstTrophyEarnedAt).isBefore(
               stackData.firstTrophyEarnedAt,
             )
           ) {
@@ -524,7 +563,7 @@ export const updateProjectAndStack = async (data: Data) => {
       }
 
       stackData.rarity = (Math.round(
-        (data.profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
+        (profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
       ) / 100) as unknown as Prisma.Decimal;
 
       stackData.timesCompleted = timesCompleted;

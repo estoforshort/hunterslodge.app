@@ -286,9 +286,9 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
         if (
           Number(stackTrophyData.value) !== Number(findProjectTrophy.points)
         ) {
-          return {
-            data: {
-              projectTrophy: await prisma.projectTrophy.update({
+          const [updateProjectTrophy, findProjectTrophyChange] =
+            await Promise.all([
+              prisma.projectTrophy.update({
                 where: {
                   profileId_stackId_groupId_trophyId: {
                     profileId: findProjectTrophy.profileId,
@@ -299,15 +299,52 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
                 },
                 data: {
                   points: stackTrophyData.value,
-                  changes: {
-                    create: {
-                      updateId: data.updateId,
-                      pointsFrom: findProjectTrophy.points,
-                      pointsTo: stackTrophyData.value,
-                    },
+                },
+              }),
+              prisma.projectTrophyChange.findUnique({
+                where: {
+                  updateId_stackId_groupId_trophyId: {
+                    updateId: data.updateId,
+                    stackId: findProjectTrophy.stackId,
+                    groupId: findProjectTrophy.groupId,
+                    trophyId: findProjectTrophy.trophyId,
                   },
                 },
               }),
+            ]);
+
+          if (findProjectTrophyChange) {
+            await prisma.projectTrophyChange.update({
+              data: {
+                pointsFrom: findProjectTrophy.points,
+                pointsTo: stackTrophyData.value,
+              },
+              where: {
+                updateId_stackId_groupId_trophyId: {
+                  updateId: findProjectTrophyChange.updateId,
+                  stackId: findProjectTrophyChange.stackId,
+                  groupId: findProjectTrophyChange.groupId,
+                  trophyId: findProjectTrophyChange.trophyId,
+                },
+              },
+            });
+          } else {
+            await prisma.projectTrophyChange.create({
+              data: {
+                updateId: data.updateId,
+                stackId: findProjectTrophy.stackId,
+                groupId: findProjectTrophy.groupId,
+                profileId: findProjectTrophy.profileId,
+                trophyId: findProjectTrophy.trophyId,
+                pointsFrom: findProjectTrophy.points,
+                pointsTo: stackTrophyData.value,
+              },
+            });
+          }
+
+          return {
+            data: {
+              projectTrophy: updateProjectTrophy,
               stackTrophy: await prisma.stackTrophy.update({
                 where: {
                   stackId_groupId_trophyId: {
@@ -378,9 +415,9 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       }
 
       if (Number(stackTrophyData.value) !== Number(findProjectTrophy.points)) {
-        return {
-          data: {
-            projectTrophy: await prisma.projectTrophy.update({
+        const [updateProjectTrophy, findProjectTrophyChange] =
+          await Promise.all([
+            prisma.projectTrophy.update({
               where: {
                 profileId_stackId_groupId_trophyId: {
                   profileId: findProjectTrophy.profileId,
@@ -391,15 +428,52 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               },
               data: {
                 points: stackTrophyData.value,
-                changes: {
-                  create: {
-                    updateId: data.updateId,
-                    pointsFrom: findProjectTrophy.points,
-                    pointsTo: stackTrophyData.value,
-                  },
+              },
+            }),
+            prisma.projectTrophyChange.findUnique({
+              where: {
+                updateId_stackId_groupId_trophyId: {
+                  updateId: data.updateId,
+                  stackId: findProjectTrophy.stackId,
+                  groupId: findProjectTrophy.groupId,
+                  trophyId: findProjectTrophy.trophyId,
                 },
               },
             }),
+          ]);
+
+        if (findProjectTrophyChange) {
+          await prisma.projectTrophyChange.update({
+            data: {
+              pointsFrom: findProjectTrophy.points,
+              pointsTo: stackTrophyData.value,
+            },
+            where: {
+              updateId_stackId_groupId_trophyId: {
+                updateId: findProjectTrophyChange.updateId,
+                stackId: findProjectTrophyChange.stackId,
+                groupId: findProjectTrophyChange.groupId,
+                trophyId: findProjectTrophyChange.trophyId,
+              },
+            },
+          });
+        } else {
+          await prisma.projectTrophyChange.create({
+            data: {
+              updateId: data.updateId,
+              stackId: findProjectTrophy.stackId,
+              groupId: findProjectTrophy.groupId,
+              profileId: findProjectTrophy.profileId,
+              trophyId: findProjectTrophy.trophyId,
+              pointsFrom: findProjectTrophy.points,
+              pointsTo: stackTrophyData.value,
+            },
+          });
+        }
+
+        return {
+          data: {
+            projectTrophy: updateProjectTrophy,
             stackTrophy: stackTrophy,
             streamTrophy,
             streamId,
