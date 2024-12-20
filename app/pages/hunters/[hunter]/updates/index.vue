@@ -23,7 +23,6 @@ const { data: updates } = await useFetch(
           status: update.status,
           type: update.type,
           fullUpdate: update.fullUpdate,
-          startedAt: update.startedAt,
           progress: update.progress,
           finishedAt: update.finishedAt,
           startedProjectsFrom: update.startedProjectsFrom,
@@ -375,7 +374,7 @@ const { data: updates } = await useFetch(
             {{
               dayjs
                 .duration({
-                  seconds: dayjs().unix() - dayjs(update.startedAt).unix(),
+                  seconds: dayjs().unix() - dayjs(update.createdAt).unix(),
                 })
                 .humanize()
             }}
@@ -402,7 +401,7 @@ const { data: updates } = await useFetch(
                     .duration({
                       seconds:
                         dayjs(update.finishedAt).unix() -
-                        dayjs(update.startedAt).unix(),
+                        dayjs(update.createdAt).unix(),
                     })
                     .humanize()
                 }}
