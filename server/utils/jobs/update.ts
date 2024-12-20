@@ -94,6 +94,8 @@ export const runUpdate = async (updateId: number) => {
         trophyTitleName: string;
         trophyTitleIconUrl: string;
         trophyTitlePlatform: string;
+        hasTrophyGroups: boolean;
+        trophyGroupCount: number;
         definedTrophies: {
           bronze: number;
           silver: number;

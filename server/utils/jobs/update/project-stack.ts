@@ -18,6 +18,8 @@ type Data = {
     trophyTitleName: string;
     trophyTitleIconUrl: string;
     trophyTitlePlatform: string;
+    hasTrophyGroups: boolean;
+    trophyGroupCount: number;
     definedTrophies: {
       bronze: number;
       silver: number;
@@ -184,7 +186,7 @@ export const updateProjectAndStack = async (data: Data) => {
         const name = data.project.trophyTitleName.replace(/\s+/g, " ").trim();
         const hash = createHash("md5")
           .update(
-            `${data.project.npServiceName}-${name}-${data.project.trophyTitlePlatform}-${data.project.definedTrophies.platinum}-${data.project.definedTrophies.gold}-${data.project.definedTrophies.silver}-${data.project.definedTrophies.gold}`,
+            `${data.project.npServiceName}-${name}-${data.project.trophyTitlePlatform}-${data.project.definedTrophies.platinum}-${data.project.definedTrophies.gold}-${data.project.definedTrophies.silver}-${data.project.definedTrophies.gold}-${data.project.hasTrophyGroups}-${data.project.trophyGroupCount}`,
           )
           .digest("hex");
 

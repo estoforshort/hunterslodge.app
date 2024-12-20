@@ -45,6 +45,12 @@ const exchangeNpsso = async (data: ExchangeNpsso) => {
       body: `code=${code}&grant_type=authorization_code&redirect_uri=${variables.REDIRECT_URI}&scope=${variables.SCOPE}&token_format=jwt`,
     });
 
+    if (!step2.ok) {
+      return {
+        data: null,
+      };
+    }
+
     const step2Data = (await step2.json()) as {
       access_token: string;
       token_type: string;
@@ -81,6 +87,12 @@ const refreshTokens = async (data: RefreshTokens) => {
       },
       body: `refresh_token=${data.refreshToken}&grant_type=refresh_token&redirect_uri=${variables.REDIRECT_URI}&scope=${variables.SCOPE}&token_format=jwt`,
     });
+
+    if (!fetchTokens.ok) {
+      return {
+        data: null,
+      };
+    }
 
     const tokensData = (await fetchTokens.json()) as {
       access_token: string;
@@ -204,6 +216,12 @@ const findProfile = async (data: FindProfile) => {
       ),
     ]);
 
+    if (!fetchProfile.ok || !fetchAccountId.ok) {
+      return {
+        data: null,
+      };
+    }
+
     const profileData = (await fetchProfile.json()) as {
       onlineId: string;
       region: string;
@@ -228,6 +246,12 @@ const findProfile = async (data: FindProfile) => {
         },
       },
     );
+
+    if (!fetchTrophySummary.ok) {
+      return {
+        data: null,
+      };
+    }
 
     const trophySummaryData = (await fetchTrophySummary.json()) as {
       accountId: string;
@@ -291,6 +315,12 @@ const profile = async (data: Profile) => {
         },
       ),
     ]);
+
+    if (!fetchProfile.ok || !fetchTrophySummary.ok) {
+      return {
+        data: null,
+      };
+    }
 
     const profileData = (await fetchProfile.json()) as {
       onlineId: string;
@@ -363,6 +393,12 @@ const projects = async (data: Projects) => {
       },
     );
 
+    if (!fetchProjects.ok) {
+      return {
+        data: null,
+      };
+    }
+
     const projectsData = (await fetchProjects.json()) as {
       trophyTitles: {
         npServiceName: string;
@@ -430,6 +466,12 @@ const projectGroups = async (data: ProjectGroups) => {
       },
     );
 
+    if (!fetchProjectGroups.ok) {
+      return {
+        data: null,
+      };
+    }
+
     const projectGroupsData = (await fetchProjectGroups.json()) as {
       trophySetVersion: string;
       hiddenFlag: boolean;
@@ -490,6 +532,12 @@ const projectGroupTrophies = async (data: ProjectGroupTrophies) => {
         },
       },
     );
+
+    if (!fetchProjectGroupTrophies.ok) {
+      return {
+        data: null,
+      };
+    }
 
     const projectGroupTrophiesData =
       (await fetchProjectGroupTrophies.json()) as {
@@ -555,6 +603,12 @@ const gameGroups = async (data: GameGroups) => {
       },
     );
 
+    if (!fetchGameGroups.ok) {
+      return {
+        data: null,
+      };
+    }
+
     const gameGroupsData = (await fetchGameGroups.json()) as {
       npServiceName: string;
       npCommunicationId: string;
@@ -618,6 +672,12 @@ const gameGroupTrophies = async (data: GameGroupTrophies) => {
         },
       },
     );
+
+    if (!fetchGameGroupTrophies.ok) {
+      return {
+        data: null,
+      };
+    }
 
     const gameGroupTrophiesData = (await fetchGameGroupTrophies.json()) as {
       trophySetVersion: string;
