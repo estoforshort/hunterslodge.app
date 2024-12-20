@@ -50,6 +50,33 @@ const { data: updates } = await useFetch(
     },
   },
 );
+
+const queueing = ref(false);
+const toast = useToast();
+
+async function requeueUpdate(updateId: number) {
+  if (queueing.value === false) {
+    queueing.value = true;
+
+    try {
+      const response = await $fetch(`/api/updates/${updateId}`, {
+        method: "POST",
+      });
+
+      toast.add({
+        description: response.data.message,
+        color: response.data.success ? "green" : "red",
+      });
+
+      queueing.value = false;
+    } catch (e) {
+      console.error(e);
+      queueing.value = false;
+    }
+  }
+}
+
+const { user } = useUserSession();
 </script>
 
 <template>
@@ -408,6 +435,20 @@ const { data: updates } = await useFetch(
               </span>
             </span>
           </div>
+
+          <UButton
+            v-if="
+              update.type === 'INITIAL' &&
+              update.status === 'FAILED' &&
+              user?.isAdmin
+            "
+            color="gray"
+            variant="soft"
+            size="xs"
+            label="Requeue"
+            :disabled="queueing"
+            @click="requeueUpdate(update.id)"
+          />
         </div>
       </template>
     </UCard>
