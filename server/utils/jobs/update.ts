@@ -169,7 +169,12 @@ export const runUpdate = async (updateId: number) => {
       for (let p = 0, pl = projects.length; p < pl; p++) {
         const project = projects[p];
 
-        if (project.progress) {
+        if (
+          project &&
+          project.progress &&
+          !isNaN(project.progress) &&
+          Number(project.progress) > 0
+        ) {
           profileSummary.startedProjects += 1;
 
           if (project.progress === 100) {
@@ -192,7 +197,12 @@ export const runUpdate = async (updateId: number) => {
     for (let p = 0, pl = projects.length; p < pl; p++) {
       const project = projects[p];
 
-      if (project.progress) {
+      if (
+        project &&
+        project.progress &&
+        !isNaN(project.progress) &&
+        Number(project.progress) > 0
+      ) {
         const updatedProject = await updateProjectAndStack({
           updateId: update.id,
           profile: {
