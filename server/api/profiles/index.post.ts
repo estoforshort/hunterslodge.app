@@ -98,7 +98,10 @@ export default defineEventHandler(async (event) => {
     });
   };
 
-  const region = await getRegion();
+  const [region, profilesCount] = await Promise.all([
+    getRegion(),
+    prisma.profile.count(),
+  ]);
 
   const createProfile = await prisma.profile.create({
     data: {
@@ -113,6 +116,7 @@ export default defineEventHandler(async (event) => {
       silver: psnProfile.data.trophySummary.earnedTrophies.silver,
       bronze: psnProfile.data.trophySummary.earnedTrophies.bronze,
       lastCheckedAt: dayjs().format(),
+      profilesCount: profilesCount + 1,
     },
   });
 

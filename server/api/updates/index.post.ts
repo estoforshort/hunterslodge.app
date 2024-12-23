@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
       points: true,
       streamPoints: true,
       lastFullUpdateAt: true,
+      profilesCount: true,
       updates: {
         select: {
           id: true,
@@ -137,9 +138,12 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const psnProfile = await psn.profile({
-    accountId: profile.accountId,
-  });
+  const [psnProfile, profilesCount] = await Promise.all([
+    psn.profile({
+      accountId: profile.accountId,
+    }),
+    prisma.profile.count(),
+  ]);
 
   if (!psnProfile.data) {
     return {
@@ -164,6 +168,7 @@ export default defineEventHandler(async (event) => {
       silver: psnProfile.data.trophySummary.earnedTrophies.silver,
       bronze: psnProfile.data.trophySummary.earnedTrophies.bronze,
       lastCheckedAt: dayjs().format(),
+      profilesCount,
     },
   });
 
@@ -201,7 +206,11 @@ export default defineEventHandler(async (event) => {
         type: "MANUAL",
         fullUpdate: dayjs().isAfter(
           dayjs(profile.lastFullUpdateAt).add(3, "hours"),
-        ),
+        )
+          ? true
+          : profile.profilesCount !== profilesCount
+            ? true
+            : false,
         startedProjectsFrom: profile.startedProjects,
         completedProjectsFrom: profile.completedProjects,
         definedPlatinumFrom: profile.definedPlatinum,

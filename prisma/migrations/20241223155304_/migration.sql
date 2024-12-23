@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Profile` ADD COLUMN `profilesCount` SMALLINT UNSIGNED NOT NULL DEFAULT 0;

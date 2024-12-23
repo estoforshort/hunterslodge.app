@@ -112,7 +112,7 @@ export const runRankings = async () => {
       streamPosition += 1;
     }
 
-    return;
+    return await runAutoQueue();
   } catch (e) {
     console.error(e);
     return;

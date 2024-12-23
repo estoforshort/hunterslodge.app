@@ -148,6 +148,7 @@ model Profile {
   streamPoints        Decimal   @default(0) @db.Decimal(19, 2)
   timeStreamed        Int       @default(0) @db.UnsignedInt
   lastFullUpdateAt    DateTime?
+  profilesCount       Int       @default(0) @db.UnsignedSmallInt
   streamPosition      Int       @default(0) @db.UnsignedSmallInt
   regionalPosition    Int       @default(0) @db.UnsignedSmallInt
   globalPosition      Int       @default(0) @db.UnsignedSmallInt

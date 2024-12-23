@@ -60,6 +60,7 @@ export default defineCachedEventHandler(
               regionalPosition: true,
               globalPosition: true,
               lastFullUpdateAt: true,
+              profilesCount: true,
             },
           },
           project: {
@@ -390,6 +391,8 @@ export default defineCachedEventHandler(
                 (a) => a.size === "l",
               );
 
+              const profilesCount = await prisma.profile.count();
+
               await prisma.profile.update({
                 where: { id: findOverlay.profile.id },
                 data: {
@@ -401,6 +404,7 @@ export default defineCachedEventHandler(
                   silver: psnProfile.data.trophySummary.earnedTrophies.silver,
                   bronze: psnProfile.data.trophySummary.earnedTrophies.bronze,
                   lastCheckedAt: dayjs().format(),
+                  profilesCount,
                 },
               });
 
@@ -436,7 +440,8 @@ export default defineCachedEventHandler(
                 findOverlay.profile.silver !==
                   psnProfile.data.trophySummary.earnedTrophies.silver ||
                 findOverlay.profile.bronze !==
-                  psnProfile.data.trophySummary.earnedTrophies.bronze
+                  psnProfile.data.trophySummary.earnedTrophies.bronze ||
+                findOverlay.profile.profilesCount !== profilesCount
               ) {
                 const createUpdate = await prisma.update.create({
                   data: {
@@ -449,7 +454,11 @@ export default defineCachedEventHandler(
                         3,
                         "hours",
                       ),
-                    ),
+                    )
+                      ? true
+                      : findOverlay.profile.profilesCount !== profilesCount
+                        ? true
+                        : false,
                     startedProjectsFrom: findOverlay.profile.startedProjects,
                     completedProjectsFrom:
                       findOverlay.profile.completedProjects,
