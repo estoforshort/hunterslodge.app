@@ -142,21 +142,26 @@ export const updateGame = async (data: Data) => {
 
       const game = await getGame();
 
+      const groupsToUpdate = [];
+
       for (let g = 0, gl = groups.data.trophyGroups.length; g < gl; g++) {
         const group = groups.data.trophyGroups[g];
 
-        const updatedGroup = await updateGroup({
-          service: data.service,
-          gameId: game.id,
-          stackId: data.stackId,
-          group,
-        });
-
-        if (!updatedGroup.data) {
-          updateSuccessful = false;
-          break;
-        }
+        groupsToUpdate.push(
+          updateGroup({
+            service: data.service,
+            gameId: game.id,
+            stackId: data.stackId,
+            group,
+          }).then((updatedGroup) => {
+            if (!updatedGroup.data) {
+              updateSuccessful = false;
+            }
+          }),
+        );
       }
+
+      await Promise.all(groupsToUpdate);
 
       if (!updateSuccessful) {
         return {

@@ -94,20 +94,25 @@ export const updateGroup = async (data: Data) => {
 
       const group = await getGroup();
 
+      const trophiesToUpdate = [];
+
       for (let t = 0, tl = trophies.data.trophies.length; t < tl; t++) {
         const trophy = trophies.data.trophies[t];
 
-        const updatedTrophy = await updateTrophy({
-          gameId: data.gameId,
-          groupId: group.id,
-          trophy,
-        });
-
-        if (!updatedTrophy.data) {
-          updateSuccessful = false;
-          break;
-        }
+        trophiesToUpdate.push(
+          updateTrophy({
+            gameId: data.gameId,
+            groupId: group.id,
+            trophy,
+          }).then((updatedTrophy) => {
+            if (!updatedTrophy.data) {
+              updateSuccessful = false;
+            }
+          }),
+        );
       }
+
+      await Promise.all(trophiesToUpdate);
 
       if (!updateSuccessful) {
         return {

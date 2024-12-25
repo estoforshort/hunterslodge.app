@@ -3,8 +3,6 @@ import { createHash } from "node:crypto";
 import { updateGame } from "./game";
 import dayjs from "dayjs";
 
-import type { Prisma } from "@prisma/client";
-
 type Data = {
   updateId: number;
   profile: {
@@ -60,7 +58,7 @@ export const updateProjectAndStack = async (data: Data) => {
       bronze: 0,
     };
 
-    let streamId = null;
+    let streamId = null as string | null;
 
     if (
       !findProjectWithStack ||
@@ -287,9 +285,9 @@ export const updateProjectAndStack = async (data: Data) => {
         firstTrophyEarnedAt: project.firstTrophyEarnedAt,
         lastTrophyEarnedAt: project.lastTrophyEarnedAt,
         progress: data.project.progress,
-        value: 0 as unknown as Prisma.Decimal,
-        points: 0 as unknown as Prisma.Decimal,
-        streamPoints: 0 as unknown as Prisma.Decimal,
+        value: 0,
+        points: 0,
+        streamPoints: 0,
       };
 
       const stackData = {
@@ -299,13 +297,13 @@ export const updateProjectAndStack = async (data: Data) => {
         definedBronze: data.project.definedTrophies.bronze,
         firstTrophyEarnedAt: stack.firstTrophyEarnedAt,
         lastTrophyEarnedAt: stack.lastTrophyEarnedAt,
-        quality: 0 as unknown as Prisma.Decimal,
+        quality: 0,
         profilesCount: profilesCount,
         timesStarted: timesStarted,
-        rarity: 0 as unknown as Prisma.Decimal,
+        rarity: 0,
         timesCompleted: 0,
         avgProgress: 0,
-        value: 0 as unknown as Prisma.Decimal,
+        value: 0,
       };
 
       const getProjectChange = async () => {
@@ -381,136 +379,136 @@ export const updateProjectAndStack = async (data: Data) => {
         }),
       ]);
 
+      const groupsToUpdate = [];
+
       for (let pg = 0, pgl = projectGroups.length; pg < pgl; pg++) {
         const group = projectGroups[pg];
 
-        const updatedGroup = await updateProjectAndStackGroup({
-          updateId: data.updateId,
-          stackChangeId: createStackChange.id,
-          profilesCount: profilesCount,
-          profile: data.profile,
-          game: {
-            id: stack.gameId,
-            service: data.project.npServiceName,
-          },
-          stack: {
-            id: stack.id,
-            timesStarted,
-          },
-          group,
-        });
+        groupsToUpdate.push(
+          updateProjectAndStackGroup({
+            updateId: data.updateId,
+            stackChangeId: createStackChange.id,
+            profilesCount: profilesCount,
+            profile: data.profile,
+            game: {
+              id: stack.gameId,
+              service: data.project.npServiceName,
+            },
+            stack: {
+              id: stack.id,
+              timesStarted,
+            },
+            group,
+          }).then((updatedGroup) => {
+            if (!updatedGroup.data) {
+              updateSuccessful = false;
+            } else {
+              if (updatedGroup.data.projectGroup.firstTrophyEarnedAt) {
+                if (
+                  !projectData.firstTrophyEarnedAt ||
+                  dayjs(
+                    updatedGroup.data.projectGroup.firstTrophyEarnedAt,
+                  ).isBefore(projectData.firstTrophyEarnedAt)
+                ) {
+                  projectData.firstTrophyEarnedAt = dayjs(
+                    updatedGroup.data.projectGroup.firstTrophyEarnedAt,
+                  ).format() as unknown as Date;
+                }
+              }
 
-        if (!updatedGroup.data) {
-          updateSuccessful = false;
-          break;
-        }
+              if (updatedGroup.data.projectGroup.lastTrophyEarnedAt) {
+                if (
+                  !projectData.lastTrophyEarnedAt ||
+                  dayjs(
+                    updatedGroup.data.projectGroup.lastTrophyEarnedAt,
+                  ).isAfter(projectData.lastTrophyEarnedAt)
+                ) {
+                  projectData.lastTrophyEarnedAt = dayjs(
+                    updatedGroup.data.projectGroup.lastTrophyEarnedAt,
+                  ).format() as unknown as Date;
+                }
+              }
 
-        if (updatedGroup.data.projectGroup.firstTrophyEarnedAt) {
-          if (
-            !projectData.firstTrophyEarnedAt ||
-            dayjs(updatedGroup.data.projectGroup.firstTrophyEarnedAt).isBefore(
-              projectData.firstTrophyEarnedAt,
-            )
-          ) {
-            projectData.firstTrophyEarnedAt = dayjs(
-              updatedGroup.data.projectGroup.firstTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
+              projectData.streamPlatinum +=
+                updatedGroup.data.projectGroup.streamPlatinum;
+              projectData.streamGold +=
+                updatedGroup.data.projectGroup.streamGold;
+              projectData.streamSilver +=
+                updatedGroup.data.projectGroup.streamSilver;
+              projectData.streamBronze +=
+                updatedGroup.data.projectGroup.streamBronze;
 
-        if (updatedGroup.data.projectGroup.lastTrophyEarnedAt) {
-          if (
-            !projectData.lastTrophyEarnedAt ||
-            dayjs(updatedGroup.data.projectGroup.lastTrophyEarnedAt).isAfter(
-              projectData.lastTrophyEarnedAt,
-            )
-          ) {
-            projectData.lastTrophyEarnedAt = dayjs(
-              updatedGroup.data.projectGroup.lastTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
+              if (updatedGroup.data.newStreamTrophies) {
+                newStreamTrophies.platinum +=
+                  updatedGroup.data.newStreamTrophies.platinum;
+                newStreamTrophies.gold +=
+                  updatedGroup.data.newStreamTrophies.gold;
+                newStreamTrophies.silver +=
+                  updatedGroup.data.newStreamTrophies.silver;
+                newStreamTrophies.bronze +=
+                  updatedGroup.data.newStreamTrophies.bronze;
+              }
 
-        projectData.streamPlatinum +=
-          updatedGroup.data.projectGroup.streamPlatinum;
-        projectData.streamGold += updatedGroup.data.projectGroup.streamGold;
-        projectData.streamSilver += updatedGroup.data.projectGroup.streamSilver;
-        projectData.streamBronze += updatedGroup.data.projectGroup.streamBronze;
+              if (updatedGroup.data.streamId && !streamId) {
+                streamId = updatedGroup.data.streamId;
+              }
 
-        if (updatedGroup.data.newStreamTrophies) {
-          newStreamTrophies.platinum +=
-            updatedGroup.data.newStreamTrophies.platinum;
-          newStreamTrophies.gold += updatedGroup.data.newStreamTrophies.gold;
-          newStreamTrophies.silver +=
-            updatedGroup.data.newStreamTrophies.silver;
-          newStreamTrophies.bronze +=
-            updatedGroup.data.newStreamTrophies.bronze;
-        }
+              projectData.value += Number(updatedGroup.data.stackGroup.value);
+              projectData.points += Number(
+                updatedGroup.data.projectGroup.points,
+              );
+              projectData.streamPoints += Number(
+                updatedGroup.data.projectGroup.streamPoints,
+              );
 
-        if (updatedGroup.data.streamId && !streamId) {
-          streamId = updatedGroup.data.streamId;
-        }
+              if (updatedGroup.data.stackGroup.firstTrophyEarnedAt) {
+                if (
+                  !stackData.firstTrophyEarnedAt ||
+                  dayjs(
+                    updatedGroup.data.stackGroup.firstTrophyEarnedAt,
+                  ).isBefore(stackData.firstTrophyEarnedAt)
+                ) {
+                  stackData.firstTrophyEarnedAt = dayjs(
+                    updatedGroup.data.stackGroup.firstTrophyEarnedAt,
+                  ).format() as unknown as Date;
+                }
+              }
 
-        projectData.value = (Math.round(
-          (Number(projectData.value) +
-            Number(updatedGroup.data.stackGroup.value) +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
+              if (updatedGroup.data.stackGroup.lastTrophyEarnedAt) {
+                if (
+                  !stackData.lastTrophyEarnedAt ||
+                  dayjs(
+                    updatedGroup.data.stackGroup.lastTrophyEarnedAt,
+                  ).isAfter(stackData.lastTrophyEarnedAt)
+                ) {
+                  stackData.lastTrophyEarnedAt = dayjs(
+                    updatedGroup.data.stackGroup.lastTrophyEarnedAt,
+                  ).format() as unknown as Date;
+                }
+              }
 
-        projectData.points = (Math.round(
-          (Number(projectData.points) +
-            Number(updatedGroup.data.projectGroup.points) +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-
-        projectData.streamPoints = (Math.round(
-          (Number(projectData.streamPoints) +
-            Number(updatedGroup.data.projectGroup.streamPoints) +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
-
-        if (updatedGroup.data.stackGroup.firstTrophyEarnedAt) {
-          if (
-            !stackData.firstTrophyEarnedAt ||
-            dayjs(updatedGroup.data.stackGroup.firstTrophyEarnedAt).isBefore(
-              stackData.firstTrophyEarnedAt,
-            )
-          ) {
-            stackData.firstTrophyEarnedAt = dayjs(
-              updatedGroup.data.stackGroup.firstTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        if (updatedGroup.data.stackGroup.lastTrophyEarnedAt) {
-          if (
-            !stackData.lastTrophyEarnedAt ||
-            dayjs(updatedGroup.data.stackGroup.lastTrophyEarnedAt).isAfter(
-              stackData.lastTrophyEarnedAt,
-            )
-          ) {
-            stackData.lastTrophyEarnedAt = dayjs(
-              updatedGroup.data.stackGroup.lastTrophyEarnedAt,
-            ).format() as unknown as Date;
-          }
-        }
-
-        stackData.value = (Math.round(
-          (Number(stackData.value) +
-            Number(updatedGroup.data.stackGroup.value) +
-            Number.EPSILON) *
-            100,
-        ) / 100) as unknown as Prisma.Decimal;
+              stackData.value += Number(updatedGroup.data.stackGroup.value);
+            }
+          }),
+        );
       }
+
+      await Promise.all(groupsToUpdate);
 
       if (!updateSuccessful) {
         return {
           data: null,
         };
       }
+
+      projectData.value =
+        Math.round((projectData.value + Number.EPSILON) * 100) / 100;
+      projectData.points =
+        Math.round((projectData.points + Number.EPSILON) * 100) / 100;
+      projectData.streamPoints =
+        Math.round((projectData.streamPoints + Number.EPSILON) * 100) / 100;
+      stackData.value =
+        Math.round((stackData.value + Number.EPSILON) * 100) / 100;
 
       const updateProject = await prisma.project.update({
         where: {
@@ -561,12 +559,13 @@ export const updateProjectAndStack = async (data: Data) => {
       ]);
 
       if (avgQuality._avg.quality) {
-        stackData.quality = avgQuality._avg.quality;
+        stackData.quality = Number(avgQuality._avg.quality);
       }
 
-      stackData.rarity = (Math.round(
-        (profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
-      ) / 100) as unknown as Prisma.Decimal;
+      stackData.rarity =
+        Math.round(
+          (profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
+        ) / 100;
 
       stackData.timesCompleted = timesCompleted;
 
