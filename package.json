@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "nuxt build",
-    "preview": "nuxt preview"
+    "preview": "nuxt preview",
+    "upgrade": "npx nuxi@latest upgrade --force"
   },
   "dependencies": {
     "@nuxt/content": "^2.13.4",
