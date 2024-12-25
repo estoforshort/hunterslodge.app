@@ -39,20 +39,15 @@ export default defineEventHandler(async (event) => {
   }
 
   if (
-    session.user.username !== "darknightghost_47" &&
-    psnProfile.data.profile.onlineId !== "darknightghost47"
+    psnProfile.data.profile.aboutMe.trim().toLowerCase() !==
+    `link:${session.user.username}`
   ) {
-    if (
-      psnProfile.data.profile.aboutMe.trim().toLowerCase() !==
-      `link:${session.user.username}`
-    ) {
-      return {
-        data: {
-          success: false,
-          message: `Please change your About me on PSN temporarily to link:${session.user.username}`,
-        },
-      };
-    }
+    return {
+      data: {
+        success: false,
+        message: `Please change your About me on PSN temporarily to link:${session.user.username}`,
+      },
+    };
   }
 
   if (!psnProfile.data.trophySummary.earnedTrophies.platinum) {
