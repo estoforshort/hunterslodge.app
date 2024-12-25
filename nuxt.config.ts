@@ -29,6 +29,13 @@ export default defineNuxtConfig({
       baseUrl: "",
     },
   },
+  nitro: {
+    storage: {
+      cache: {
+        driver: "redis",
+      },
+    },
+  },
   routeRules: {
     "/api/content.json": { prerender: true },
     "/api/public/**": { cors: true },
