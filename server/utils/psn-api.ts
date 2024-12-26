@@ -525,7 +525,7 @@ const projectGroupTrophies = async (data: ProjectGroupTrophies) => {
     }
 
     const fetchProjectGroupTrophies = await fetch(
-      `${variables.BASE_API}/trophy/v1/users/${data.accountId}/npCommunicationIds/${data.npCommunicationId}/trophyGroups/${data.trophyGroupId}/trophies?npServiceName=${data.npServiceName}`,
+      `${variables.BASE_API}/trophy/v1/users/${data.accountId}/npCommunicationIds/${data.npCommunicationId}/trophyGroups/${data.trophyGroupId === "000" ? "default" : data.trophyGroupId}/trophies?npServiceName=${data.npServiceName}`,
       {
         headers: {
           Authorization: `Bearer ${tokens.data.accessToken}`,
@@ -665,7 +665,7 @@ const gameGroupTrophies = async (data: GameGroupTrophies) => {
     }
 
     const fetchGameGroupTrophies = await fetch(
-      `${variables.BASE_API}/trophy/v1/npCommunicationIds/${data.npCommunicationId}/trophyGroups/${data.trophyGroupId}/trophies?npServiceName=${data.npServiceName}`,
+      `${variables.BASE_API}/trophy/v1/npCommunicationIds/${data.npCommunicationId}/trophyGroups/${data.trophyGroupId === "000" ? "default" : data.trophyGroupId}/trophies?npServiceName=${data.npServiceName}`,
       {
         headers: {
           Authorization: `Bearer ${tokens.data.accessToken}`,
