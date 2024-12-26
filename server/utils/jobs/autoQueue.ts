@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 export const runAutoQueue = async () => {
   try {
-    const [appSettings, profiles, profilesCount] = await Promise.all([
+    const [appSettings, profiles] = await Promise.all([
       prisma.appSettings.findUniqueOrThrow({
         select: { updatesEnabled: true },
         where: { appId: "app" },
@@ -37,7 +37,6 @@ export const runAutoQueue = async () => {
           id: "asc",
         },
       }),
-      prisma.profile.count(),
     ]);
 
     if (!appSettings.updatesEnabled) {
@@ -49,7 +48,7 @@ export const runAutoQueue = async () => {
 
       if (
         dayjs().isAfter(dayjs(profile.lastFullUpdateAt).add(7, "days")) ||
-        profile.profilesCount !== profilesCount
+        profile.profilesCount !== profiles.length
       ) {
         const [hasQueuedUpdate, initialUpdate] = await Promise.all([
           prisma.update.count({
@@ -102,7 +101,7 @@ export const runAutoQueue = async () => {
                 silver: psnProfile.data.trophySummary.earnedTrophies.silver,
                 bronze: psnProfile.data.trophySummary.earnedTrophies.bronze,
                 lastCheckedAt: dayjs().format(),
-                profilesCount,
+                profilesCount: profiles.length,
               },
             });
 

@@ -1,3 +1,5 @@
+import { runAutoQueue } from "./autoQueue";
+
 export const runRankings = async () => {
   try {
     const [regions, profiles, streamers] = await Promise.all([

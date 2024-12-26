@@ -1,3 +1,5 @@
+import { runUpdate } from "./jobs/update";
+import { runRankings } from "./jobs/rank";
 import { Queue, Worker } from "bullmq";
 
 import type { UpdateType } from "@prisma/client";
