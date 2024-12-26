@@ -806,7 +806,7 @@ model StackChange {
 
 model StackGroupChange {
   stackChangeId String      @db.Char(36)
-  stackChange   StackChange @relation(fields: [stackChangeId], references: [id])
+  stackChange   StackChange @relation(fields: [stackChangeId], references: [id], onDelete: Cascade)
 
   stackId    String     @db.VarChar(36)
   groupId    String     @db.Char(3)
@@ -841,7 +841,7 @@ model StackTrophyChange {
   stackChangeId    String           @db.Char(36)
   stackId          String           @db.VarChar(36)
   groupId          String           @db.Char(3)
-  stackGroupChange StackGroupChange @relation(fields: [stackChangeId, stackId, groupId], references: [stackChangeId, stackId, groupId])
+  stackGroupChange StackGroupChange @relation(fields: [stackChangeId, stackId, groupId], references: [stackChangeId, stackId, groupId], onDelete: Cascade)
 
   trophyId    Int         @db.UnsignedSmallInt
   StackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])

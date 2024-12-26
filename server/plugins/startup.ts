@@ -15,5 +15,5 @@ export default defineNitroPlugin(async () => {
     });
   }
 
-  worker.run();
+  await worker.run();
 });

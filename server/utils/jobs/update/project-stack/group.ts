@@ -534,6 +534,27 @@ export const updateProjectAndStackGroup = async (data: Data) => {
       await Promise.all(trophiesToUpdate);
 
       if (!updateSuccessful) {
+        await Promise.all([
+          await prisma.projectGroupChange.delete({
+            where: {
+              updateId_stackId_groupId: {
+                updateId: createProjectGroupChange.updateId,
+                stackId: createProjectGroupChange.stackId,
+                groupId: createProjectGroupChange.groupId,
+              },
+            },
+          }),
+          await prisma.stackGroupChange.delete({
+            where: {
+              stackChangeId_stackId_groupId: {
+                stackChangeId: createStackGroupChange.stackChangeId,
+                stackId: createStackGroupChange.stackId,
+                groupId: createStackGroupChange.groupId,
+              },
+            },
+          }),
+        ]);
+
         return {
           data: null,
         };
