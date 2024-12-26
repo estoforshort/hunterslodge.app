@@ -25,6 +25,7 @@ export const runUpdate = async (updateId: number) => {
         },
         status: true,
         fullUpdate: true,
+        startedAt: true,
         startedProjectsFrom: true,
         completedProjectsFrom: true,
         definedPlatinumFrom: true,
@@ -56,7 +57,7 @@ export const runUpdate = async (updateId: number) => {
       where: { id: update.id },
       data: {
         status: "RUNNING",
-        startedAt: dayjs().format(),
+        startedAt: update.startedAt ?? dayjs().format(),
       },
     });
 
