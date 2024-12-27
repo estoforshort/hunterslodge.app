@@ -165,7 +165,10 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             },
             where: {
               stackId: data.stack.id,
-              groupId: data.group.trophyGroupId,
+              groupId:
+                data.group.trophyGroupId === "default"
+                  ? "000"
+                  : data.group.trophyGroupId,
             },
             orderBy: { trophyId: "asc" },
           }),
@@ -177,7 +180,10 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             where: {
               profileId: data.profile.id,
               stackId: data.stack.id,
-              groupId: data.group.trophyGroupId,
+              groupId:
+                data.group.trophyGroupId === "default"
+                  ? "000"
+                  : data.group.trophyGroupId,
             },
             orderBy: { trophyId: "asc" },
           }),
