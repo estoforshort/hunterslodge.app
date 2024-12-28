@@ -74,7 +74,7 @@ const { user } = useUserSession();
       <UForm :schema :state="body" class="space-y-4" @submit="onSubmit">
         <UFormGroup
           name="onlineId"
-          :description="`Before proceeding with the linking process, please make sure to change your About me on PSN temporarily to link:${user?.username}. You can change it back once we are done here.`"
+          :description="`Before proceeding with the linking process, please make sure to change your About me on PSN temporarily to link:${user?.id}. You can change it back once we are done here.`"
         >
           <UInput v-model="body.onlineId" placeholder="PSN Username" />
         </UFormGroup>

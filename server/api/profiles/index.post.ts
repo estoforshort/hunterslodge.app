@@ -40,12 +40,12 @@ export default defineEventHandler(async (event) => {
 
   if (
     psnProfile.data.profile.aboutMe.trim().toLowerCase() !==
-    `link:${session.user.username}`
+    `link:${session.user.id}`
   ) {
     return {
       data: {
         success: false,
-        message: `Please change your About me on PSN temporarily to link:${session.user.username}`,
+        message: `Please change your About me on PSN temporarily to link:${session.user.id}`,
       },
     };
   }
