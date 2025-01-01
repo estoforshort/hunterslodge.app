@@ -105,10 +105,9 @@ export default defineCachedEventHandler(
     ]);
 
     if (!findOverlay) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Not Found",
-      });
+      return {
+        data: [],
+      };
     }
 
     const twitchStream = await twitch.streams.getStreamByUserId(
