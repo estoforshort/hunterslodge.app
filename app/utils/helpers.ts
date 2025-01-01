@@ -1,18 +1,14 @@
 export const ordinal = (i: number) => {
-  const j = i % 10,
-    k = i % 100;
+  if (i > 13) const j = i % 10;
 
-  if (j === 1 && k !== 11) {
-    return i + "st";
+  switch (j) {
+    case 1:
+      return i + "st";
+    case 2:
+      return i + "nd";
+    case 3:
+      return i + "rd";
+    case default:
+      return i + "th";
   }
-
-  if (j === 2 && k !== 12) {
-    return i + "nd";
-  }
-
-  if (j === 3 && k !== 13) {
-    return i + "rd";
-  }
-
-  return i + "th";
 };
