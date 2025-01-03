@@ -1,5 +1,9 @@
 export const ordinal = (i: number) => {
-  if (i > 13) const j = i % 10;
+  let j = i;
+
+  if (j > 13) {
+    j = j % 10;
+  }
 
   switch (j) {
     case 1:
@@ -8,7 +12,7 @@ export const ordinal = (i: number) => {
       return i + "nd";
     case 3:
       return i + "rd";
-    case default:
+    default:
       return i + "th";
   }
 };
