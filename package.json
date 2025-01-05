@@ -27,7 +27,7 @@
     "format-thousands": "^2.0.0",
     "fuse.js": "^7.0.0",
     "node-fetch": "^3.3.2",
-    "nuxt": "^3.15.0",
+    "nuxt": "^3.15.1",
     "nuxt-auth-utils": "^0.5.0",
     "nuxt-authorization": "^0.3.0",
     "zod": "^3.23.8"
