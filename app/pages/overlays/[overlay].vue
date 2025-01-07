@@ -17,7 +17,7 @@ useSeoMeta({
 
 const route = useRoute();
 
-const { data: overlay, refresh } = await useFetch(
+const { data: overlay, refresh: refreshOverlay } = await useFetch(
   `/api/public/v1/overlays/${route.params.overlay}`,
   {
     transform: (overlay) => {
@@ -58,13 +58,10 @@ const { data: overlay, refresh } = await useFetch(
                 overlay.data.project.earnedGold +
                 overlay.data.project.earnedSilver +
                 overlay.data.project.earnedBronze,
-              earnedStreamTrophies:
-                overlay.data.project.streamPlatinum +
-                overlay.data.project.streamGold +
-                overlay.data.project.streamSilver +
-                overlay.data.project.streamBronze,
               progress: overlay.data.project.progress,
-              streamPoints: overlay.data.project.streamPoints,
+              value: Number(overlay.data.project.value),
+              points: Number(overlay.data.project.points),
+              streamPoints: Number(overlay.data.project.streamPoints),
               timeStreamed: overlay.data.project.timeStreamed,
             }
           : null,
@@ -73,9 +70,61 @@ const { data: overlay, refresh } = await useFetch(
   },
 );
 
+const { data: streamers, refresh: refreshStreamers } = await useFetch(
+  "/api/public/v1/profiles",
+  {
+    query: { orderBy: "streamPosition", direction: "asc", onlyStreamers: true },
+    transform: (streamers) => {
+      return streamers.data.map((streamer) => ({
+        points: Number(streamer.streamPoints),
+        position: streamer.streamPosition,
+      }));
+    },
+  },
+);
+
+const pointsBehind = ref(0);
+const pointsAhead = ref(0);
+
 onMounted(() => {
   setInterval(async () => {
-    await refresh();
+    await refreshOverlay();
+
+    if (overlay.value?.style === "streamer") {
+      await refreshStreamers();
+
+      if (overlay.value?.profile && streamers.value) {
+        if (overlay.value.profile.streamPosition > 1) {
+          const personAhead = streamers.value.find(
+            (p) => p.position === overlay.value!.profile.streamPosition - 1,
+          );
+
+          if (personAhead) {
+            pointsBehind.value =
+              Math.round(
+                (personAhead.points -
+                  Number(overlay.value?.profile.streamPoints)) *
+                  100,
+              ) / 100;
+          }
+        }
+
+        if (overlay.value.profile.streamPosition < streamers.value.length) {
+          const personBehind = streamers.value.find(
+            (p) => p.position === overlay.value!.profile.streamPosition + 1,
+          );
+
+          if (personBehind) {
+            pointsAhead.value =
+              Math.round(
+                (Number(overlay.value?.profile.streamPoints) -
+                  personBehind.points) *
+                  100,
+              ) / 100;
+          }
+        }
+      }
+    }
   }, 5000);
 });
 </script>
@@ -99,32 +148,35 @@ onMounted(() => {
 
       <UIcon v-else name="i-bi-trophy" class="my-auto me-2 h-5 w-5" />
 
-      <span v-if="overlay.style === 'default'" class="my-auto me-6">
+      <span class="my-auto me-6">
         {{ formatThousands(overlay.project.earnedTrophies, ",") }}/{{
           formatThousands(overlay.project.definedTrophies, ",")
         }}
         ({{ overlay.project.progress }}%)
       </span>
 
-      <span v-if="overlay.style === 'streamer'" class="my-auto me-6">
-        {{ formatThousands(overlay.project.earnedStreamTrophies, ",") }}/{{
-          formatThousands(overlay.project.earnedTrophies, ",")
-        }}/{{ formatThousands(overlay.project.definedTrophies, ",") }} ({{
-          overlay.project.progress
-        }}%)
-      </span>
-
       <UIcon
         v-if="overlay.style === 'streamer'"
-        name="i-bi-p-circle-fill"
+        name="i-bi-piggy-bank-fill"
         class="my-auto me-2 h-5 w-5"
       />
       <span v-if="overlay.style === 'streamer'" class="my-auto me-6">
-        {{ formatThousands(overlay.project.streamPoints, ",") }}
+        {{ overlay.project.progress !== 100 ? "≈" : ""
+        }}{{
+          formatThousands(
+            Math.round((overlay.project.value - overlay.project.points) * 100) /
+              100,
+            ",",
+          )
+        }}
       </span>
 
-      <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
-      <span class="my-auto">
+      <UIcon
+        v-if="overlay.style !== 'streamer'"
+        name="i-bi-clock-history"
+        class="my-auto me-2 h-5 w-5"
+      />
+      <span v-if="overlay.style !== 'streamer'" class="my-auto">
         {{
           Math.round(
             dayjs
@@ -207,73 +259,29 @@ onMounted(() => {
       v-if="overlay.style === 'streamer'"
       class="ms-2 flex text-center font-mono text-xl font-semibold text-white"
     >
-      <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
-      <span class="my-auto me-6">
-        {{
-          Math.round(
-            dayjs
-              .duration(overlay.profile.timeStreamed, "seconds")
-              .as("hours") * 10,
-          ) / 10
-        }}h
-      </span>
+      <span v-if="overlay.profile.streamPosition" class="my-auto">
+        <div v-if="streamers" class="align-middle font-mono">
+          <span v-if="pointsBehind" class="me-6 align-middle text-red-400">
+            <UBadge color="red" variant="soft" class="align-middle text-sm">
+              {{ ordinal(overlay.profile.streamPosition - 1) }}
+            </UBadge>
+            +{{ formatThousands(pointsBehind, ",") }}</span
+          >
 
-      <UIcon
-        v-if="overlay.profile.streamPosition"
-        name="i-bi-p-circle-fill"
-        class="my-auto me-2 h-5 w-5"
-      />
-      <span v-if="overlay.profile.streamPosition" class="my-auto me-6">
-        {{ formatThousands(overlay.profile.streamPoints, ",") }}
-        ({{ ordinal(overlay.profile.streamPosition) }})
-      </span>
+          <span class="align-middle" :class="pointsAhead ? 'me-6' : 'me-2'">
+            <UBadge color="black" variant="soft" class="align-middle text-sm">
+              {{ ordinal(overlay.profile.streamPosition) }}
+            </UBadge>
+            {{ formatThousands(overlay.profile.streamPoints, ",") }}
+          </span>
 
-      <UIcon
-        v-if="overlay.profile.streamPlatinum"
-        name="i-bi-trophy-fill"
-        class="my-auto me-2 h-5 w-5 text-sky-300"
-      />
-      <span
-        v-if="overlay.profile.streamPlatinum"
-        class="my-auto me-6 text-sky-300"
-      >
-        {{ formatThousands(overlay.profile.streamPlatinum, ",") }}
-      </span>
-
-      <UIcon
-        v-if="overlay.profile.streamGold"
-        name="i-bi-trophy-fill"
-        class="my-auto me-2 h-5 w-5 text-yellow-400"
-      />
-      <span
-        v-if="overlay.profile.streamGold"
-        class="my-auto me-6 text-yellow-400"
-      >
-        {{ formatThousands(overlay.profile.streamGold, ",") }}
-      </span>
-
-      <UIcon
-        v-if="overlay.profile.streamSilver"
-        name="i-bi-trophy-fill"
-        class="my-auto me-2 h-5 w-5 text-gray-300"
-      />
-      <span
-        v-if="overlay.profile.streamSilver"
-        class="my-auto me-6 text-gray-300"
-      >
-        {{ formatThousands(overlay.profile.streamSilver, ",") }}
-      </span>
-
-      <UIcon
-        v-if="overlay.profile.streamBronze"
-        name="i-bi-trophy-fill"
-        class="my-auto me-2 h-5 w-5 text-orange-500"
-      />
-      <span
-        v-if="overlay.profile.streamBronze"
-        class="my-auto me-2 text-orange-500"
-      >
-        {{ formatThousands(overlay.profile.streamBronze, ",") }}
+          <span v-if="pointsAhead" class="me-2 align-middle text-green-500">
+            <UBadge color="green" variant="soft" class="align-middle text-sm">
+              {{ ordinal(overlay.profile.streamPosition + 1) }}
+            </UBadge>
+            -{{ formatThousands(pointsAhead, ",") }}
+          </span>
+        </div>
       </span>
     </div>
   </figure>

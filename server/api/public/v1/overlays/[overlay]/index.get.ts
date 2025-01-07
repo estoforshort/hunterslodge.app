@@ -89,6 +89,7 @@ export default defineCachedEventHandler(
               streamSilver: true,
               streamBronze: true,
               progress: true,
+              value: true,
               points: true,
               streamPoints: true,
               timeStreamed: true,
@@ -106,7 +107,7 @@ export default defineCachedEventHandler(
 
     if (!findOverlay) {
       return {
-        data: [],
+        data: null,
       };
     }
 
