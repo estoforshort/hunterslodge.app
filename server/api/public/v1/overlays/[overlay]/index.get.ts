@@ -89,6 +89,7 @@ export default defineCachedEventHandler(
               streamSilver: true,
               streamBronze: true,
               progress: true,
+              value: true,
               points: true,
               streamPoints: true,
               timeStreamed: true,
@@ -105,10 +106,9 @@ export default defineCachedEventHandler(
     ]);
 
     if (!findOverlay) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Not Found",
-      });
+      return {
+        data: null,
+      };
     }
 
     const twitchStream = await twitch.streams.getStreamByUserId(
