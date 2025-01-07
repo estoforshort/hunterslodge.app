@@ -126,10 +126,12 @@ onMounted(() => {
       <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
       <span class="my-auto">
         {{
-          dayjs
-            .duration(overlay.project.timeStreamed, "seconds")
-            .format("HH:mm")
-        }}
+          Math.round(
+            dayjs
+              .duration(overlay.project.timeStreamed, "seconds")
+              .as("hours") * 10,
+          ) / 10
+        }}h
       </span>
     </div>
 
@@ -208,10 +210,12 @@ onMounted(() => {
       <UIcon name="i-bi-clock-history" class="my-auto me-2 h-5 w-5" />
       <span class="my-auto me-6">
         {{
-          dayjs
-            .duration(overlay.profile.timeStreamed, "seconds")
-            .format("HH:mm")
-        }}
+          Math.round(
+            dayjs
+              .duration(overlay.profile.timeStreamed, "seconds")
+              .as("hours") * 10,
+          ) / 10
+        }}h
       </span>
 
       <UIcon

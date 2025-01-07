@@ -167,7 +167,11 @@ const { data: profile } = await useFetch(
     >
       <UCard>
         <p class="text-lg font-bold">
-          {{ dayjs.duration(profile.timeStreamed, "seconds").format("H") }}
+          {{
+            Math.round(
+              dayjs.duration(profile.timeStreamed, "seconds").as("hours") * 10,
+            ) / 10
+          }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream hours</p>
       </UCard>
