@@ -1,3 +1,4 @@
+import { fileTypeFromBuffer } from "file-type";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
@@ -24,7 +25,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const fileType = await fileTypeFromBuffer(findImage.image);
+
   appendResponseHeaders(event, {
+    "content-type": fileType?.mime,
     "cache-control": "max-age=604800",
   });
 
