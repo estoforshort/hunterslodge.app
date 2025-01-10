@@ -12,12 +12,6 @@ export default defineEventHandler(async (event) => {
     select: {
       gameId: true,
       groupId: true,
-      gameGroup: {
-        select: {
-          name: true,
-          imageUrl: true,
-        },
-      },
       definedPlatinum: true,
       definedGold: true,
       definedSilver: true,

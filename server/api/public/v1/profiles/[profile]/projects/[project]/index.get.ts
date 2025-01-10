@@ -10,35 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const data = await prisma.project.findUnique({
     select: {
-      stack: {
-        select: {
-          id: true,
-          game: {
-            select: {
-              id: true,
-              name: true,
-              imageUrl: true,
-              platforms: {
-                select: {
-                  platformId: true,
-                },
-              },
-            },
-          },
-          definedPlatinum: true,
-          definedGold: true,
-          definedSilver: true,
-          definedBronze: true,
-          firstTrophyEarnedAt: true,
-          lastTrophyEarnedAt: true,
-          quality: true,
-          timesStarted: true,
-          rarity: true,
-          timesCompleted: true,
-          avgProgress: true,
-          value: true,
-        },
-      },
+      stackId: true,
       earnedPlatinum: true,
       earnedGold: true,
       earnedSilver: true,

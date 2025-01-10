@@ -10,23 +10,8 @@ export default defineEventHandler(async (event) => {
   const data = await prisma.profile.findUnique({
     select: {
       id: true,
-      user: {
-        select: {
-          id: true,
-          username: true,
-          displayName: true,
-          imageUrl: true,
-          isAdmin: true,
-          isFounder: true,
-          createdAt: true,
-        },
-      },
-      region: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
+      userId: true,
+      regionId: true,
       accountId: true,
       onlineId: true,
       imageUrl: true,

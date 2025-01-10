@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     pageSize: z.number({ coerce: true }).positive().int().max(100).optional(),
     orderBy: z.enum(orderBy).optional(),
     direction: z.enum(["asc", "desc"]).optional(),
-    onlyStreamers: z.boolean({ coerce: true }).optional(),
+    onlyStreamers: z.enum(["true", "false"]).optional(),
   });
 
   const query = await getValidatedQuery(event, querySchema.parse);
@@ -47,23 +47,8 @@ export default defineEventHandler(async (event) => {
     prisma.profile.findMany({
       select: {
         id: true,
-        user: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            imageUrl: true,
-            isAdmin: true,
-            isFounder: true,
-            createdAt: true,
-          },
-        },
-        region: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        userId: true,
+        regionId: true,
         accountId: true,
         onlineId: true,
         imageUrl: true,
@@ -95,19 +80,19 @@ export default defineEventHandler(async (event) => {
         createdAt: true,
       },
       where: {
-        lastFullUpdateAt: { not: null },
-        streamPoints: { gte: query.onlyStreamers ? 0.01 : 0 },
+        globalPosition: { gte: 1 },
+        streamPoints: { gte: query.onlyStreamers === "true" ? 0.01 : 0 },
       },
       skip: Math.floor((page - 1) * pageSize),
       take: pageSize,
       orderBy: {
-        [query.orderBy ?? "points"]: query.direction ?? "desc",
+        [query.orderBy ?? "globalPosition"]: query.direction ?? "asc",
       },
     }),
     prisma.profile.count({
       where: {
-        lastFullUpdateAt: { not: null },
-        streamPoints: { gte: query.onlyStreamers ? 0.01 : 0 },
+        globalPosition: { gt: 0 },
+        streamPoints: { gte: query.onlyStreamers === "true" ? 0.01 : 0 },
       },
     }),
   ]);

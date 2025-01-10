@@ -13,31 +13,13 @@ export default defineEventHandler(async (event) => {
     select: {
       trophies: {
         select: {
-          stackTrophy: {
-            select: {
-              gameTrophy: {
-                select: {
-                  gameId: true,
-                  groupId: true,
-                  id: true,
-                  type: true,
-                  name: true,
-                  description: true,
-                  imageUrl: true,
-                },
-              },
-              firstEarnedAt: true,
-              lastEarnedAt: true,
-              psnRate: true,
-              quality: true,
-              timesEarned: true,
-              rarity: true,
-              value: true,
-            },
-          },
+          stackId: true,
+          groupId: true,
+          trophyId: true,
           streamId: true,
           earnedAt: true,
           points: true,
+          createdAt: true,
         },
         orderBy: { trophyId: "asc" },
       },

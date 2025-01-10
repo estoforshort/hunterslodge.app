@@ -12,28 +12,8 @@ export default defineEventHandler(async (event) => {
     select: {
       groups: {
         select: {
-          stackGroup: {
-            select: {
-              gameGroup: {
-                select: {
-                  gameId: true,
-                  id: true,
-                  name: true,
-                  imageUrl: true,
-                },
-              },
-              definedPlatinum: true,
-              definedGold: true,
-              definedSilver: true,
-              definedBronze: true,
-              firstTrophyEarnedAt: true,
-              lastTrophyEarnedAt: true,
-              quality: true,
-              timesCompleted: true,
-              avgProgress: true,
-              value: true,
-            },
-          },
+          stackId: true,
+          groupId: true,
           earnedPlatinum: true,
           earnedGold: true,
           earnedSilver: true,
@@ -47,6 +27,7 @@ export default defineEventHandler(async (event) => {
           progress: true,
           points: true,
           streamPoints: true,
+          createdAt: true,
         },
         orderBy: { groupId: "asc" },
       },

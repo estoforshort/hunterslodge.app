@@ -15,15 +15,6 @@ export default defineEventHandler(async (event) => {
           gameId: true,
           groupId: true,
           trophyId: true,
-          gameTrophy: {
-            select: {
-              id: true,
-              type: true,
-              name: true,
-              description: true,
-              imageUrl: true,
-            },
-          },
           firstEarnedAt: true,
           lastEarnedAt: true,
           quality: true,
