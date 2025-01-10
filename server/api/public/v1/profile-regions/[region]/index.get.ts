@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async (event) => {
   const paramsSchema = z.object({
     region: z.string().length(2),
   });
