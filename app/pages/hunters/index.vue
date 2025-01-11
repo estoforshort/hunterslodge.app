@@ -21,6 +21,7 @@ const { data: hunters } = await useFetch("/api/public/v1/profiles", {
         earnedSilver: hunter.earnedSilver,
         earnedBronze: hunter.earnedBronze,
         points: formatThousands(hunter.points, ","),
+        streamerPoints: Number(hunter.streamPoints),
         globalPosition: hunter.globalPosition,
       })),
       page: hunters.page,
@@ -74,7 +75,11 @@ const columns = [
           </template>
 
           <template #hunter-data="{ row }">
-            <CompactUserInfo :user-id="row.userId" :region-id="row.regionId" />
+            <CompactUserInfo
+              :user-id="row.userId"
+              :region-id="row.regionId"
+              :streamer-points="row.streamerPoints"
+            />
           </template>
 
           <template #earnedPlatinum-data="{ row }">

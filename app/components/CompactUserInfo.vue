@@ -2,6 +2,7 @@
 const props = defineProps<{
   userId: string;
   regionId: string;
+  streamerPoints: number;
 }>();
 
 const { data: user } = await useFetch(`/api/public/v1/users/${props.userId}`, {
@@ -13,6 +14,7 @@ const { data: user } = await useFetch(`/api/public/v1/users/${props.userId}`, {
     return {
       id: user.data.id,
       displayName: user.data.displayName,
+      isAdimin: user.data.isAdmin,
       isFounder: user.data.isFounder,
       profileId: user.data.profile?.id,
     };
@@ -40,20 +42,51 @@ const config = useRuntimeConfig();
 
 <template>
   <div v-if="user && region" class="flex items-center gap-3">
-    <UTooltip :text="user.isFounder ? 'Founder' : ''" :popper="{ arrow: true }">
+    <UTooltip
+      :text="
+        user.isAdimin
+          ? 'Administrator'
+          : user.isFounder
+            ? 'Founder'
+            : streamerPoints > 0
+              ? 'Streamer'
+              : ''
+      "
+      :popper="{ arrow: true }"
+    >
       <UChip
-        color="yellow"
+        :color="
+          user.isAdimin
+            ? 'red'
+            : user.isFounder
+              ? 'yellow'
+              : streamerPoints > 0
+                ? 'primary'
+                : 'gray'
+        "
         position="top-left"
-        text="F"
+        :text="
+          user.isAdimin
+            ? 'A'
+            : user.isFounder
+              ? 'F'
+              : streamerPoints > 0
+                ? 'S'
+                : ''
+        "
         size="xl"
-        :show="user.isFounder"
+        :show="user.isAdimin || user.isFounder || streamerPoints > 0"
       >
         <div
           class="bg-cool-200 dark:bg-cool-800 rounded"
           :class="
-            user.isFounder
-              ? 'border-2 border-yellow-500 dark:border-yellow-400'
-              : ''
+            user.isAdimin
+              ? 'border-2 border-red-500 dark:border-red-400'
+              : user.isFounder
+                ? 'border-2 border-yellow-500 dark:border-yellow-400'
+                : streamerPoints > 0
+                  ? 'border-primary dark:border-primary border-2'
+                  : ''
           "
         >
           <NuxtLink :to="`/hunters/${user.profileId}`">
