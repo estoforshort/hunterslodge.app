@@ -1,7 +1,16 @@
 import { z } from "zod";
 
 export default defineCachedEventHandler(async (event) => {
-  const orderBy = ["createdAt"] as const;
+  const orderBy = [
+    "name",
+    "earnedPlatinum",
+    "earnedGold",
+    "earnedSilver",
+    "earnedBronze",
+    "points",
+    "position",
+    "createdAt",
+  ] as const;
 
   const querySchema = z.object({
     orderBy: z.enum(orderBy).optional(),
