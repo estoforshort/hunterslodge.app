@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@nuxt/eslint",
     "nuxt-auth-utils",
-    "nuxt-authorization",
     "@nuxt/image",
     "@nuxt/content",
   ],
