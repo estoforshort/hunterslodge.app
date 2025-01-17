@@ -38,7 +38,6 @@ export default defineNuxtConfig({
   },
   routeRules: {
     "/api/content.json": { prerender: true },
-    "/api/public/**": { cors: true },
     "/docs": { redirect: "/docs/getting-started", prerender: false },
   },
   image: {
