@@ -1,8 +1,4 @@
-import { updateSettings } from "~/utils/abilities/app-settings";
-
-export default defineEventHandler(async (event) => {
-  await authorize(event, updateSettings);
-
+export default defineEventHandler(async () => {
   const data = await prisma.appSettings.findUniqueOrThrow({
     select: {
       overlaysEnabled: true,

@@ -1,8 +1,14 @@
-import { updateSettings } from "~/utils/abilities/app-settings";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
-  await authorize(event, updateSettings);
+  const session = await requireUserSession(event);
+
+  if (!session.user.isAdmin) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
 
   const bodySchema = z.object({
     overlaysEnabled: z.boolean(),

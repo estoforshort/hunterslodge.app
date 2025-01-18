@@ -1,9 +1,15 @@
-import { updateTokens } from "~/utils/abilities/app-tokens";
 import dayjs from "dayjs";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
-  await authorize(event, updateTokens);
+  const session = await requireUserSession(event);
+
+  if (!session.user.isAdmin) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
 
   const bodySchema = z.object({
     npsso: z.string().min(1),

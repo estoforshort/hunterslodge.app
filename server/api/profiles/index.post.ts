@@ -1,4 +1,3 @@
-import { linkProfile } from "~/utils/abilities/profiles";
 import { getName } from "country-list";
 import fetch from "node-fetch";
 import dayjs from "dayjs";
@@ -6,7 +5,13 @@ import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
-  await authorize(event, linkProfile);
+
+  if (session.user.profileId) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
 
   const appSettings = await prisma.appSettings.findUniqueOrThrow({
     select: { linkingEnabled: true },
@@ -55,7 +60,7 @@ export default defineEventHandler(async (event) => {
       data: {
         success: false,
         message:
-          "To join Hunters Lodge, you need have at least 1 platinum on your profile",
+          "To join the Lodge, you need to earn at least one platinum trophy first",
       },
     };
   }
@@ -77,7 +82,7 @@ export default defineEventHandler(async (event) => {
     return {
       data: {
         success: false,
-        message: "Profile already linked by an other user",
+        message: "PSN already linked by an other user",
       },
     };
   }
@@ -180,7 +185,7 @@ export default defineEventHandler(async (event) => {
   return {
     data: {
       success: true,
-      message: "Profile successfully linked. Welcome to Hunters Lodge!",
+      message: "PSN successfully linked. Welcome to the Lodge, Hunter!",
     },
   };
 });

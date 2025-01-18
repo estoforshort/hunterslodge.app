@@ -1,9 +1,14 @@
-import { manageOverlay } from "~/utils/abilities/overlay";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
-  await authorize(event, manageOverlay);
+
+  if (!session.user.profileId) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
 
   const style = ["default", "streamer"] as const;
 
