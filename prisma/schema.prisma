@@ -167,6 +167,9 @@ model Profile {
 
   @@index([regionId, regionalPosition])
   @@index([lastFullUpdateAt])
+  @@index([streamPoints])
+  @@index([timeStreamed])
+  @@index([streamPosition])
 }
 
 model ProfileImage {
@@ -669,6 +672,7 @@ model ProjectTrophy {
 
   @@id([profileId, stackId, groupId, trophyId])
   @@index([profileId, stackId, groupId])
+  @@index([streamId])
 }
 
 model ProjectChange {
