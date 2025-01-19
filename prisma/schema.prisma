@@ -104,6 +104,8 @@ model ProfileRegion {
   profiles        Profile[]
   changes         ProfileRegionChange[]
   positionChanges ProfileRegionPositionChange[]
+
+  @@index([position])
 }
 
 model Profile {
