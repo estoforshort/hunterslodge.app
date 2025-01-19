@@ -9,7 +9,7 @@ const route = useRoute();
 const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
 const pageSize = 50;
 
-const { data: hunters } = await useFetch("/api/public/v1/profiles", {
+const { data: hunters } = await useFetch("/api/profiles", {
   query: { page, pageSize },
   transform: (hunters) => {
     return {

@@ -5,33 +5,41 @@ const props = defineProps<{
   streamerPoints: number;
 }>();
 
-const { data: user } = await useFetch(`/api/public/v1/users/${props.userId}`, {
+const { data: user } = await useFetch(`/api/users/${props.userId}`, {
   transform: (user) => {
     if (!user.data) {
-      return null;
+      return {
+        data: null,
+      };
     }
 
     return {
-      id: user.data.id,
-      displayName: user.data.displayName,
-      isAdimin: user.data.isAdmin,
-      isFounder: user.data.isFounder,
-      profileId: user.data.profile?.id,
+      data: {
+        id: user.data.id,
+        displayName: user.data.displayName,
+        isAdimin: user.data.isAdmin,
+        isFounder: user.data.isFounder,
+        profileId: user.data.profile?.id,
+      },
     };
   },
 });
 
 const { data: region } = await useFetch(
-  `/api/public/v1/profile-regions/${props.regionId}`,
+  `/api/profile-regions/${props.regionId}`,
   {
     transform: (region) => {
       if (!region.data) {
-        return null;
+        return {
+          data: null,
+        };
       }
 
       return {
-        id: region.data.id,
-        name: region.data.name,
+        data: {
+          id: region.data.id,
+          name: region.data.name,
+        },
       };
     },
   },
@@ -41,12 +49,12 @@ const config = useRuntimeConfig();
 </script>
 
 <template>
-  <div v-if="user && region" class="flex items-center gap-3">
+  <div v-if="user?.data && region?.data" class="flex items-center gap-3">
     <UTooltip
       :text="
-        user.isAdimin
+        user.data.isAdimin
           ? 'Administrator'
-          : user.isFounder
+          : user.data.isFounder
             ? 'Founder'
             : streamerPoints > 0
               ? 'Streamer'
@@ -56,9 +64,9 @@ const config = useRuntimeConfig();
     >
       <UChip
         :color="
-          user.isAdimin
+          user.data.isAdimin
             ? 'red'
-            : user.isFounder
+            : user.data.isFounder
               ? 'yellow'
               : streamerPoints > 0
                 ? 'primary'
@@ -66,32 +74,32 @@ const config = useRuntimeConfig();
         "
         position="top-left"
         :text="
-          user.isAdimin
+          user.data.isAdimin
             ? 'A'
-            : user.isFounder
+            : user.data.isFounder
               ? 'F'
               : streamerPoints > 0
                 ? 'S'
                 : ''
         "
         size="xl"
-        :show="user.isAdimin || user.isFounder || streamerPoints > 0"
+        :show="user.data.isAdimin || user.data.isFounder || streamerPoints > 0"
       >
         <div
           class="bg-cool-200 dark:bg-cool-800 rounded"
           :class="
-            user.isAdimin
+            user.data.isAdimin
               ? 'border-2 border-red-500 dark:border-red-400'
-              : user.isFounder
+              : user.data.isFounder
                 ? 'border-2 border-yellow-500 dark:border-yellow-400'
                 : streamerPoints > 0
                   ? 'border-primary dark:border-primary border-2'
                   : ''
           "
         >
-          <NuxtLink :to="`/hunters/${user.profileId}`">
+          <NuxtLink :to="`/hunters/${user.data.profileId}`">
             <NuxtImg
-              :src="`${config.public.baseUrl}/images/users/${user.id}`"
+              :src="`${config.public.baseUrl}/api/images/users/${user.data.id}`"
               width="48"
               class="max-h-12 min-h-12 min-w-12 max-w-12 rounded object-contain"
               placeholder
@@ -103,15 +111,15 @@ const config = useRuntimeConfig();
 
     <span>
       <span class="font-semibold">
-        <NuxtLink :to="`/hunters/${user.profileId}`">
-          {{ user.displayName }}
+        <NuxtLink :to="`/hunters/${user.data.profileId}`">
+          {{ user.data.displayName }}
         </NuxtLink>
       </span>
       <br />
       <span>
         <UBadge color="gray" variant="solid" size="sm" class="align-middle">
-          <UIcon :name="`i-circle-flags-${region.id}`" />
-          {{ region.name }}
+          <UIcon :name="`i-circle-flags-${region.data.id}`" />
+          {{ region.data.name }}
         </UBadge>
       </span>
     </span>
