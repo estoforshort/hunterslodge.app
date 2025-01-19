@@ -11,7 +11,35 @@ useSeoMeta({
   title: "Home",
 });
 
-const { data: stats } = await useFetch("/api/statistics");
+const { data: stats } = await useFetch("/api/statistics", {
+  transform: (stats) => {
+    return {
+      data: {
+        stacks: formatThousands(stats.data.stacks, ","),
+        stackTrophies: formatThousands(stats.data.stackTrophies, ","),
+        profiles: formatThousands(stats.data.profiles, ","),
+        streamers: formatThousands(stats.data.streamers, ","),
+        timeStreamed: formatThousands(
+          Math.round(
+            dayjs
+              .duration(stats?.data.timeStreamed ?? 0, "seconds")
+              .as("hours") * 10,
+          ) / 10,
+          ",",
+        ),
+        earnedStreamTrophies: formatThousands(
+          stats.data.earnedStreamTrophies,
+          ",",
+        ),
+        totalEarnedTrophies: formatThousands(
+          stats.data.totalEarnedTrophies,
+          ",",
+        ),
+      },
+    };
+  },
+});
+
 const config = useRuntimeConfig();
 </script>
 
@@ -50,58 +78,49 @@ const config = useRuntimeConfig();
           <ULandingCard
             class="col-span-4 row-span-2"
             icon="i-bi-joystick"
-            :title="formatThousands(stats?.data.stacks, ',')"
+            :title="stats?.data.stacks"
             description="Games tracked"
           />
 
           <ULandingCard
             class="col-span-5 row-span-2"
             icon="i-bi-trophy"
-            :title="formatThousands(stats?.data.stackTrophies, ',')"
+            :title="stats?.data.stackTrophies"
             description="Trophies tracked"
           />
 
           <ULandingCard
             class="col-span-3 row-span-2"
             icon="i-bi-people"
-            :title="stats?.data.profiles.toString()"
+            :title="stats?.data.profiles"
             description="Hunters joined"
           />
 
           <ULandingCard
             class="col-span-5 row-span-2"
             icon="i-bi-twitch"
-            :title="stats?.data.streamers.toString()"
+            :title="stats?.data.streamers"
             description="Streamers"
           />
 
           <ULandingCard
             class="col-span-7 row-span-2"
             icon="i-bi-hourglass-split"
-            :title="
-              formatThousands(
-                Math.round(
-                  dayjs
-                    .duration(stats?.data.timeStreamed ?? 0, 'seconds')
-                    .as('hours') * 10,
-                ) / 10,
-                ',',
-              )
-            "
+            :title="stats?.data.timeStreamed"
             description="Hours streamed"
           />
 
           <ULandingCard
             class="col-span-4 row-span-2"
             icon="i-bi-trophy"
-            :title="formatThousands(stats?.data.earnedStreamTrophies, ',')"
+            :title="stats?.data.earnedStreamTrophies"
             description="Trophies earned on stream"
           />
 
           <ULandingCard
             class="col-span-8 row-span-2"
             icon="i-bi-trophy"
-            :title="formatThousands(stats?.data.totalEarnedTrophies, ',')"
+            :title="stats?.data.totalEarnedTrophies"
             description="Total trophies earned"
           />
         </ULandingGrid>
