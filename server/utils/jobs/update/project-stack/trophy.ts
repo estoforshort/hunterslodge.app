@@ -101,11 +101,12 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
     if (stackTrophyData.timesEarned) {
       stackTrophyData.rarity =
         Math.round(
-          (data.profilesCount / stackTrophyData.timesEarned + Number.EPSILON) *
+          ((stackTrophy.timesEarned / data.profilesCount) * 100 +
+            Number.EPSILON) *
             100,
         ) / 100;
     } else {
-      stackTrophyData.rarity = data.profilesCount;
+      stackTrophyData.rarity = 0;
     }
 
     switch (data.trophy.trophyType) {
@@ -143,11 +144,8 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
     }
 
     const valueMultiplier =
-      Math.round(
-        ((stackTrophyData.quality / 100) * stackTrophyData.rarity +
-          Number.EPSILON) *
-          100,
-      ) / 100;
+      Math.round((1 - (stackTrophyData.rarity / 100 + Number.EPSILON)) * 100) /
+      100;
 
     stackTrophyData.value =
       Math.round(
