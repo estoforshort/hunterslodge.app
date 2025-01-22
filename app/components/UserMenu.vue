@@ -118,7 +118,7 @@ const items = computed(() => [
       :popper="{ placement: 'bottom-end' }"
       class="align-middle"
     >
-      <UAvatar :src="`/images/users/${user.id}`" size="md" />
+      <UAvatar :src="`/api/images/users/${user.id}`" size="md" />
 
       <template #user="{}">
         <div class="text-left">

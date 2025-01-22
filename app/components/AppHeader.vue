@@ -17,7 +17,7 @@ const links = [
     to: "/games",
   },
   {
-    label: "Docs",
+    label: "About us",
     to: "/docs",
   },
 ];
