@@ -300,7 +300,6 @@ export const updateProjectAndStack = async (data: Data) => {
         quality: 0,
         profilesCount: profilesCount,
         timesStarted: timesStarted,
-        rarity: 0,
         timesCompleted: 0,
         avgProgress: 0,
         value: 0,
@@ -371,7 +370,6 @@ export const updateProjectAndStack = async (data: Data) => {
             definedBronzeFrom: stack.definedBronze,
             qualityFrom: stack.quality,
             timesStartedFrom: stack.timesStarted,
-            rarityFrom: stack.rarity,
             timesCompletedFrom: stack.timesCompleted,
             avgProgressFrom: stack.avgProgress,
             valueFrom: stack.value,
@@ -578,11 +576,6 @@ export const updateProjectAndStack = async (data: Data) => {
         stackData.quality = Number(avgQuality._avg.quality);
       }
 
-      stackData.rarity =
-        Math.round(
-          (profilesCount / stackData.timesStarted + Number.EPSILON) * 100,
-        ) / 100;
-
       stackData.timesCompleted = timesCompleted;
 
       if (avgProgress._avg.progress) {
@@ -605,7 +598,6 @@ export const updateProjectAndStack = async (data: Data) => {
           definedBronzeTo: updateStack.definedBronze,
           qualityTo: updateStack.quality,
           timesStartedTo: updateStack.timesStarted,
-          rarityTo: updateStack.rarity,
           timesCompletedTo: updateStack.timesCompleted,
           avgProgressTo: updateStack.avgProgress,
           valueTo: updateStack.value,
