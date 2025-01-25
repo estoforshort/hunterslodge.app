@@ -18,9 +18,6 @@ export default defineEventHandler(async (event) => {
                 stackId: true,
               },
             },
-            viewers: true,
-            mature: true,
-            language: true,
             lastLiveAt: true,
             updateProject: true,
             updateTrophies: true,
@@ -74,9 +71,6 @@ export default defineEventHandler(async (event) => {
   const createOverlay = await prisma.overlay.create({
     data: {
       profileId: profile.id,
-      viewers: profile.overlay.viewers,
-      mature: profile.overlay.mature,
-      language: profile.overlay.language,
       lastLiveAt: profile.overlay.lastLiveAt,
       updateProject: profile.overlay.updateProject,
       updateTrophies: profile.overlay.updateTrophies,
