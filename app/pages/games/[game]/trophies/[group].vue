@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import relativeTime from "dayjs/plugin/relativeTime";
-import formatThousands from "format-thousands";
 import duration from "dayjs/plugin/duration";
 import dayjs from "dayjs";
 
@@ -10,12 +9,12 @@ dayjs.extend(duration);
 const route = useRoute();
 
 const { data: trophies } = await useFetch(
-  `/api/public/v1/stacks/${route.params.game}/groups/${route.params.group}/trophies`,
+  `/api/games/${route.params.game}/groups/${route.params.group}/trophies`,
   {
     transform: (trophies) => {
       return {
         data: trophies.data.map((trophy) => ({
-          gameId: trophy.gameId,
+          stackId: trophy.stackId,
           groupId: trophy.groupId,
           trophyId: trophy.trophyId,
           type: trophy.gameTrophy.type,
@@ -39,11 +38,19 @@ const config = useRuntimeConfig();
     <figure
       v-for="trophy in trophies?.data"
       :key="trophy.trophyId"
-      class="mb-2 flex rounded-e-lg shadow-lg last:mb-0"
-      :class="useTrophyBackground(trophy.type)"
+      class="mb-2 flex rounded-e-lg bg-gradient-to-r from-white via-white shadow-lg last:mb-0"
+      :class="
+        trophy.type === 'platinum'
+          ? 'to-sky-400 dark:from-gray-900 dark:via-slate-950 dark:to-sky-600'
+          : trophy.type === 'gold'
+            ? 'to-yellow-400 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-600'
+            : trophy.type === 'silver'
+              ? 'to-cool-400 dark:from-gray-900 dark:via-slate-950 dark:to-slate-600'
+              : 'to-orange-400 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800'
+      "
     >
       <img
-        :src="`${config.public.baseUrl}/images/games/${trophy.gameId}/${trophy.groupId}/${trophy.trophyId}`"
+        :src="`${config.public.baseUrl}/api/games/${trophy.stackId}/groups/${trophy.groupId}/trophies/${trophy.trophyId}/image`"
         class="mb-auto min-h-20 min-w-20 max-w-20 justify-start object-contain"
       />
 
@@ -54,20 +61,7 @@ const config = useRuntimeConfig();
           <div class="flex">
             <p class="me-3 align-middle">
               <UTooltip
-                text="Quality"
-                class="align-middle"
-                :popper="{ placement: 'left', arrow: true }"
-              >
-                <span class="align-middle">
-                  <UIcon name="i-bi-award-fill" class="me-1 align-middle" />
-                  <span class="align-middle"> {{ trophy.quality }}% </span>
-                </span>
-              </UTooltip>
-            </p>
-
-            <p class="me-3 align-middle">
-              <UTooltip
-                text="Times earned"
+                :text="`Earned by ${trophy.timesEarned} ${trophy.timesEarned === 1 ? 'hunter' : 'hunters'}`"
                 class="align-middle"
                 :popper="{ placement: 'left', arrow: true }"
               >
@@ -76,35 +70,20 @@ const config = useRuntimeConfig();
                     name="i-bi-check-circle-fill"
                     class="me-1 align-middle"
                   />
-                  <span class="align-middle">{{ trophy.timesEarned }}</span>
-                </span>
-              </UTooltip>
-            </p>
-
-            <p class="me-3 align-middle">
-              <UTooltip
-                text="Rarity ratio"
-                class="align-middle"
-                :popper="{ placement: 'left', arrow: true }"
-              >
-                <span class="align-middle">
-                  <UIcon name="i-bi-r-circle-fill" class="me-1 align-middle" />
-                  <span class="align-middle">{{ trophy.rarity }}</span>
+                  <span class="align-middle">{{ trophy.rarity }}%</span>
                 </span>
               </UTooltip>
             </p>
 
             <p class="align-middle">
               <UTooltip
-                text="Point value"
+                :text="`${trophy.quality}% quality`"
                 class="align-middle"
                 :popper="{ placement: 'left', arrow: true }"
               >
                 <span class="align-middle">
                   <UIcon name="i-bi-p-circle-fill" class="me-1 align-middle" />
-                  <span class="align-middle">{{
-                    formatThousands(trophy.value, ",")
-                  }}</span>
+                  <span class="align-middle"> {{ trophy.value }} </span>
                 </span>
               </UTooltip>
             </p>

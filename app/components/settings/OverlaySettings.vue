@@ -1,9 +1,10 @@
 <script setup lang="ts">
-const { data: overlay, refresh } = await useFetch("/api/overlays");
-const { data: profile } = await useFetch("/api/profiles");
+const { data: overlay, refresh } = await useFetch("/api/me/overlay");
+
+const { user } = useUserSession();
 
 const { data: projects } = await useFetch(
-  `/api/public/v1/profiles/${profile.value?.data?.id ?? 0}/projects`,
+  `/api/hunters/${user.value?.username}/projects`,
   {
     transform: (projects) => {
       return projects.data.map((project) => ({
@@ -88,7 +89,7 @@ async function updateOverlay() {
   try {
     loading.value = true;
 
-    await $fetch("/api/overlays", {
+    await $fetch("/api/me/overlay", {
       method: "PUT",
       body: {
         stackId: project.value?.id,
@@ -128,7 +129,7 @@ async function updateOverlay() {
     class="px-4 py-6"
   >
     <UCard>
-      <div v-if="!profile?.data">
+      <div v-if="!user?.profileId">
         You need to link your PSN to use this feature.
       </div>
 

@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import { UButton } from "#components";
 import dayjs from "dayjs";
 
 const props = defineProps<{
-  id: number;
   username: string;
 }>();
 
 const { data: streams } = await useFetch(
-  `/api/public/v1/profiles/${props.id}/streams`,
+  `/api/hunters/${props.username}/streams`,
   {
     query: { pageSize: 1, orderBy: "createdAt", direction: "desc" },
     transform: (streams) => {
@@ -15,6 +15,9 @@ const { data: streams } = await useFetch(
         data: streams.data.map((stream) => ({
           endsAt: stream.endsAt,
         })),
+        page: streams.page,
+        pageSize: streams.pageSize,
+        totalSize: streams.totalSize,
       };
     },
   },
@@ -25,8 +28,13 @@ const { data: streams } = await useFetch(
   <div
     v-if="streams?.data[0] && dayjs(streams.data[0].endsAt).isAfter(dayjs())"
   >
-    <NuxtLink :to="`https://twitch.tv/${username}`" target="_blank">
-      <UBadge size="sm" color="purple" variant="subtle" label="Watch now" />
-    </NuxtLink>
+    <UButton
+      :to="`https://twitch.tv/${props.username}`"
+      target="_blank"
+      label="Live now"
+      color="primary"
+      variant="outline"
+      size="xs"
+    />
   </div>
 </template>

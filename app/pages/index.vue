@@ -1,11 +1,45 @@
 <script setup lang="ts">
+import relativeTime from "dayjs/plugin/relativeTime";
 import formatThousands from "format-thousands";
+import duration from "dayjs/plugin/duration";
+import dayjs from "dayjs";
+
+dayjs.extend(relativeTime);
+dayjs.extend(duration);
 
 useSeoMeta({
   title: "Home",
 });
 
-const { data: stats } = await useFetch("/api/public/v1/statistics");
+const { data: stats } = await useFetch("/api/app/statistics", {
+  transform: (stats) => {
+    return {
+      data: {
+        stacks: formatThousands(stats.data.stacks, ","),
+        stackTrophies: formatThousands(stats.data.stackTrophies, ","),
+        profiles: formatThousands(stats.data.profiles, ","),
+        streamers: formatThousands(stats.data.streamers, ","),
+        timeStreamed: formatThousands(
+          Math.round(
+            dayjs
+              .duration(stats?.data.timeStreamed ?? 0, "seconds")
+              .as("hours") * 10,
+          ) / 10,
+          ",",
+        ),
+        earnedStreamTrophies: formatThousands(
+          stats.data.earnedStreamTrophies,
+          ",",
+        ),
+        totalEarnedTrophies: formatThousands(
+          stats.data.totalEarnedTrophies,
+          ",",
+        ),
+      },
+    };
+  },
+});
+
 const config = useRuntimeConfig();
 </script>
 
@@ -26,42 +60,68 @@ const config = useRuntimeConfig();
           />
         </div>
 
-        <ULandingHero title="Welcome to the Lodge, Hunter!" />
+        <ULandingHero
+          title="Welcome to the Lodge, Hunter!"
+          description="Hunters Lodge is the web app for PlayStation trophy hunters on Twitch."
+          :links="[
+            {
+              label: 'Read more about us',
+              trailingIcon: 'i-heroicons-arrow-right',
+              color: 'gray',
+              size: 'xl',
+              to: '/docs',
+            },
+          ]"
+        />
 
         <ULandingGrid>
           <ULandingCard
-            class="col-span-6 row-span-2"
+            class="col-span-4 row-span-2"
             icon="i-bi-joystick"
-            :title="formatThousands(stats?.data?.stacks, ',')"
+            :title="stats?.data.stacks"
             description="Games tracked"
           />
 
           <ULandingCard
-            class="col-span-6 row-span-2"
+            class="col-span-5 row-span-2"
             icon="i-bi-trophy"
-            :title="formatThousands(stats?.data?.stackTrophies, ',')"
+            :title="stats?.data.stackTrophies"
             description="Trophies tracked"
           />
 
           <ULandingCard
-            class="col-span-4 row-span-2"
+            class="col-span-3 row-span-2"
             icon="i-bi-people"
-            :title="stats?.data?.profiles.toString()"
+            :title="stats?.data.profiles"
             description="Hunters joined"
           />
 
           <ULandingCard
-            class="col-span-4 row-span-2"
-            icon="i-bi-joystick"
-            :title="formatThousands(stats?.data?.projects, ',')"
-            description="Games started"
+            class="col-span-5 row-span-2"
+            icon="i-bi-twitch"
+            :title="stats?.data.streamers"
+            description="Streamers"
+          />
+
+          <ULandingCard
+            class="col-span-7 row-span-2"
+            icon="i-bi-hourglass-split"
+            :title="stats?.data.timeStreamed"
+            description="Hours streamed"
           />
 
           <ULandingCard
             class="col-span-4 row-span-2"
             icon="i-bi-trophy"
-            :title="formatThousands(stats?.data?.earnedTrophies, ',')"
-            description="Trophies earned"
+            :title="stats?.data.earnedStreamTrophies"
+            description="Trophies earned on stream"
+          />
+
+          <ULandingCard
+            class="col-span-8 row-span-2"
+            icon="i-bi-trophy"
+            :title="stats?.data.totalEarnedTrophies"
+            description="Total trophies earned"
           />
         </ULandingGrid>
       </UPageBody>

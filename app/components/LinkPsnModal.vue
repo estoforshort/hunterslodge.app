@@ -20,7 +20,7 @@ async function onSubmit() {
   loading.value = true;
 
   try {
-    const linkPsn = await $fetch("/api/profiles", {
+    const linkPsn = await $fetch("/api/hunters", {
       method: "POST",
       body,
     });

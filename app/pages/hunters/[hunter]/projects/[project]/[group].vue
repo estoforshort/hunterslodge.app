@@ -10,16 +10,16 @@ dayjs.extend(duration);
 const route = useRoute();
 
 const { data: project } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}`,
+  `/api/hunters/${route.params.hunter}/projects/${route.params.project}/summary`,
 );
 
 const { data: groups } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}/groups`,
+  `/api/hunters/${route.params.hunter}/projects/${route.params.project}/groups`,
   {
     transform: (groups) => {
       return {
         data: groups.data.map((group) => ({
-          groupId: group.stackGroup.gameGroup.id,
+          groupId: group.stackGroup.groupId,
           name: group.stackGroup.gameGroup.name,
         })),
       };
@@ -30,16 +30,16 @@ const { data: groups } = await useFetch(
 const group = groups.value?.data.find((g) => g.groupId === route.params.group);
 
 const { data: stackTrophies } = await useFetch(
-  `/api/public/v1/stacks/${route.params.project}/groups/${route.params.group}/trophies`,
+  `/api/games/${route.params.project}/groups/${route.params.group}/trophies`,
 );
 
 const { data: projectTrophies } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}/groups/${route.params.group}/trophies`,
+  `/api/hunters/${route.params.hunter}/projects/${route.params.project}/groups/${route.params.group}/trophies`,
 );
 
 function isEarned(id: number) {
   const earned = projectTrophies.value?.data.find(
-    (trophy) => trophy.stackTrophy.gameTrophy.id === id,
+    (trophy) => trophy.trophyId === id,
   );
 
   if (earned) {
@@ -84,16 +84,35 @@ const config = useRuntimeConfig();
     <figure
       v-for="trophy in stackTrophies?.data"
       :key="trophy.trophyId"
-      class="mb-2 flex rounded-e-lg shadow-lg last:mb-0"
+      class="mb-2 flex rounded-e-lg bg-gradient-to-r from-white via-white shadow-lg last:mb-0"
       :class="
-        isEarned(trophy.gameTrophy.id)
-          ? useTrophyBackground(trophy.gameTrophy.type)
-          : useTrophyBackground(trophy.gameTrophy.type) +
-            ' opacity-40 hover:opacity-100 dark:opacity-20 dark:hover:opacity-100'
+        isEarned(trophy.trophyId)
+          ? trophy.gameTrophy.type === 'platinum'
+            ? isEarned(trophy.trophyId)?.streamId
+              ? 'border-primary border-e-8 to-sky-400 dark:from-gray-900 dark:via-slate-950 dark:to-sky-600'
+              : 'to-sky-400 dark:from-gray-900 dark:via-slate-950 dark:to-sky-600'
+            : trophy.gameTrophy.type === 'gold'
+              ? isEarned(trophy.trophyId)?.streamId
+                ? 'border-primary border-e-8 to-yellow-400 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-600'
+                : 'to-yellow-400 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-600'
+              : trophy.gameTrophy.type === 'silver'
+                ? isEarned(trophy.trophyId)?.streamId
+                  ? 'to-cool-400 border-primary border-e-8 dark:from-gray-900 dark:via-slate-950 dark:to-slate-600'
+                  : 'to-cool-400 dark:from-gray-900 dark:via-slate-950 dark:to-slate-600'
+                : isEarned(trophy.trophyId)?.streamId
+                  ? 'border-primary border-e-8 to-orange-400 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800'
+                  : 'to-orange-400 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800'
+          : trophy.gameTrophy.type === 'platinum'
+            ? 'to-sky-400 opacity-40 hover:opacity-100 dark:from-gray-900 dark:via-slate-950 dark:to-sky-600 dark:opacity-20 dark:hover:opacity-100'
+            : trophy.gameTrophy.type === 'gold'
+              ? 'to-yellow-400 opacity-40 hover:opacity-100 dark:from-gray-900 dark:via-slate-950 dark:to-yellow-600 dark:opacity-20 dark:hover:opacity-100'
+              : trophy.gameTrophy.type === 'silver'
+                ? 'to-cool-400 opacity-40 hover:opacity-100 dark:from-gray-900 dark:via-slate-950 dark:to-slate-600 dark:opacity-20 dark:hover:opacity-100'
+                : 'to-orange-400 opacity-40 hover:opacity-100 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800 dark:opacity-20 dark:hover:opacity-100'
       "
     >
       <img
-        :src="`${config.public.baseUrl}/images/games/${trophy.gameId}/${trophy.groupId}/${trophy.trophyId}`"
+        :src="`${config.public.baseUrl}/api/games/${trophy.stackId}/groups/${trophy.groupId}/trophies/${trophy.trophyId}/image`"
         class="mb-auto min-h-20 min-w-20 max-w-20 justify-start object-contain"
       />
 
@@ -104,33 +123,23 @@ const config = useRuntimeConfig();
           <div class="flex">
             <p class="me-3 align-middle">
               <UTooltip
-                text="Quality"
+                :text="`Earned by ${trophy.timesEarned} ${trophy.timesEarned === 1 ? 'hunter' : 'hunters'}`"
                 class="align-middle"
                 :popper="{ placement: 'left', arrow: true }"
               >
                 <span class="align-middle">
-                  <UIcon name="i-bi-award-fill" class="me-1 align-middle" />
-                  <span class="align-middle"> {{ trophy.quality }}% </span>
-                </span>
-              </UTooltip>
-            </p>
-
-            <p class="me-3 align-middle">
-              <UTooltip
-                text="Rarity ratio"
-                class="align-middle"
-                :popper="{ placement: 'left', arrow: true }"
-              >
-                <span class="align-middle">
-                  <UIcon name="i-bi-r-circle-fill" class="me-1 align-middle" />
-                  <span class="align-middle">{{ trophy.rarity }}</span>
+                  <UIcon
+                    name="i-bi-check-circle-fill"
+                    class="me-1 align-middle"
+                  />
+                  <span class="align-middle">{{ trophy.rarity }}%</span>
                 </span>
               </UTooltip>
             </p>
 
             <p class="align-middle">
               <UTooltip
-                text="Points"
+                :text="`${trophy.quality}% quality`"
                 class="align-middle"
                 :popper="{ placement: 'left', arrow: true }"
               >
@@ -142,25 +151,6 @@ const config = useRuntimeConfig();
                       ",",
                     )
                   }}</span>
-                </span>
-              </UTooltip>
-            </p>
-
-            <p
-              v-if="isEarned(trophy.trophyId)?.streamId"
-              class="ms-3 align-middle"
-            >
-              <UTooltip
-                text="Earned on stream"
-                class="align-middle"
-                :popper="{ placement: 'left', arrow: true }"
-              >
-                <span class="align-middle">
-                  <UIcon
-                    name="i-bi-camera-reels-fill"
-                    class="text-primary align-middle"
-                  />
-                  <span class="align-middle"></span>
                 </span>
               </UTooltip>
             </p>

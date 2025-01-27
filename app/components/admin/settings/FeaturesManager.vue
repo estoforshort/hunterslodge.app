@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: settings } = await useFetch("/api/app-settings");
+const { data: settings } = await useFetch("/api/app/settings");
 
 const features = reactive({
   overlaysEnabled: settings.value?.data.overlaysEnabled,
@@ -14,7 +14,7 @@ async function updateFeatures() {
   try {
     updatingFeatures.value = true;
 
-    await $fetch("/api/app-settings", {
+    await $fetch("/api/app/settings", {
       method: "PUT",
       body: features,
     });

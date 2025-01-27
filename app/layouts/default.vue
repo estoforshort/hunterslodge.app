@@ -7,7 +7,7 @@ const { data: navigation } = await useAsyncData(
   { default: () => [] },
 );
 
-const { data: files } = useLazyFetch<ParsedContent[]>("/api/content.json", {
+const { data: files } = useLazyFetch<ParsedContent[]>("/api/content", {
   default: () => [],
   server: false,
 });
@@ -17,6 +17,7 @@ provide("navigation", navigation);
 
 <template>
   <div>
+    <div id="top" />
     <AppHeader />
 
     <UMain>

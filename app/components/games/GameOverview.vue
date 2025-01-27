@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import relativeTime from "dayjs/plugin/relativeTime";
-import formatThousands from "format-thousands";
 import duration from "dayjs/plugin/duration";
 import dayjs from "dayjs";
 
@@ -8,9 +7,9 @@ dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
 const props = defineProps<{
+  orderBy: string;
   game: {
-    stackId: string;
-    gameId: number;
+    id: string;
     name: string;
     platforms: {
       platformId: string;
@@ -33,14 +32,14 @@ const config = useRuntimeConfig();
 </script>
 
 <template>
-  <NuxtLink :to="`/games/${props.game.stackId}`">
+  <NuxtLink :to="`/games/${props.game.id}`">
     <figure
       class="flex rounded-lg bg-gradient-to-r from-white via-white to-gray-200 shadow-lg dark:from-gray-900 dark:via-slate-950 dark:to-slate-950"
     >
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/images/games/${game.gameId}`"
+            :src="`${config.public.baseUrl}/api/games/${game.id}/image`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder
@@ -64,7 +63,7 @@ const config = useRuntimeConfig();
           </div>
 
           <div class="flex">
-            <UPopover mode="hover" :popper="{ placement: 'auto' }">
+            <UPopover mode="hover" :popper="{ placement: 'left-start' }">
               <span class="align-middle">
                 <UIcon name="i-bi-info-circle" class="align-middle" />
               </span>
@@ -72,27 +71,71 @@ const config = useRuntimeConfig();
               <template #panel>
                 <div class="p-2">
                   <p class="text-sm">
-                    First trophy
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(game.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    and last
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(game.lastTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                    <UIcon
+                      name="i-bi-hourglass-top"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(game.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-bottom"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(game.lastTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+                    <span class="align-middle"> {{ game.quality }}% </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon name="i-bi-people-fill" class="me-2 align-middle" />
+                    <span class="align-middle"> {{ game.timesStarted }} </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-check-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ game.timesCompleted }}
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-p-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ game.value }}
+                    </span>
                   </p>
                 </div>
               </template>
@@ -152,7 +195,7 @@ const config = useRuntimeConfig();
           </div>
 
           <div class="flex flex-row justify-between">
-            <span class="align-middle">
+            <span v-if="orderBy === 'quality'" class="align-middle">
               <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
               <UTooltip
                 text="Quality"
@@ -163,7 +206,10 @@ const config = useRuntimeConfig();
               </UTooltip>
             </span>
 
-            <span class="align-middle">
+            <span
+              v-if="orderBy === 'timesCompleted' || orderBy === 'timesStarted'"
+              class="align-middle"
+            >
               <UIcon name="i-bi-check-circle-fill" class="me-2 align-middle" />
               <UTooltip
                 text="Times completed/started"
@@ -176,7 +222,53 @@ const config = useRuntimeConfig();
               </UTooltip>
             </span>
 
-            <span class="align-middle">
+            <span v-if="orderBy === 'lastTrophyEarnedAt'" class="align-middle">
+              <UIcon name="i-bi-hourglass-bottom" class="me-2 align-middle" />
+              <UTooltip
+                text="Last trophy"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
+                  Last trophy
+                  {{
+                    dayjs
+                      .duration({
+                        seconds:
+                          dayjs().unix() -
+                          dayjs(game.lastTrophyEarnedAt).unix(),
+                      })
+                      .humanize()
+                  }}
+                  ago
+                </span>
+              </UTooltip>
+            </span>
+
+            <span v-if="orderBy === 'firstTrophyEarnedAt'" class="align-middle">
+              <UIcon name="i-bi-hourglass-top" class="me-2 align-middle" />
+              <UTooltip
+                text="First trophy"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
+                  First trophy
+                  {{
+                    dayjs
+                      .duration({
+                        seconds:
+                          dayjs().unix() -
+                          dayjs(game.firstTrophyEarnedAt).unix(),
+                      })
+                      .humanize()
+                  }}
+                  ago
+                </span>
+              </UTooltip>
+            </span>
+
+            <span v-if="orderBy === 'value'" class="align-middle">
               <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
               <UTooltip
                 text="Point value"
@@ -184,11 +276,7 @@ const config = useRuntimeConfig();
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="me-4 align-middle">
-                  {{
-                    formatThousands(Number(game.value), {
-                      separator: ",",
-                    })
-                  }}
+                  {{ game.value }}
                 </span>
               </UTooltip>
             </span>

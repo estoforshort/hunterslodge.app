@@ -2,13 +2,13 @@
 const route = useRoute();
 
 const { data: groups } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}/groups`,
+  `/api/hunters/${route.params.hunter}/projects/${route.params.project}/groups`,
   {
     transform: (groups) => {
       return {
         data: groups.data.map((group) => ({
-          gameId: group.stackGroup.gameGroup.gameId,
-          groupId: group.stackGroup.gameGroup.id,
+          stackId: group.stackGroup.stackId,
+          groupId: group.stackGroup.groupId,
           name: group.stackGroup.gameGroup.name,
           definedPlatinum: group.stackGroup.definedPlatinum,
           definedGold: group.stackGroup.definedGold,
@@ -25,6 +25,8 @@ const { data: groups } = await useFetch(
           firstTrophyEarnedAt: group.firstTrophyEarnedAt,
           lastTrophyEarnedAt: group.lastTrophyEarnedAt,
           quality: group.stackGroup.quality,
+          timesCompleted: group.stackGroup.timesCompleted,
+          value: group.stackGroup.value,
           progress: group.progress,
           points: group.points,
           streamPoints: group.streamPoints,
@@ -41,7 +43,7 @@ if (groups.value && groups.value.data.length === 1) {
 }
 
 const { data: project } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects/${route.params.project}`,
+  `/api/hunters/${route.params.hunter}/projects/${route.params.project}/summary`,
 );
 
 const breadcrumb = computed(() => [

@@ -8,8 +8,8 @@ dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
 const props = defineProps<{
+  orderBy: string;
   project: {
-    gameId: number;
     stackId: string;
     name: string;
     platforms: {
@@ -30,6 +30,9 @@ const props = defineProps<{
     firstTrophyEarnedAt: string | null;
     lastTrophyEarnedAt: string | null;
     quality: string;
+    timesStarted: number;
+    timesCompleted: number;
+    value: string;
     progress: number;
     points: string;
     streamPoints: string;
@@ -74,17 +77,15 @@ const route = useRoute();
           ? streamProgress === 100
             ? 'border-primary'
             : 'border-green-500 dark:border-green-400'
-          : streamProgress === project.progress
-            ? 'border-primary'
-            : project.earnedPlatinum
-              ? 'border-sky-500 dark:border-sky-400'
-              : 'border-gray-200 dark:border-gray-950'
+          : project.earnedPlatinum
+            ? 'border-sky-500 dark:border-sky-400'
+            : 'border-gray-200 dark:border-gray-950'
       "
     >
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/images/games/${project.gameId}`"
+            :src="`${config.public.baseUrl}/api/games/${project.stackId}/image`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder
@@ -108,81 +109,150 @@ const route = useRoute();
           </div>
 
           <div class="flex">
-            <UPopover
-              v-if="project.timeStreamed"
-              mode="hover"
-              :popper="{ placement: 'auto' }"
-            >
-              <span class="me-2 align-middle">
-                <UIcon
-                  name="i-bi-clock-history"
-                  class="me-1 align-middle lg:me-2"
-                />
-                <span class="hidden align-middle lg:me-2 lg:inline-block">
-                  {{
-                    dayjs
-                      .duration(project.timeStreamed, "seconds")
-                      .format("HH:mm")
-                  }}
-                </span>
-              </span>
-
-              <template #panel>
-                <div class="p-2">
-                  <p class="text-sm">
-                    Time streamed:
-                    {{
-                      dayjs
-                        .duration(project.timeStreamed, "seconds")
-                        .format("HH:mm")
-                    }}
-                  </p>
-                </div>
-              </template>
-            </UPopover>
-
-            <UPopover mode="hover" :popper="{ placement: 'auto' }">
+            <UPopover mode="hover" :popper="{ placement: 'left-start' }">
               <span class="align-middle">
                 <UIcon name="i-bi-info-circle" class="align-middle" />
               </span>
 
               <template #panel>
                 <div class="p-2">
-                  <p v-if="project.progress !== 100" class="text-sm">
-                    Started
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(project.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                  <p v-if="project.firstTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-top"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(project.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
                   </p>
 
-                  <p v-else class="text-sm">
-                    Completed in
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs(project.lastTrophyEarnedAt).unix() -
-                            dayjs(project.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }},
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(project.lastTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                  <p v-if="project.lastTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-bottom"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(project.lastTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
+                  <p v-if="project.progress === 100" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-split"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs(project.lastTrophyEarnedAt).unix() -
+                              dayjs(project.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                    </span>
+                  </p>
+
+                  <p v-if="project.timeStreamed" class="text-primary text-sm">
+                    <UIcon
+                      name="i-bi-camera-video-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        Math.round(
+                          dayjs
+                            .duration(project.timeStreamed, "seconds")
+                            .as("hours") * 10,
+                        ) / 10
+                      }}h
+                    </span>
+                  </p>
+
+                  <p
+                    v-if="
+                      Number(project.streamPoints) &&
+                      project.streamPoints !== project.points
+                    "
+                    class="text-primary text-sm"
+                  >
+                    <UIcon
+                      name="i-bi-p-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ formatThousands(project.streamPoints, ",") }}
+                    </span>
+                  </p>
+
+                  <p
+                    class="text-sm"
+                    :class="
+                      project.streamPoints
+                        ? project.streamPoints === project.points
+                          ? 'text-primary'
+                          : ''
+                        : ''
+                    "
+                  >
+                    <UIcon
+                      name="i-bi-p-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ formatThousands(project.points, ",") }}
+                    </span>
+                  </p>
+
+                  <p class="mt-2 text-sm">
+                    <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+                    <span class="align-middle"> {{ project.quality }}% </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon name="i-bi-people-fill" class="me-2 align-middle" />
+                    <span class="align-middle">
+                      {{ project.timesStarted }}
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-check-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ project.timesCompleted }}
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-p-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ formatThousands(project.value, ",") }}
+                    </span>
                   </p>
                 </div>
               </template>
@@ -266,49 +336,191 @@ const route = useRoute();
           </div>
 
           <div class="flex flex-row justify-between">
-            <span class="align-middle">
-              <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+            <span
+              v-if="orderBy === 'lastTrophyEarnedAt'"
+              class="align-middle"
+              :class="
+                Number(project.streamPoints)
+                  ? project.streamPoints === project.points
+                    ? 'text-primary'
+                    : project.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : project.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
+                  : project.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : project.earnedPlatinum
+                      ? 'text-sky-600 dark:text-sky-400'
+                      : ''
+              "
+            >
+              <UIcon name="i-bi-hourglass-bottom" class="me-2 align-middle" />
               <UTooltip
-                text="Quality"
-                class="align-middle"
+                text="Last trophy"
+                class="truncate align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="me-4 align-middle">
-                  {{ project.quality }}
+                  Last trophy
+                  {{
+                    dayjs
+                      .duration({
+                        seconds:
+                          dayjs().unix() -
+                          dayjs(project.lastTrophyEarnedAt).unix(),
+                      })
+                      .humanize()
+                  }}
+                  ago
                 </span>
               </UTooltip>
             </span>
 
-            <span class="align-middle">
-              <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
+            <span
+              v-if="orderBy === 'firstTrophyEarnedAt'"
+              class="align-middle"
+              :class="
+                Number(project.streamPoints)
+                  ? project.streamPoints === project.points
+                    ? 'text-primary'
+                    : project.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : project.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
+                  : project.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : project.earnedPlatinum
+                      ? 'text-sky-600 dark:text-sky-400'
+                      : ''
+              "
+            >
+              <UIcon name="i-bi-hourglass-top" class="me-2 align-middle" />
               <UTooltip
-                text="Stream/total points"
+                text="First trophy"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
-                <span
-                  v-if="Number(project.streamPoints)"
-                  class="me-4 align-middle"
-                >
+                <span class="me-4 align-middle">
+                  First trophy
+                  {{
+                    dayjs
+                      .duration({
+                        seconds:
+                          dayjs().unix() -
+                          dayjs(project.firstTrophyEarnedAt).unix(),
+                      })
+                      .humanize()
+                  }}
+                  ago
+                </span>
+              </UTooltip>
+            </span>
+
+            <span
+              v-if="orderBy === 'points'"
+              class="align-middle"
+              :class="
+                Number(project.streamPoints)
+                  ? project.streamPoints === project.points
+                    ? 'text-primary'
+                    : project.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : project.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
+                  : project.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : project.earnedPlatinum
+                      ? 'text-sky-600 dark:text-sky-400'
+                      : ''
+              "
+            >
+              <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
+              <UTooltip
+                text="Points"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
+                  {{
+                    formatThousands(Number(project.points), {
+                      separator: ",",
+                    })
+                  }}
+                </span>
+              </UTooltip>
+            </span>
+
+            <span
+              v-if="orderBy === 'streamPoints' && Number(project.streamPoints)"
+              class="align-middle"
+              :class="
+                Number(project.streamPoints)
+                  ? project.streamPoints === project.points
+                    ? 'text-primary'
+                    : project.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : project.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
+                  : project.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : project.earnedPlatinum
+                      ? 'text-sky-600 dark:text-sky-400'
+                      : ''
+              "
+            >
+              <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
+              <UTooltip
+                text="Points"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
                   {{
                     formatThousands(Number(project.streamPoints), {
                       separator: ",",
                     })
                   }}
-                  /
-                  {{
-                    formatThousands(Number(project.points), {
-                      separator: ",",
-                    })
-                  }}
                 </span>
+              </UTooltip>
+            </span>
 
-                <span v-else class="me-4 align-middle">
+            <span
+              v-if="orderBy === 'timeStreamed' && Number(project.timeStreamed)"
+              class="align-middle"
+              :class="
+                Number(project.streamPoints)
+                  ? project.streamPoints === project.points
+                    ? 'text-primary'
+                    : project.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : project.earnedPlatinum
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : ''
+                  : project.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : project.earnedPlatinum
+                      ? 'text-sky-600 dark:text-sky-400'
+                      : ''
+              "
+            >
+              <UIcon name="i-bi-camera-video-fill" class="me-2 align-middle" />
+              <UTooltip
+                text="Stream/total points"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
                   {{
-                    formatThousands(Number(project.points), {
-                      separator: ",",
-                    })
-                  }}
+                    Math.round(
+                      dayjs
+                        .duration(project.timeStreamed, "seconds")
+                        .as("hours") * 10,
+                    ) / 10
+                  }}h
                 </span>
               </UTooltip>
             </span>

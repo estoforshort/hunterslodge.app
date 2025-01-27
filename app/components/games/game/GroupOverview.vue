@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import relativeTime from "dayjs/plugin/relativeTime";
-import formatThousands from "format-thousands";
 import duration from "dayjs/plugin/duration";
 import dayjs from "dayjs";
 
@@ -9,7 +8,7 @@ dayjs.extend(duration);
 
 defineProps<{
   group: {
-    gameId: number;
+    stackId: string;
     groupId: string;
     name: string;
     definedPlatinum: number;
@@ -37,7 +36,7 @@ const route = useRoute();
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/images/games/${group.gameId}/${group.groupId}`"
+            :src="`${config.public.baseUrl}/api/games/${group.stackId}/groups/${group.groupId}/image`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder
@@ -51,36 +50,65 @@ const route = useRoute();
             <span class="align-middle">{{ group.name }}</span>
           </div>
 
-          <div v-if="group.firstTrophyEarnedAt" class="flex">
-            <UPopover mode="hover" :popper="{ placement: 'auto' }">
+          <div class="flex">
+            <UPopover mode="hover" :popper="{ placement: 'left-start' }">
               <span class="align-middle">
                 <UIcon name="i-bi-info-circle" class="align-middle" />
               </span>
 
               <template #panel>
                 <div class="p-2">
+                  <p v-if="group.firstTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-top"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(group.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
+                  <p v-if="group.lastTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-bottom"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(group.lastTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
                   <p class="text-sm">
-                    First trophy
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(group.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    and last
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(group.lastTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                    <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+                    <span class="align-middle"> {{ group.quality }}% </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-check-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ group.timesCompleted }}
+                    </span>
                   </p>
                 </div>
               </template>
@@ -141,30 +169,6 @@ const route = useRoute();
 
           <div class="flex flex-row justify-between">
             <span class="align-middle">
-              <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
-              <UTooltip
-                text="Quality"
-                class="align-middle"
-                :popper="{ placement: 'top', arrow: true }"
-              >
-                <span class="me-4 align-middle"> {{ group.quality }}% </span>
-              </UTooltip>
-            </span>
-
-            <span class="align-middle">
-              <UIcon name="i-bi-check-circle-fill" class="me-2 align-middle" />
-              <UTooltip
-                text="Times completed/started"
-                class="align-middle"
-                :popper="{ placement: 'top', arrow: true }"
-              >
-                <span class="me-4 align-middle">
-                  {{ group.timesCompleted }}
-                </span>
-              </UTooltip>
-            </span>
-
-            <span class="align-middle">
               <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
               <UTooltip
                 text="Point value"
@@ -172,11 +176,7 @@ const route = useRoute();
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="me-4 align-middle">
-                  {{
-                    formatThousands(Number(group.value), {
-                      separator: ",",
-                    })
-                  }}
+                  {{ group.value }}
                 </span>
               </UTooltip>
             </span>

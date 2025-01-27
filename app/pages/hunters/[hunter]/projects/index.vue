@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
-const pageSize = 100;
+const pageSize = 50;
 
 const orderOptions = [
   {
@@ -11,14 +11,6 @@ const orderOptions = [
   {
     name: "Order by first trophy",
     value: "firstTrophyEarnedAt",
-  },
-  {
-    name: "Order by quality",
-    value: "quality",
-  },
-  {
-    name: "Order by progress",
-    value: "progress",
   },
   {
     name: "Order by points",
@@ -49,13 +41,12 @@ const orderBy = ref("lastTrophyEarnedAt");
 const direction = ref("desc");
 
 const { data: projects } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}/projects`,
+  `/api/hunters/${route.params.hunter}/projects`,
   {
     query: { orderBy, direction, page, pageSize },
     transform: (projects) => {
       return {
         data: projects.data.map((project) => ({
-          gameId: project.stack.game.id,
           stackId: project.stack.id,
           name: project.stack.game.name,
           platforms: project.stack.game.platforms,
@@ -74,6 +65,9 @@ const { data: projects } = await useFetch(
           firstTrophyEarnedAt: project.firstTrophyEarnedAt,
           lastTrophyEarnedAt: project.lastTrophyEarnedAt,
           quality: project.stack.quality,
+          timesStarted: project.stack.timesStarted,
+          timesCompleted: project.stack.timesCompleted,
+          value: project.stack.value,
           progress: project.progress,
           points: project.points,
           streamPoints: project.streamPoints,
@@ -117,7 +111,7 @@ const { data: projects } = await useFetch(
       :key="project.stackId"
       class="mb-3 last:mb-0"
     >
-      <HuntersHunterProjectOverview :project />
+      <HuntersHunterProjectOverview :order-by="orderBy" :project />
     </div>
 
     <div

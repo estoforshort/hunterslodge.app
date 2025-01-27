@@ -5,18 +5,20 @@ useSeoMeta({
   title: "Regions",
 });
 
-const { data: regions } = await useFetch("/api/public/v1/profile-regions", {
+const { data: regions } = await useFetch("/api/regions", {
   transform: (regions) => {
-    return regions.data.map((region) => ({
-      id: region.id,
-      name: region.name,
-      earnedPlatinum: region.earnedPlatinum,
-      earnedGold: region.earnedGold,
-      earnedSilver: region.earnedSilver,
-      earnedBronze: region.earnedBronze,
-      points: formatThousands(region.points, ","),
-      position: region.position,
-    }));
+    return {
+      data: regions.data.map((region) => ({
+        id: region.id,
+        name: region.name,
+        earnedPlatinum: region.earnedPlatinum,
+        earnedGold: region.earnedGold,
+        earnedSilver: region.earnedSilver,
+        earnedBronze: region.earnedBronze,
+        points: formatThousands(region.points, ","),
+        position: region.position,
+      })),
+    };
   },
 });
 
@@ -56,7 +58,7 @@ const columns = [
   <UPage>
     <UPageBody>
       <UCard :ui="{ body: { padding: '!p-0' } }">
-        <UTable v-if="regions" :columns="columns" :rows="regions">
+        <UTable v-if="regions?.data" :columns="columns" :rows="regions.data">
           <template #position-data="{ row }">
             <span v-if="row.position">
               {{ ordinal(row.position) }}

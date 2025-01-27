@@ -1,8 +1,5 @@
-import { manageOverlay } from "~/utils/abilities/overlay";
-
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
-  await authorize(event, manageOverlay);
 
   const [appSettings, profile] = await Promise.all([
     prisma.appSettings.findUniqueOrThrow({
@@ -21,9 +18,6 @@ export default defineEventHandler(async (event) => {
                 stackId: true,
               },
             },
-            viewers: true,
-            mature: true,
-            language: true,
             lastLiveAt: true,
             updateProject: true,
             updateTrophies: true,
@@ -77,9 +71,6 @@ export default defineEventHandler(async (event) => {
   const createOverlay = await prisma.overlay.create({
     data: {
       profileId: profile.id,
-      viewers: profile.overlay.viewers,
-      mature: profile.overlay.mature,
-      language: profile.overlay.language,
       lastLiveAt: profile.overlay.lastLiveAt,
       updateProject: profile.overlay.updateProject,
       updateTrophies: profile.overlay.updateTrophies,
@@ -103,7 +94,7 @@ export default defineEventHandler(async (event) => {
   return {
     data: {
       success: true,
-      message: "The new overlay URL successfully generated",
+      message: "New overlay successfully generated",
       overlay: createOverlay.id,
     },
   };

@@ -74,6 +74,8 @@ model User {
 
   image   UserImage?
   profile Profile?
+
+  @@fulltext([displayName])
 }
 
 model UserImage {
@@ -104,6 +106,8 @@ model ProfileRegion {
   profiles        Profile[]
   changes         ProfileRegionChange[]
   positionChanges ProfileRegionPositionChange[]
+
+  @@index([position])
 }
 
 model Profile {
@@ -167,6 +171,9 @@ model Profile {
 
   @@index([regionId, regionalPosition])
   @@index([lastFullUpdateAt])
+  @@index([streamPoints])
+  @@index([timeStreamed])
+  @@index([streamPosition])
 }
 
 model ProfileImage {
@@ -195,9 +202,6 @@ model Overlay {
   project Project?
 
   style          OverlayStyle @default(default)
-  viewers        Int          @default(0) @db.UnsignedMediumInt
-  mature         Boolean      @default(false)
-  language       String?      @db.Char(2)
   lastLiveAt     DateTime?
   showProject    Boolean      @default(false)
   updateProject  Boolean      @default(false)
@@ -215,8 +219,6 @@ model Stream {
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
 
-  maxViewers   Int      @db.UnsignedMediumInt
-  avgViewers   Int      @db.UnsignedMediumInt
   platinum     Int      @default(0) @db.UnsignedSmallInt
   gold         Int      @default(0) @db.UnsignedMediumInt
   silver       Int      @default(0) @db.UnsignedMediumInt
@@ -226,24 +228,10 @@ model Stream {
   createdAt    DateTime
   updatedAt    DateTime @updatedAt
 
-  viewers  Viewers[]
   projects StreamsOnProjects[]
   trophies ProjectTrophy[]
 
   @@index([profileId, createdAt, endsAt])
-}
-
-model Viewers {
-  id String @id @default(uuid()) @db.VarChar(36)
-
-  streamId String @db.VarChar(36)
-  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
-
-  viewers   Int      @db.UnsignedMediumInt
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([streamId])
 }
 
 enum UpdateStatus {
@@ -478,7 +466,6 @@ model Stack {
   quality             Decimal   @default(0) @db.Decimal(5, 2)
   profilesCount       Int       @default(0) @db.UnsignedSmallInt
   timesStarted        Int       @default(0) @db.UnsignedSmallInt
-  rarity              Decimal   @default(0) @db.Decimal(7, 2)
   timesCompleted      Int       @default(0) @db.UnsignedSmallInt
   avgProgress         Int       @default(0) @db.UnsignedTinyInt
   value               Decimal   @default(0) @db.Decimal(14, 2)
@@ -669,6 +656,7 @@ model ProjectTrophy {
 
   @@id([profileId, stackId, groupId, trophyId])
   @@index([profileId, stackId, groupId])
+  @@index([streamId])
 }
 
 model ProjectChange {
@@ -788,8 +776,6 @@ model StackChange {
   qualityTo           Decimal  @default(0) @db.Decimal(5, 2)
   timesStartedFrom    Int      @db.UnsignedSmallInt
   timesStartedTo      Int      @default(0) @db.UnsignedSmallInt
-  rarityFrom          Decimal  @db.Decimal(7, 2)
-  rarityTo            Decimal  @default(0) @db.Decimal(7, 2)
   timesCompletedFrom  Int      @db.UnsignedSmallInt
   timesCompletedTo    Int      @default(0) @db.UnsignedSmallInt
   avgProgressFrom     Int      @db.UnsignedTinyInt
@@ -895,6 +881,8 @@ model ProfileRegionPositionChange {
   positionTo   Int      @db.UnsignedTinyInt
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([regionId])
 }
 
 model ProfileStreamPositionChange {
@@ -907,6 +895,8 @@ model ProfileStreamPositionChange {
   streamPositionTo   Int      @db.UnsignedSmallInt
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+
+  @@index([profileId])
 }
 
 model ProfileRegionalPositionChange {
@@ -919,6 +909,8 @@ model ProfileRegionalPositionChange {
   regionalPositionTo   Int      @db.UnsignedSmallInt
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+
+  @@index([profileId])
 }
 
 model ProfileGlobalPositionChange {
@@ -931,4 +923,6 @@ model ProfileGlobalPositionChange {
   globalPositionTo   Int      @db.UnsignedSmallInt
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+
+  @@index([profileId])
 }

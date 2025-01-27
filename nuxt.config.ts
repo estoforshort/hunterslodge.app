@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@nuxt/eslint",
     "nuxt-auth-utils",
-    "nuxt-authorization",
     "@nuxt/image",
     "@nuxt/content",
   ],
@@ -37,8 +36,7 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
-    "/api/content.json": { prerender: true },
-    "/api/public/**": { cors: true },
+    "/api/content": { prerender: true },
     "/docs": { redirect: "/docs/getting-started", prerender: false },
   },
   image: {

@@ -139,9 +139,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const [psnProfile, profilesCount] = await Promise.all([
-    psn.profile({
-      accountId: profile.accountId,
-    }),
+    psn.profile({ accountId: profile.accountId }),
     prisma.profile.count(),
   ]);
 

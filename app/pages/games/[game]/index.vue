@@ -4,7 +4,7 @@ import formatThousands from "format-thousands";
 const route = useRoute();
 
 const { data: game } = await useFetch(
-  `/api/public/v1/stacks/${route.params.game}`,
+  `/api/games/${route.params.game}/summary`,
   {
     transform: (game) => {
       if (!game.data) {
@@ -18,7 +18,6 @@ const { data: game } = await useFetch(
         definedBronze: game.data.definedBronze,
         quality: game.data.quality,
         timesStarted: game.data.timesStarted,
-        rarity: game.data.rarity,
         timesCompleted: game.data.timesCompleted,
         progress: game.data.avgProgress,
         value: game.data.value,
@@ -73,13 +72,6 @@ const { data: game } = await useFetch(
 
       <UCard>
         <p class="text-lg font-bold">
-          {{ game.rarity }}
-        </p>
-        <p class="text-gray-400 dark:text-gray-500">Rarity</p>
-      </UCard>
-
-      <UCard>
-        <p class="text-lg font-bold">
           {{ game.timesCompleted }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Times completed</p>
@@ -94,7 +86,7 @@ const { data: game } = await useFetch(
 
       <UCard>
         <p class="text-lg font-bold">
-          {{ formatThousands(Number(game.value), ",") }}
+          {{ formatThousands(game.value, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Value</p>
       </UCard>

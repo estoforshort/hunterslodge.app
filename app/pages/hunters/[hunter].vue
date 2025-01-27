@@ -3,38 +3,36 @@ import formatThousands from "format-thousands";
 
 const route = useRoute();
 
-const { data: profile } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}`,
+const { data: hunter } = await useFetch(
+  `/api/hunters/${route.params.hunter}/summary`,
   {
-    transform: (profile) => {
-      if (!profile.data) {
+    transform: (hunter) => {
+      if (!hunter.data) {
         return null;
       }
 
       return {
-        id: profile.data.id,
-        userId: profile.data.user.id,
-        username: profile.data.user.username,
-        displayName: profile.data.user.displayName,
-        admin: profile.data.user.isAdmin,
-        founder: profile.data.user.isFounder,
+        username: hunter.data.user.username,
+        displayName: hunter.data.user.displayName,
+        admin: hunter.data.user.isAdmin,
+        founder: hunter.data.user.isFounder,
         region: {
-          name: profile.data.region.name,
+          name: hunter.data.region.name,
         },
-        startedProjects: profile.data.startedProjects,
-        completedProjects: profile.data.completedProjects,
-        completion: profile.data.completion,
-        streamPoints: profile.data.streamPoints,
-        streamPosition: profile.data.streamPosition,
-        regionalPosition: profile.data.regionalPosition,
-        globalPosition: profile.data.globalPosition,
+        startedProjects: hunter.data.startedProjects,
+        completedProjects: hunter.data.completedProjects,
+        completion: hunter.data.completion,
+        streamPoints: hunter.data.streamPoints,
+        streamPosition: hunter.data.streamPosition,
+        regionalPosition: hunter.data.regionalPosition,
+        globalPosition: hunter.data.globalPosition,
       };
     },
   },
 );
 
 useSeoMeta({
-  title: profile.value?.displayName,
+  title: hunter.value?.displayName,
 });
 
 const links = computed(() => [
@@ -42,13 +40,13 @@ const links = computed(() => [
     {
       label: "Summary",
       icon: "i-bi-grid",
-      to: `/hunters/${profile.value?.id}`,
+      to: `/hunters/${hunter.value?.username}`,
       exact: true,
     },
     {
       label: "Projects",
       icon: "i-bi-joystick",
-      to: `/hunters/${profile.value?.id}/projects`,
+      to: `/hunters/${hunter.value?.username}/projects`,
       active:
         route.name === "hunters-hunter-projects"
           ? true
@@ -63,7 +61,7 @@ const links = computed(() => [
     {
       label: "Updates",
       icon: "i-heroicons-arrow-path",
-      to: `/hunters/${profile.value?.id}/updates`,
+      to: `/hunters/${hunter.value?.username}/updates`,
     },
   ],
 ]);
@@ -73,7 +71,7 @@ const links = computed(() => [
   <UPage>
     <UPageBody>
       <div
-        v-if="profile"
+        v-if="hunter"
         class="mt-24 rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-800 dark:bg-gray-900"
       >
         <div class="grid grid-cols-1 md:grid-cols-3">
@@ -82,20 +80,20 @@ const links = computed(() => [
           >
             <div>
               <p class="text-lg font-bold">
-                {{ formatThousands(profile.startedProjects, ",") }}
+                {{ formatThousands(hunter.startedProjects, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Projects</p>
             </div>
 
             <div>
               <p class="text-lg font-bold">
-                {{ formatThousands(profile.completedProjects, ",") }}
+                {{ formatThousands(hunter.completedProjects, ",") }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Completions</p>
             </div>
 
             <div>
-              <p class="text-lg font-bold">{{ profile.completion }}%</p>
+              <p class="text-lg font-bold">{{ hunter.completion }}%</p>
               <p class="text-gray-400 dark:text-gray-500">Completion</p>
             </div>
           </div>
@@ -105,36 +103,36 @@ const links = computed(() => [
               class="absolute inset-x-0 top-0 mx-auto -mt-24 flex h-48 w-48 items-center justify-center rounded-full shadow-2xl"
             >
               <img
-                :src="`/images/users/${profile.userId}`"
+                :src="`/api/hunters/${hunter.username}/images/twitch`"
                 class="rounded-full"
               />
             </div>
           </div>
 
           <div class="mt-32 grid grid-cols-3 space-x-6 text-center lg:mt-0">
-            <div v-if="profile.streamPosition">
+            <div v-if="hunter.streamPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.streamPosition) }}
+                {{ ordinal(hunter.streamPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Streamer</p>
             </div>
 
             <div v-else></div>
 
-            <div v-if="profile.regionalPosition">
+            <div v-if="hunter.regionalPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.regionalPosition) }}
+                {{ ordinal(hunter.regionalPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">
-                {{ profile.region.name }}
+                {{ hunter.region.name }}
               </p>
             </div>
 
             <div v-else></div>
 
-            <div v-if="profile.globalPosition">
+            <div v-if="hunter.globalPosition">
               <p class="text-lg font-bold">
-                {{ ordinal(profile.globalPosition) }}
+                {{ ordinal(hunter.globalPosition) }}
               </p>
               <p class="text-gray-400 dark:text-gray-500">Global</p>
             </div>
@@ -145,21 +143,21 @@ const links = computed(() => [
 
         <div class="mt-20 pb-6 text-center">
           <h1 class="text-4xl font-medium">
-            {{ profile.displayName }}
+            {{ hunter.displayName }}
           </h1>
 
           <p class="mt-4">
             <NuxtLink
-              :to="`https://twitch.tv/${profile.username}`"
+              :to="`https://twitch.tv/${hunter.username}`"
               target="_blank"
             >
-              twitch.tv/{{ profile.username }}
+              twitch.tv/{{ hunter.username }}
             </NuxtLink>
           </p>
 
           <div class="mt-2 flex justify-center gap-2">
             <UBadge
-              v-if="profile.admin"
+              v-if="hunter.admin"
               size="md"
               color="gray"
               variant="solid"
@@ -167,7 +165,7 @@ const links = computed(() => [
             />
 
             <UBadge
-              v-if="profile.founder"
+              v-if="hunter.founder"
               size="md"
               color="gray"
               variant="solid"
@@ -175,7 +173,7 @@ const links = computed(() => [
             />
 
             <UBadge
-              v-if="Number(profile.streamPoints) > 0"
+              v-if="Number(hunter.streamPoints) > 0"
               size="md"
               color="gray"
               variant="solid"
@@ -185,7 +183,7 @@ const links = computed(() => [
         </div>
       </div>
 
-      <UHorizontalNavigation v-if="profile" :links="links" class="mt-12" />
+      <UHorizontalNavigation v-if="hunter" :links="links" class="mt-12" />
 
       <UPageCard>
         <NuxtPage />
