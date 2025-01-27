@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import formatThousands from "format-thousands";
+
 const route = useRoute();
 
 const { data: groups } = await useFetch(
-  `/api/public/v1/stacks/${route.params.game}/groups`,
+  `/api/games/${route.params.game}/groups`,
   {
     transform: (groups) => {
       return {
         data: groups.data.map((group) => ({
-          gameId: group.gameId,
+          stackId: group.stackId,
           groupId: group.groupId,
           name: group.gameGroup.name,
           definedPlatinum: group.definedPlatinum,
@@ -19,7 +21,7 @@ const { data: groups } = await useFetch(
           quality: group.quality,
           timesCompleted: group.timesCompleted,
           progress: group.avgProgress,
-          value: group.value,
+          value: formatThousands(group.value, ","),
         })),
       };
     },

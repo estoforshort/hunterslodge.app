@@ -5,7 +5,7 @@ useSeoMeta({
   title: "Regions",
 });
 
-const { data: regions } = await useFetch("/api/profile-regions", {
+const { data: regions } = await useFetch("/api/regions", {
   transform: (regions) => {
     return {
       data: regions.data.map((region) => ({

@@ -31,8 +31,7 @@ async function queueUpdate() {
             color: "gray",
             size: "xs",
             label: "View updates",
-            click: () =>
-              navigateTo(`/hunters/${user.value?.profileId}/updates`),
+            click: () => navigateTo(`/hunters/${user.value?.username}/updates`),
           },
         ],
       });
@@ -71,7 +70,7 @@ const items = computed(() => [
     {
       label: "My profile",
       icon: "i-bi-person",
-      to: `/hunters/${user.value?.profileId}`,
+      to: `/hunters/${user.value?.username}`,
       class: user.value?.profileId === null ? "hidden" : "",
     },
     {
@@ -118,7 +117,7 @@ const items = computed(() => [
       :popper="{ placement: 'bottom-end' }"
       class="align-middle"
     >
-      <UAvatar :src="`/api/images/users/${user.id}`" size="md" />
+      <UAvatar :src="`/api/hunters/${user.username}/images/twitch`" size="md" />
 
       <template #user="{}">
         <div class="text-left">

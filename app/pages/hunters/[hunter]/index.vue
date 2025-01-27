@@ -9,29 +9,29 @@ dayjs.extend(duration);
 
 const route = useRoute();
 
-const { data: profile } = await useFetch(
-  `/api/public/v1/profiles/${route.params.hunter}`,
+const { data: hunter } = await useFetch(
+  `/api/hunters/${route.params.hunter}/summary`,
   {
-    transform: (profile) => {
-      if (!profile.data) {
+    transform: (hunter) => {
+      if (!hunter.data) {
         return null;
       }
 
       return {
-        firstTrophyEarnedAt: profile.data.firstTrophyEarnedAt,
-        lastTrophyEarnedAt: profile.data.lastTrophyEarnedAt,
-        earnedPlatinum: profile.data.earnedPlatinum,
-        earnedGold: profile.data.earnedGold,
-        earnedSilver: profile.data.earnedSilver,
-        earnedBronze: profile.data.earnedBronze,
-        streamPlatinum: profile.data.streamPlatinum,
-        streamGold: profile.data.streamGold,
-        streamSilver: profile.data.streamSilver,
-        streamBronze: profile.data.streamBronze,
-        hiddenTrophies: profile.data.hiddenTrophies,
-        points: profile.data.points,
-        streamPoints: profile.data.streamPoints,
-        timeStreamed: profile.data.timeStreamed,
+        firstTrophyEarnedAt: hunter.data.firstTrophyEarnedAt,
+        lastTrophyEarnedAt: hunter.data.lastTrophyEarnedAt,
+        earnedPlatinum: hunter.data.earnedPlatinum,
+        earnedGold: hunter.data.earnedGold,
+        earnedSilver: hunter.data.earnedSilver,
+        earnedBronze: hunter.data.earnedBronze,
+        streamPlatinum: hunter.data.streamPlatinum,
+        streamGold: hunter.data.streamGold,
+        streamSilver: hunter.data.streamSilver,
+        streamBronze: hunter.data.streamBronze,
+        hiddenTrophies: hunter.data.hiddenTrophies,
+        points: hunter.data.points,
+        streamPoints: hunter.data.streamPoints,
+        timeStreamed: hunter.data.timeStreamed,
       };
     },
   },
@@ -39,7 +39,7 @@ const { data: profile } = await useFetch(
 </script>
 
 <template>
-  <div v-if="profile">
+  <div v-if="hunter">
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <UCard>
         <p class="text-lg font-bold">
@@ -47,7 +47,7 @@ const { data: profile } = await useFetch(
             dayjs
               .duration({
                 seconds:
-                  dayjs().unix() - dayjs(profile.firstTrophyEarnedAt).unix(),
+                  dayjs().unix() - dayjs(hunter.firstTrophyEarnedAt).unix(),
               })
               .humanize()
           }}
@@ -62,7 +62,7 @@ const { data: profile } = await useFetch(
             dayjs
               .duration({
                 seconds:
-                  dayjs().unix() - dayjs(profile.lastTrophyEarnedAt).unix(),
+                  dayjs().unix() - dayjs(hunter.lastTrophyEarnedAt).unix(),
               })
               .humanize()
           }}
@@ -75,28 +75,28 @@ const { data: profile } = await useFetch(
     <div class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
       <UCard>
         <p class="text-lg font-bold text-sky-500 dark:text-sky-300">
-          {{ formatThousands(profile.earnedPlatinum, ",") }}
+          {{ formatThousands(hunter.earnedPlatinum, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Platinum</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-          {{ formatThousands(profile.earnedGold, ",") }}
+          {{ formatThousands(hunter.earnedGold, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Gold</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-gray-500 dark:text-gray-300">
-          {{ formatThousands(profile.earnedSilver, ",") }}
+          {{ formatThousands(hunter.earnedSilver, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Silver</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-orange-600 dark:text-orange-500">
-          {{ formatThousands(profile.earnedBronze, ",") }}
+          {{ formatThousands(hunter.earnedBronze, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Bronze</p>
       </UCard>
@@ -105,14 +105,14 @@ const { data: profile } = await useFetch(
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
       <UCard>
         <p class="text-lg font-bold">
-          {{ formatThousands(profile.hiddenTrophies, ",") }}
+          {{ formatThousands(hunter.hiddenTrophies, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Hidden trophies</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold">
-          {{ formatThousands(Number(profile.points), ",") }}
+          {{ formatThousands(Number(hunter.points), ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Points</p>
       </UCard>
@@ -120,37 +120,37 @@ const { data: profile } = await useFetch(
 
     <div
       v-if="
-        profile.streamBronze ||
-        profile.streamSilver ||
-        profile.streamGold ||
-        profile.streamPlatinum
+        hunter.streamBronze ||
+        hunter.streamSilver ||
+        hunter.streamGold ||
+        hunter.streamPlatinum
       "
       class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4"
     >
       <UCard>
         <p class="text-lg font-bold text-sky-500 dark:text-sky-300">
-          {{ formatThousands(profile.streamPlatinum, ",") }}
+          {{ formatThousands(hunter.streamPlatinum, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream platinum</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-          {{ formatThousands(profile.streamGold, ",") }}
+          {{ formatThousands(hunter.streamGold, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream gold</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-gray-500 dark:text-gray-300">
-          {{ formatThousands(profile.streamSilver, ",") }}
+          {{ formatThousands(hunter.streamSilver, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream silver</p>
       </UCard>
 
       <UCard>
         <p class="text-lg font-bold text-orange-600 dark:text-orange-500">
-          {{ formatThousands(profile.streamBronze, ",") }}
+          {{ formatThousands(hunter.streamBronze, ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream bronze</p>
       </UCard>
@@ -158,10 +158,10 @@ const { data: profile } = await useFetch(
 
     <div
       v-if="
-        profile.streamBronze ||
-        profile.streamSilver ||
-        profile.streamGold ||
-        profile.streamPlatinum
+        hunter.streamBronze ||
+        hunter.streamSilver ||
+        hunter.streamGold ||
+        hunter.streamPlatinum
       "
       class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2"
     >
@@ -169,7 +169,7 @@ const { data: profile } = await useFetch(
         <p class="text-lg font-bold">
           {{
             Math.round(
-              dayjs.duration(profile.timeStreamed, "seconds").as("hours") * 10,
+              dayjs.duration(hunter.timeStreamed, "seconds").as("hours") * 10,
             ) / 10
           }}
         </p>
@@ -178,7 +178,7 @@ const { data: profile } = await useFetch(
 
       <UCard>
         <p class="text-lg font-bold">
-          {{ formatThousands(Number(profile.streamPoints), ",") }}
+          {{ formatThousands(Number(hunter.streamPoints), ",") }}
         </p>
         <p class="text-gray-400 dark:text-gray-500">Stream points</p>
       </UCard>

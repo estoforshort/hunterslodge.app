@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
   ]);
 
   return {
-    data,
+    data: data?.changes ?? [],
     page,
     pageSize,
     totalSize,

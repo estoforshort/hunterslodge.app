@@ -9,7 +9,7 @@ dayjs.extend(duration);
 
 const props = defineProps<{
   group: {
-    gameId: number;
+    stackId: string;
     groupId: string;
     name: string;
     definedPlatinum: number;
@@ -27,6 +27,8 @@ const props = defineProps<{
     firstTrophyEarnedAt: string | null;
     lastTrophyEarnedAt: string | null;
     quality: string;
+    timesCompleted: number;
+    value: string;
     progress: number;
     points: string;
     streamPoints: string;
@@ -78,7 +80,7 @@ const route = useRoute();
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/images/games/${group.gameId}/${group.groupId}`"
+            :src="`${config.public.baseUrl}/api/games/${group.stackId}/groups/${group.groupId}/image`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder
@@ -93,48 +95,92 @@ const route = useRoute();
           </div>
 
           <div v-if="group.firstTrophyEarnedAt" class="flex">
-            <UPopover mode="hover" :popper="{ placement: 'auto' }">
+            <UPopover mode="hover" :popper="{ placement: 'left-start' }">
               <span class="align-middle">
                 <UIcon name="i-bi-info-circle" class="align-middle" />
               </span>
 
               <template #panel>
                 <div class="p-2">
-                  <p v-if="group.progress !== 100" class="text-sm">
-                    Started
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(group.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                  <p v-if="group.firstTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-top"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(group.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
                   </p>
 
-                  <p v-else class="text-sm">
-                    Completed in
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs(group.lastTrophyEarnedAt).unix() -
-                            dayjs(group.firstTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }},
-                    {{
-                      dayjs
-                        .duration({
-                          seconds:
-                            dayjs().unix() -
-                            dayjs(group.lastTrophyEarnedAt).unix(),
-                        })
-                        .humanize()
-                    }}
-                    ago
+                  <p v-if="group.lastTrophyEarnedAt" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-bottom"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs().unix() -
+                              dayjs(group.lastTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                      ago
+                    </span>
+                  </p>
+
+                  <p v-if="group.progress === 100" class="text-sm">
+                    <UIcon
+                      name="i-bi-hourglass-split"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{
+                        dayjs
+                          .duration({
+                            seconds:
+                              dayjs(group.lastTrophyEarnedAt).unix() -
+                              dayjs(group.firstTrophyEarnedAt).unix(),
+                          })
+                          .humanize()
+                      }}
+                    </span>
+                  </p>
+
+                  <p class="mt-2 text-sm">
+                    <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
+                    <span class="align-middle"> {{ group.quality }}% </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-check-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ group.timesCompleted }}
+                    </span>
+                  </p>
+
+                  <p class="text-sm">
+                    <UIcon
+                      name="i-bi-p-circle-fill"
+                      class="me-2 align-middle"
+                    />
+                    <span class="align-middle">
+                      {{ group.value }}
+                    </span>
                   </p>
                 </div>
               </template>
@@ -218,18 +264,20 @@ const route = useRoute();
           </div>
 
           <div class="flex flex-row justify-between">
-            <span class="align-middle">
-              <UIcon name="i-bi-award-fill" class="me-2 align-middle" />
-              <UTooltip
-                text="Quality"
-                class="align-middle"
-                :popper="{ placement: 'top', arrow: true }"
-              >
-                <span class="me-4 align-middle"> {{ group.quality }}% </span>
-              </UTooltip>
-            </span>
-
-            <span class="align-middle">
+            <span
+              class="align-middle"
+              :class="
+                Number(group.streamPoints)
+                  ? group.streamPoints === group.points
+                    ? 'text-primary'
+                    : group.progress === 100
+                      ? 'text-green-600 dark:text-green-400'
+                      : ''
+                  : group.progress === 100
+                    ? 'text-green-600 dark:text-green-400'
+                    : ''
+              "
+            >
               <UIcon name="i-bi-p-circle-fill" class="me-2 align-middle" />
               <UTooltip
                 text="Stream/total points"
@@ -237,7 +285,10 @@ const route = useRoute();
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span
-                  v-if="Number(group.streamPoints)"
+                  v-if="
+                    Number(group.streamPoints) &&
+                    Number(group.streamPoints) !== Number(group.points)
+                  "
                   class="me-4 align-middle"
                 >
                   {{
@@ -271,12 +322,14 @@ const route = useRoute();
               >
                 <span
                   :class="
-                    group.progress === 100
-                      ? streamProgress === 100
+                    Number(group.streamPoints)
+                      ? group.streamPoints === group.points
                         ? 'text-primary'
-                        : 'text-green-600 dark:text-green-400'
-                      : group.earnedPlatinum
-                        ? 'text-sky-600 dark:text-sky-400'
+                        : group.progress === 100
+                          ? 'text-green-600 dark:text-green-400'
+                          : ''
+                      : group.progress === 100
+                        ? 'text-green-600 dark:text-green-400'
                         : ''
                   "
                 >

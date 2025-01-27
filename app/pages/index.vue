@@ -11,7 +11,7 @@ useSeoMeta({
   title: "Home",
 });
 
-const { data: stats } = await useFetch("/api/statistics", {
+const { data: stats } = await useFetch("/api/app/statistics", {
   transform: (stats) => {
     return {
       data: {

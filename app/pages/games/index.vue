@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import formatThousands from "format-thousands";
 import Fuse from "fuse.js";
 
 useSeoMeta({
@@ -7,16 +8,12 @@ useSeoMeta({
 
 const route = useRoute();
 const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
-const pageSize = 100;
+const pageSize = 50;
 
 const orderOptions = [
   {
     name: "Order by value",
     value: "value",
-  },
-  {
-    name: "Order by average progress",
-    value: "avgProgress",
   },
   {
     name: "Order by times completed",
@@ -54,13 +51,12 @@ const directionOptions = [
 const orderBy = ref("value");
 const direction = ref("desc");
 
-const { data: games } = await useFetch(`/api/public/v1/stacks`, {
+const { data: games } = await useFetch(`/api/games`, {
   query: { orderBy, direction, page, pageSize },
   transform: (games) => {
     return {
       data: games.data.map((game) => ({
-        stackId: game.id,
-        gameId: game.gameId,
+        id: game.id,
         name: game.game.name,
         platforms: game.game.platforms,
         definedPlatinum: game.definedPlatinum,
@@ -73,7 +69,7 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
         timesStarted: game.timesStarted,
         timesCompleted: game.timesCompleted,
         progress: game.avgProgress,
-        value: game.value,
+        value: formatThousands(game.value, ","),
       })),
       page: games.page,
       pageSize: games.pageSize,
@@ -84,8 +80,7 @@ const { data: games } = await useFetch(`/api/public/v1/stacks`, {
 
 const searchResults = ref<
   {
-    stackId: string;
-    gameId: number;
+    id: string;
     name: string;
     platforms: {
       platformId: string;
@@ -112,7 +107,7 @@ async function search() {
     if (!searching.value && name.value.length) {
       searching.value = true;
 
-      const response = await $fetch("/api/public/v1/stacks/search", {
+      const response = await $fetch("/api/games/search", {
         method: "POST",
         body: { name: name.value },
       });
@@ -133,8 +128,7 @@ async function search() {
 
           if (result) {
             searchResults.value.push({
-              stackId: result.id,
-              gameId: result.gameId,
+              id: result.id,
               name: result.game.name,
               platforms: result.game.platforms,
               definedPlatinum: result.definedPlatinum,
@@ -210,20 +204,20 @@ watch(name, (newName) => {
           <div v-if="name.trim().length">
             <div
               v-for="game in searchResults"
-              :key="game.stackId"
+              :key="game.id"
               class="mb-3 last:mb-0"
             >
-              <GamesGameOverview :game />
+              <GamesGameOverview :order-by="'value'" :game />
             </div>
           </div>
 
           <div v-else>
             <div
               v-for="game in games?.data"
-              :key="game.stackId"
+              :key="game.id"
               class="mb-3 last:mb-0"
             >
-              <GamesGameOverview :game />
+              <GamesGameOverview :order-by="orderBy" :game />
             </div>
           </div>
 

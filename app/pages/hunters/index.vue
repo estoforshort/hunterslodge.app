@@ -9,19 +9,19 @@ const route = useRoute();
 const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
 const pageSize = 50;
 
-const { data: hunters } = await useFetch("/api/profiles", {
+const { data: hunters } = await useFetch("/api/hunters", {
   query: { page, pageSize },
   transform: (hunters) => {
     return {
       data: hunters.data.map((hunter) => ({
-        userId: hunter.userId,
-        regionId: hunter.regionId,
+        user: hunter.user,
+        region: hunter.region,
         earnedPlatinum: hunter.earnedPlatinum,
         earnedGold: hunter.earnedGold,
         earnedSilver: hunter.earnedSilver,
         earnedBronze: hunter.earnedBronze,
         points: formatThousands(hunter.points, ","),
-        streamerPoints: Number(hunter.streamPoints),
+        streamPosition: hunter.streamPosition,
         globalPosition: hunter.globalPosition,
       })),
       page: hunters.page,
@@ -61,6 +61,8 @@ const columns = [
     label: "Points",
   },
 ];
+
+const config = useRuntimeConfig();
 </script>
 
 <template>
@@ -69,17 +71,94 @@ const columns = [
       <UCard :ui="{ body: { padding: '!p-0' } }">
         <UTable v-if="hunters" :columns="columns" :rows="hunters.data">
           <template #globalPosition-data="{ row }">
-            <span v-if="row.globalPosition">
-              {{ ordinal(row.globalPosition) }}
-            </span>
+            {{ ordinal(row.globalPosition) }}
           </template>
 
           <template #hunter-data="{ row }">
-            <CompactUserInfo
-              :user-id="row.userId"
-              :region-id="row.regionId"
-              :streamer-points="row.streamerPoints"
-            />
+            <div class="flex items-center gap-3">
+              <UTooltip
+                :text="
+                  row.user.isAdmin
+                    ? 'Administrator'
+                    : row.user.isFounder
+                      ? 'Founder'
+                      : row.streamPosition > 0
+                        ? 'Streamer'
+                        : ''
+                "
+                :popper="{ arrow: true }"
+              >
+                <UChip
+                  :color="
+                    row.user.isAdmin
+                      ? 'red'
+                      : row.user.isFounder
+                        ? 'yellow'
+                        : row.streamPosition > 0
+                          ? 'primary'
+                          : 'gray'
+                  "
+                  position="top-left"
+                  :text="
+                    row.user.isAdmin
+                      ? 'A'
+                      : row.user.isFounder
+                        ? 'F'
+                        : row.streamPosition > 0
+                          ? 'S'
+                          : ''
+                  "
+                  size="xl"
+                  :show="
+                    row.user.isAdmin ||
+                    row.user.isFounder ||
+                    row.streamPosition > 0
+                  "
+                >
+                  <div
+                    class="bg-cool-200 dark:bg-cool-800 rounded"
+                    :class="
+                      row.user.isAdmin
+                        ? 'border-2 border-red-500 dark:border-red-400'
+                        : row.user.isFounder
+                          ? 'border-2 border-yellow-500 dark:border-yellow-400'
+                          : row.streamPosition > 0
+                            ? 'border-primary dark:border-primary border-2'
+                            : ''
+                    "
+                  >
+                    <NuxtLink :to="`/hunters/${row.user.username}`">
+                      <NuxtImg
+                        :src="`${config.public.baseUrl}/api/hunters/${row.user.username}/images/twitch`"
+                        width="48"
+                        class="max-h-12 min-h-12 min-w-12 max-w-12 rounded object-contain"
+                        placeholder
+                      />
+                    </NuxtLink>
+                  </div>
+                </UChip>
+              </UTooltip>
+
+              <span>
+                <span class="font-semibold">
+                  <NuxtLink :to="`/hunters/${row.user.username}`">
+                    {{ row.user.displayName }}
+                  </NuxtLink>
+                </span>
+                <br />
+                <span>
+                  <UBadge
+                    color="gray"
+                    variant="solid"
+                    size="sm"
+                    class="align-middle"
+                  >
+                    <UIcon :name="`i-circle-flags-${row.region.id}`" />
+                    {{ row.region.name }}
+                  </UBadge>
+                </span>
+              </span>
+            </div>
           </template>
 
           <template #earnedPlatinum-data="{ row }">

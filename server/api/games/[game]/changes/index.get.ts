@@ -32,6 +32,8 @@ export default defineEventHandler(async (event) => {
             definedBronzeTo: true,
             qualityFrom: true,
             qualityTo: true,
+            timesStartedFrom: true,
+            timesStartedTo: true,
             timesCompletedFrom: true,
             timesCompletedTo: true,
             avgProgressFrom: true,
@@ -59,7 +61,7 @@ export default defineEventHandler(async (event) => {
   ]);
 
   return {
-    data,
+    data: data?.changes ?? [],
     page,
     pageSize,
     totalSize,

@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
   ]);
 
   return {
-    data,
+    data: data?.profiles ?? [],
     page,
     pageSize,
     totalSize,

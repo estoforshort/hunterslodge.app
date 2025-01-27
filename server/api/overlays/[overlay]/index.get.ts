@@ -58,6 +58,7 @@ export default defineCachedEventHandler(
               timeStreamed: true,
               lastFullUpdateAt: true,
               profilesCount: true,
+              streamPosition: true,
             },
           },
           project: {
@@ -240,7 +241,7 @@ export default defineCachedEventHandler(
 
           const fuse = new Fuse(findProjects, {
             keys: ["stack.game.name"],
-            threshold: 0.1,
+            threshold: 0.2,
           });
 
           const results = fuse.search(twitchStream.gameName);

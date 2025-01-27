@@ -20,7 +20,7 @@ async function onSubmit() {
   loading.value = true;
 
   try {
-    await $fetch("/api/app-tokens", {
+    await $fetch("/api/app/tokens", {
       method: "PUT",
       body,
     });

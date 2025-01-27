@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
             },
           },
         },
-        take: 100,
+        take: 50,
       });
     },
     { maxAge: 60, staleMaxAge: 60 },

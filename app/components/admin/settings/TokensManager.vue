@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
-const { data: tokens, refresh } = await useFetch("/api/app-tokens");
+const { data: tokens, refresh } = await useFetch("/api/app/tokens");
 
 const modal = useModal();
 

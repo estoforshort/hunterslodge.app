@@ -18,7 +18,7 @@ useSeoMeta({
 const route = useRoute();
 
 const { data: overlay, refresh: refreshOverlay } = await useFetch(
-  `/api/public/v1/overlays/${route.params.overlay}`,
+  `/api/overlays/${route.params.overlay}`,
   {
     transform: (overlay) => {
       if (!overlay.data) {
@@ -47,7 +47,7 @@ const { data: overlay, refresh: refreshOverlay } = await useFetch(
         },
         project: overlay.data.project
           ? {
-              id: overlay.data.project.stack.game.id,
+              id: overlay.data.project.stack.id,
               definedTrophies:
                 overlay.data.project.stack.definedPlatinum +
                 overlay.data.project.stack.definedGold +
@@ -59,9 +59,8 @@ const { data: overlay, refresh: refreshOverlay } = await useFetch(
                 overlay.data.project.earnedSilver +
                 overlay.data.project.earnedBronze,
               progress: overlay.data.project.progress,
-              value: Number(overlay.data.project.value),
+              value: Number(overlay.data.project.stack.value),
               points: Number(overlay.data.project.points),
-              streamPoints: Number(overlay.data.project.streamPoints),
               timeStreamed: overlay.data.project.timeStreamed,
             }
           : null,
@@ -71,7 +70,7 @@ const { data: overlay, refresh: refreshOverlay } = await useFetch(
 );
 
 const { data: streamers, refresh: refreshStreamers } = await useFetch(
-  "/api/public/v1/profiles",
+  "/api/hunters",
   {
     query: { orderBy: "streamPosition", direction: "asc", onlyStreamers: true },
     transform: (streamers) => {
@@ -138,7 +137,7 @@ onMounted(() => {
       v-if="overlay.project"
       class="flex text-center font-mono text-xl font-semibold text-white"
     >
-      <img :src="`/images/games/${overlay.project.id}`" class="me-2 h-11" />
+      <img :src="`/api/games/${overlay.project.id}/image`" class="me-2 h-11" />
 
       <UIcon
         v-if="overlay.project.progress === 100"
@@ -173,7 +172,7 @@ onMounted(() => {
 
       <UIcon
         v-if="overlay.style !== 'streamer'"
-        name="i-bi-clock-history"
+        name="i-bi-camera-video-fill"
         class="my-auto me-2 h-5 w-5"
       />
       <span v-if="overlay.style !== 'streamer'" class="my-auto">

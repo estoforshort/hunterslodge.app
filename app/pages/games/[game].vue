@@ -2,7 +2,7 @@
 const route = useRoute();
 
 const { data: game } = await useFetch(
-  `/api/public/v1/stacks/${route.params.game}`,
+  `/api/games/${route.params.game}/summary`,
   {
     transform: (game) => {
       if (!game.data) {
@@ -10,8 +10,7 @@ const { data: game } = await useFetch(
       }
 
       return {
-        stackId: game.data.id,
-        gameId: game.data.gameId,
+        id: game.data.id,
         name: game.data.game.name,
         platforms: game.data.game.platforms,
       };
@@ -28,13 +27,13 @@ const links = computed(() => [
     {
       label: "Summary",
       icon: "i-bi-grid",
-      to: `/games/${game.value?.stackId}`,
+      to: `/games/${game.value?.id}`,
       exact: true,
     },
     {
       label: "Trophies",
       icon: "i-bi-trophy",
-      to: `/games/${game.value?.stackId}/trophies`,
+      to: `/games/${game.value?.id}/trophies`,
       active:
         route.name === "games-game-trophies"
           ? true
@@ -47,7 +46,7 @@ const links = computed(() => [
     {
       label: "Charts",
       icon: "i-bi-graph-up",
-      to: `/games/${game.value?.stackId}/charts`,
+      to: `/games/${game.value?.id}/charts`,
       exact: true,
     },
   ],
@@ -61,7 +60,7 @@ const config = useRuntimeConfig();
     <UPageBody v-if="game">
       <div class="flex justify-center">
         <NuxtImg
-          :src="`${config.public.baseUrl}/images/games/${game.gameId}`"
+          :src="`${config.public.baseUrl}/api/games/${game.id}/image`"
           height="176"
           placeholder
           class="rounded-lg"
