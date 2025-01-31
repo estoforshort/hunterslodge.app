@@ -46,10 +46,7 @@ export const runAutoQueue = async () => {
     for (let p = 0, pl = profiles.length; p < pl; p++) {
       const profile = profiles[p];
 
-      if (
-        dayjs().isAfter(dayjs(profile.lastFullUpdateAt).add(7, "days")) ||
-        profile.profilesCount !== profiles.length
-      ) {
+      if (dayjs().isAfter(dayjs(profile.lastFullUpdateAt).add(7, "days"))) {
         const [hasQueuedUpdate, initialUpdate] = await Promise.all([
           prisma.update.count({
             where: {
