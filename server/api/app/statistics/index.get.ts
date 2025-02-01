@@ -11,11 +11,13 @@ export default defineCachedEventHandler(
     ] = await Promise.all([
       prisma.stack.count(),
       prisma.stackTrophy.count(),
-      prisma.profile.count(),
+      prisma.profile.count({ where: { userId: { not: null } } }),
       prisma.profile.count({ where: { streamPosition: { gt: 0 } } }),
       prisma.profile.aggregate({ _sum: { timeStreamed: true } }),
       prisma.projectTrophy.count({ where: { streamId: { not: null } } }),
-      prisma.projectTrophy.count(),
+      prisma.projectTrophy.count({
+        where: { profile: { userId: { not: null } } },
+      }),
     ]);
 
     return {
