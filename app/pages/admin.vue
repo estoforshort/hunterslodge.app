@@ -11,6 +11,11 @@ const links = [
       to: "/admin",
       exact: true,
     },
+    {
+      label: "Shadow Hunters",
+      icon: "i-bi-people",
+      to: "/admin/shadows",
+    },
   ],
   [
     {

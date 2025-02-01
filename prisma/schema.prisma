@@ -116,8 +116,8 @@ model Profile {
   appId String @default("app") @db.Char(3)
   app   App    @relation(references: [id], fields: [appId])
 
-  userId String @unique @db.VarChar(36)
-  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  userId String? @unique @db.VarChar(36)
+  user   User?   @relation(references: [id], fields: [userId], onDelete: SetNull)
 
   regionId String        @db.Char(2)
   region   ProfileRegion @relation(references: [id], fields: [regionId])

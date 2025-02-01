@@ -21,6 +21,7 @@ export const runRankings = async () => {
           globalPosition: true,
         },
         where: {
+          userId: { not: null },
           lastFullUpdateAt: { not: null },
         },
         orderBy: {
@@ -35,6 +36,7 @@ export const runRankings = async () => {
           streamPosition: true,
         },
         where: {
+          userId: { not: null },
           streamPoints: { gt: 0 },
         },
         orderBy: {
