@@ -696,7 +696,7 @@ model ProjectChange {
 
   @@id([updateId, stackId])
   @@index([updateId])
-  @@index([profileId, stackId])
+  @@index([profileId, stackId, createdAt])
 }
 
 model ProjectGroupChange {
@@ -736,7 +736,7 @@ model ProjectGroupChange {
   trophyChanges ProjectTrophyChange[]
 
   @@id([updateId, stackId, groupId])
-  @@index([profileId, stackId, groupId])
+  @@index([profileId, stackId, groupId, createdAt])
 }
 
 model ProjectTrophyChange {
@@ -755,7 +755,7 @@ model ProjectTrophyChange {
   updatedAt  DateTime @updatedAt
 
   @@id([updateId, stackId, groupId, trophyId])
-  @@index([profileId, stackId, groupId, trophyId])
+  @@index([profileId, stackId, groupId, trophyId, createdAt])
 }
 
 model StackChange {
@@ -787,7 +787,7 @@ model StackChange {
 
   groupChanges StackGroupChange[]
 
-  @@index([stackId])
+  @@index([stackId, createdAt])
 }
 
 model StackGroupChange {
@@ -820,7 +820,7 @@ model StackGroupChange {
   trophyChanges StackTrophyChange[]
 
   @@id([stackChangeId, stackId, groupId])
-  @@index([stackId, groupId])
+  @@index([stackId, groupId, createdAt])
 }
 
 model StackTrophyChange {
@@ -846,7 +846,7 @@ model StackTrophyChange {
   updatedAt       DateTime @updatedAt
 
   @@id([stackChangeId, stackId, groupId, trophyId])
-  @@index([stackId, groupId, trophyId])
+  @@index([stackId, groupId, trophyId, createdAt])
 }
 
 model ProfileRegionChange {

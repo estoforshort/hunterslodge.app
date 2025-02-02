@@ -47,6 +47,9 @@ export default defineEventHandler(async (event) => {
           orderBy: {
             createdAt: "asc",
           },
+          where: {
+            createdAt: { gt: new Date("2025-01-28T08:00:00") },
+          },
         },
       },
       where: {
@@ -56,6 +59,7 @@ export default defineEventHandler(async (event) => {
     prisma.stackChange.count({
       where: {
         stackId: params.game,
+        createdAt: { gt: new Date("2025-01-28T08:00:00") },
       },
     }),
   ]);
