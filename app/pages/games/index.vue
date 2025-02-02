@@ -6,9 +6,32 @@ useSeoMeta({
   title: "Games",
 });
 
-const route = useRoute();
-const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
-const pageSize = 50;
+const platformOptions = [
+  {
+    name: "All platforms",
+    value: "all",
+  },
+  {
+    name: "PS5",
+    value: "ps5",
+  },
+  {
+    name: "PS4",
+    value: "ps4",
+  },
+  {
+    name: "Vita",
+    value: "psvita",
+  },
+  {
+    name: "PS3",
+    value: "ps3",
+  },
+  {
+    name: "PC",
+    value: "pspc",
+  },
+];
 
 const orderOptions = [
   {
@@ -48,11 +71,17 @@ const directionOptions = [
   },
 ];
 
+const route = useRoute();
+
+const page = ref(Number(route.query.page) ? Number(route.query.page) : 1);
+const pageSize = 50;
+
+const platform = ref("all");
 const orderBy = ref("value");
 const direction = ref("desc");
 
 const { data: games } = await useFetch(`/api/games`, {
-  query: { orderBy, direction, page, pageSize },
+  query: { platform, orderBy, direction, page, pageSize },
   transform: (games) => {
     return {
       data: games.data.map((game) => ({
@@ -171,7 +200,21 @@ watch(name, (newName) => {
       <UPageCard>
         <div id="top">
           <UInput v-model="name" placeholder="Search..." class="mb-3" />
-          <div class="mb-6 grid grid-cols-2 gap-3">
+          <div class="mb-6 grid grid-cols-3 gap-3">
+            <USelect
+              v-model="platform"
+              :options="platformOptions"
+              option-attribute="name"
+              :disabled="name.trim().length > 0"
+            >
+              <template #trailing>
+                <UIcon
+                  name="i-heroicons-arrows-up-down-20-solid"
+                  class="h-5 w-5"
+                />
+              </template>
+            </USelect>
+
             <USelect
               v-model="orderBy"
               :options="orderOptions"
