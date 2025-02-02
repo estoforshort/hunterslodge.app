@@ -141,7 +141,7 @@ async function search() {
               timesStarted: result.timesStarted,
               timesCompleted: result.timesCompleted,
               progress: result.avgProgress,
-              value: result.value,
+              value: formatThousands(result.value, ","),
             });
           }
         }
