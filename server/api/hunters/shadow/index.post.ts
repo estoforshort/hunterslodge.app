@@ -13,10 +13,19 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const appSettings = await prisma.appSettings.findUniqueOrThrow({
+  const appSettings = await prisma.appSettings.findUnique({
     select: { linkingEnabled: true },
     where: { appId: "app" },
   });
+
+  if (!appSettings) {
+    return {
+      data: {
+        success: false,
+        message: "App settings not found",
+      },
+    };
+  }
 
   if (!appSettings.linkingEnabled) {
     return {

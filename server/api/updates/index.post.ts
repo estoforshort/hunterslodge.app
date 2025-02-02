@@ -4,12 +4,12 @@ import dayjs from "dayjs";
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
 
-  const appSettings = await prisma.appSettings.findUniqueOrThrow({
+  const appSettings = await prisma.appSettings.findUnique({
     select: { updatesEnabled: true },
     where: { appId: "app" },
   });
 
-  if (!appSettings.updatesEnabled) {
+  if (!appSettings?.updatesEnabled) {
     return {
       data: {
         success: false,

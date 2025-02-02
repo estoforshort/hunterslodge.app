@@ -9,14 +9,18 @@ export default defineEventHandler(async (event) => {
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const stack = await prisma.stack.findUniqueOrThrow({
+  const stack = await prisma.stack.findUnique({
     select: {
       gameId: true,
     },
     where: { id: params.game },
   });
 
-  const findImage = await prisma.groupImage.findUniqueOrThrow({
+  if (!stack) {
+    return "404 Not Found";
+  }
+
+  const findImage = await prisma.groupImage.findUnique({
     where: {
       gameId_groupId: {
         gameId: stack.gameId,
@@ -24,6 +28,10 @@ export default defineEventHandler(async (event) => {
       },
     },
   });
+
+  if (!findImage) {
+    return "404 Not Found";
+  }
 
   const fileType = await fileTypeFromBuffer(findImage.image);
 

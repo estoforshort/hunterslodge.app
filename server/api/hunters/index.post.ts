@@ -13,12 +13,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const appSettings = await prisma.appSettings.findUniqueOrThrow({
+  const appSettings = await prisma.appSettings.findUnique({
     select: { linkingEnabled: true },
     where: { appId: "app" },
   });
 
-  if (!appSettings.linkingEnabled) {
+  if (!appSettings?.linkingEnabled) {
     return {
       data: {
         success: false,
