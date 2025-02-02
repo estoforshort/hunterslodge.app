@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import formatThousands from "format-thousands";
 import dayjs from "dayjs";
 import {
   VisArea,
@@ -10,7 +11,7 @@ import {
 
 const props = defineProps<{
   changes: {
-    timesCompleted: number;
+    value: string;
     createdAt: string;
   }[];
 }>();
@@ -24,17 +25,17 @@ for (let c = 0, cl = props.changes.length; c < cl; c++) {
   if (change && change.createdAt) {
     data.value.push({
       x: dayjs(change.createdAt).unix(),
-      y: change.timesCompleted,
+      y: Number(change.value),
     });
   }
 }
 
 const template = (d: DataRecord) =>
-  `${dayjs.unix(d.x).format("DD.MM.YYYY")}: ${d.y}`;
+  `${dayjs.unix(d.x).format("DD.MM.YYYY")}: ${formatThousands(d.y, ",")}`;
 </script>
 
 <template>
-  <VisXYContainer :data="data" class="h-24">
+  <VisXYContainer :data="data" class="h-16">
     <VisLine
       :x="(d: DataRecord) => d.x"
       :y="(d: DataRecord) => d.y"
