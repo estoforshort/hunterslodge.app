@@ -8,9 +8,13 @@ export default defineEventHandler(async (event) => {
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const findImage = await prisma.profileImage.findFirstOrThrow({
+  const findImage = await prisma.profileImage.findFirst({
     where: { profile: { user: { username: params.hunter } } },
   });
+
+  if (!findImage) {
+    return "404 Not Found";
+  }
 
   const fileType = await fileTypeFromBuffer(findImage.image);
 

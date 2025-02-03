@@ -13,6 +13,10 @@ const { data: game } = await useFetch(
         id: game.data.id,
         name: game.data.game.name,
         platforms: game.data.game.platforms,
+        definedPlatinum: game.data.definedPlatinum,
+        definedGold: game.data.definedGold,
+        definedSilver: game.data.definedSilver,
+        definedBronze: game.data.definedBronze,
       };
     },
   },
@@ -23,6 +27,7 @@ useSeoMeta({
 });
 
 const links = computed(() => [
+  [],
   [
     {
       label: "Summary",
@@ -42,14 +47,7 @@ const links = computed(() => [
             : false,
     },
   ],
-  [
-    {
-      label: "Charts",
-      icon: "i-bi-graph-up",
-      to: `/games/${game.value?.id}/charts`,
-      exact: true,
-    },
-  ],
+  [],
 ]);
 
 const config = useRuntimeConfig();
@@ -69,6 +67,56 @@ const config = useRuntimeConfig();
 
       <div class="mt-4 text-center text-4xl font-medium">
         {{ game.name }}
+      </div>
+
+      <div class="my-4 text-center text-2xl font-medium">
+        <span
+          v-if="game.definedPlatinum"
+          class="me-8 text-sky-500 dark:text-sky-300"
+        >
+          <span class="align-middle">
+            <UIcon name="i-bi-trophy" class="me-2 align-middle" />
+            <span class="align-middle">
+              {{ game.definedPlatinum }}
+            </span>
+          </span>
+        </span>
+
+        <span
+          v-if="game.definedGold"
+          class="me-8 text-yellow-600 dark:text-yellow-400"
+        >
+          <span class="align-middle">
+            <UIcon name="i-bi-trophy" class="me-2 align-middle" />
+            <span class="align-middle">
+              {{ game.definedGold }}
+            </span>
+          </span>
+        </span>
+
+        <span
+          v-if="game.definedSilver"
+          class="me-8 text-gray-500 dark:text-gray-300"
+        >
+          <span class="align-middle">
+            <UIcon name="i-bi-trophy" class="me-2 align-middle" />
+            <span class="align-middle">
+              {{ game.definedSilver }}
+            </span>
+          </span>
+        </span>
+
+        <span
+          v-if="game.definedBronze"
+          class="text-orange-600 dark:text-orange-500"
+        >
+          <span class="align-middle">
+            <UIcon name="i-bi-trophy" class="me-2 align-middle" />
+            <span class="align-middle">
+              {{ game.definedBronze }}
+            </span>
+          </span>
+        </span>
       </div>
 
       <div class="mt-2 text-center">

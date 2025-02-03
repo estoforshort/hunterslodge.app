@@ -28,13 +28,55 @@ const props = defineProps<{
   };
 }>();
 
+const { user } = useUserSession();
+
+let progress = 0;
+let platinum = 0;
+
+if (user.value?.profileId) {
+  const { data: project } = await useFetch(
+    `/api/hunters/${user.value?.username}/projects/${props.game.id}/summary`,
+    {
+      transform: (project) => {
+        if (!project.data) {
+          return { data: null };
+        }
+
+        return {
+          data: {
+            earnedPlatinum: project.data.earnedPlatinum,
+            progress: project.data.progress,
+          },
+        };
+      },
+    },
+  );
+
+  if (project.value?.data) {
+    progress = project.value.data.progress;
+    platinum = project.value.data.earnedPlatinum;
+  }
+}
+
 const config = useRuntimeConfig();
 </script>
 
 <template>
+  <div>
+    <div></div>
+  </div>
   <NuxtLink :to="`/games/${props.game.id}`">
     <figure
       class="flex rounded-lg bg-gradient-to-r from-white via-white to-gray-200 shadow-lg dark:from-gray-900 dark:via-slate-950 dark:to-slate-950"
+      :class="
+        progress
+          ? progress === 100
+            ? 'border-e-2 border-green-500 dark:border-green-400'
+            : platinum >= 1
+              ? 'border-e-2 border-sky-500 dark:border-sky-400'
+              : 'border-e-2 border-gray-500 dark:border-gray-400'
+          : ''
+      "
     >
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
@@ -206,18 +248,28 @@ const config = useRuntimeConfig();
               </UTooltip>
             </span>
 
-            <span
-              v-if="orderBy === 'timesCompleted' || orderBy === 'timesStarted'"
-              class="align-middle"
-            >
+            <span v-if="orderBy === 'timesCompleted'" class="align-middle">
               <UIcon name="i-bi-check-circle-fill" class="me-2 align-middle" />
               <UTooltip
-                text="Times completed/started"
+                text="Times completed"
                 class="align-middle"
                 :popper="{ placement: 'top', arrow: true }"
               >
                 <span class="me-4 align-middle">
-                  {{ game.timesCompleted }} / {{ game.timesStarted }}
+                  {{ game.timesCompleted }}
+                </span>
+              </UTooltip>
+            </span>
+
+            <span v-if="orderBy === 'timesStarted'" class="align-middle">
+              <UIcon name="i-bi-people-fill" class="me-2 align-middle" />
+              <UTooltip
+                text="Times started"
+                class="align-middle"
+                :popper="{ placement: 'top', arrow: true }"
+              >
+                <span class="me-4 align-middle">
+                  {{ game.timesStarted }}
                 </span>
               </UTooltip>
             </span>

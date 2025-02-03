@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const data = await prisma.appTokens.findUniqueOrThrow({
+  const data = await prisma.appTokens.findUnique({
     select: {
       expiresAt: true,
       refreshTokenExpiresAt: true,

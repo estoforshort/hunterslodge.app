@@ -18,10 +18,19 @@ export default defineEventHandler(async (event) => {
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
 
-  const appSettings = await prisma.appSettings.findUniqueOrThrow({
+  const appSettings = await prisma.appSettings.findUnique({
     select: { updatesEnabled: true },
     where: { appId: "app" },
   });
+
+  if (!appSettings) {
+    return {
+      data: {
+        success: false,
+        message: "App settings not found",
+      },
+    };
+  }
 
   if (!appSettings.updatesEnabled) {
     return {

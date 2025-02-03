@@ -46,6 +46,9 @@ export default defineEventHandler(async (event) => {
           orderBy: {
             createdAt: "asc",
           },
+          where: {
+            createdAt: { gt: new Date("2025-01-28T08:00:00") },
+          },
         },
       },
       where: {
@@ -59,6 +62,7 @@ export default defineEventHandler(async (event) => {
       where: {
         stackId: params.game,
         groupId: params.group,
+        createdAt: { gt: new Date("2025-01-28T08:00:00") },
       },
     }),
   ]);

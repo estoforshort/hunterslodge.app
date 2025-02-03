@@ -43,6 +43,9 @@ export default defineEventHandler(async (event) => {
           skip: Math.floor((page - 1) * pageSize),
           take: pageSize,
           orderBy: { createdAt: "asc" },
+          where: {
+            createdAt: { gt: new Date("2025-01-28T08:00:00") },
+          },
         },
       },
       where: {
@@ -60,6 +63,7 @@ export default defineEventHandler(async (event) => {
         stackId: params.project,
         groupId: params.group,
         trophyId: params.trophy,
+        createdAt: { gt: new Date("2025-01-28T08:00:00") },
       },
     }),
   ]);

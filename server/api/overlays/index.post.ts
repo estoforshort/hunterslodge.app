@@ -2,11 +2,11 @@ export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event);
 
   const [appSettings, profile] = await Promise.all([
-    prisma.appSettings.findUniqueOrThrow({
+    prisma.appSettings.findUnique({
       select: { overlaysEnabled: true },
       where: { appId: "app" },
     }),
-    prisma.profile.findUniqueOrThrow({
+    prisma.profile.findUnique({
       select: {
         id: true,
         lastFullUpdateAt: true,
@@ -28,11 +28,29 @@ export default defineEventHandler(async (event) => {
     }),
   ]);
 
+  if (!appSettings) {
+    return {
+      data: {
+        success: false,
+        message: "App settings not found",
+      },
+    };
+  }
+
   if (!appSettings.overlaysEnabled) {
     return {
       data: {
         success: false,
         message: "Overlay creation is currently disabled",
+      },
+    };
+  }
+
+  if (!profile) {
+    return {
+      data: {
+        success: false,
+        message: "Profile not found",
       },
     };
   }
