@@ -19,7 +19,7 @@ const links = [
   <UFooter :links>
     <template #left>
       Created with <UIcon name="i-bi-heart" /> by
-      <NuxtLink to="https://www.patreon.com/estoforshort" target="_blank">
+      <NuxtLink to="https://www.twitch.tv/estoforshort" target="_blank">
         EstoForShort
       </NuxtLink>
     </template>

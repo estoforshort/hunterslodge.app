@@ -212,7 +212,7 @@ export default defineEventHandler(async (event) => {
         appId: "app",
         profileId: profile.id,
         status: "WAITING",
-        type: "MANUAL",
+        type: "FORCED",
         fullUpdate: dayjs().isAfter(
           dayjs(profile.lastFullUpdateAt).add(3, "hours"),
         )
