@@ -18,7 +18,7 @@ type Data = {
   };
   stack: {
     id: string;
-    timesStarted: number;
+    totalTimesStarted: number;
   };
   group: {
     trophyGroupId: string;
@@ -221,19 +221,6 @@ export const updateProjectAndStackGroup = async (data: Data) => {
           data: null,
         };
       }
-
-      let avgTrophyEarnRate = 0;
-
-      for (let t = 0, tl = trophies.length; t < tl; t++) {
-        if (trophies[t].trophyType !== "platinum") {
-          avgTrophyEarnRate += Number(trophies[t].trophyEarnedRate);
-        }
-      }
-
-      avgTrophyEarnRate =
-        Math.round(
-          (avgTrophyEarnRate / trophies.length + Number.EPSILON) * 100,
-        ) / 100;
 
       const gameGroup = await prisma.group.findUnique({
         where: {
@@ -438,8 +425,8 @@ export const updateProjectAndStackGroup = async (data: Data) => {
             gameId: data.game.id,
             groupId: gameGroup.id,
             stackId: data.stack.id,
-            avgTrophyEarnRate,
             trophy,
+            totalTimesStarted: data.stack.totalTimesStarted,
           }).then((updatedTrophy) => {
             if (!updatedTrophy.data) {
               updateSuccessful = false;

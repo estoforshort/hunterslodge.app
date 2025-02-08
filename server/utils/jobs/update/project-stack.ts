@@ -269,9 +269,14 @@ export const updateProjectAndStack = async (data: Data) => {
 
       const project = await getProject();
 
-      const timesStarted = await prisma.project.count({
-        where: { stackId: stack.id },
-      });
+      const [timesStarted, totalTimesStarted] = await Promise.all([
+        prisma.project.count({
+          where: { stackId: stack.id },
+        }),
+        prisma.project.count({
+          where: { stack: { gameId: stack.gameId } },
+        }),
+      ]);
 
       const projectData = {
         earnedPlatinum: data.project.earnedTrophies.platinum,
@@ -394,7 +399,7 @@ export const updateProjectAndStack = async (data: Data) => {
             },
             stack: {
               id: stack.id,
-              timesStarted,
+              totalTimesStarted,
             },
             group,
           }).then((updatedGroup) => {

@@ -13,7 +13,6 @@ type Data = {
   gameId: number;
   groupId: string;
   stackId: string;
-  avgTrophyEarnRate: number;
   trophy: {
     trophyId: number;
     earned: boolean;
@@ -21,6 +20,7 @@ type Data = {
     trophyType: TrophyType;
     trophyEarnedRate: string;
   };
+  totalTimesStarted: number;
 };
 
 export const updateProjectAndStackTrophy = async (data: Data) => {
@@ -62,95 +62,160 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
       getStackTrophy(),
     ]);
 
+    let [timesEarned, totalTimesEarned] = await Promise.all([
+      prisma.projectTrophy.count({
+        where: {
+          stackId: stackTrophy.stackId,
+          trophyId: stackTrophy.trophyId,
+        },
+      }),
+      prisma.projectTrophy.count({
+        where: {
+          stackTrophy: {
+            gameId: stackTrophy.gameId,
+            trophyId: stackTrophy.trophyId,
+          },
+        },
+      }),
+    ]);
+
+    if (data.trophy.earned && !findProjectTrophy) {
+      timesEarned += 1;
+      totalTimesEarned += 1;
+    }
+
     const stackTrophyData = {
       firstEarnedAt: stackTrophy.firstEarnedAt,
       lastEarnedAt: stackTrophy.lastEarnedAt,
       psnRate: Number(data.trophy.trophyEarnedRate),
-      quality:
-        Math.round(
-          (100 - Number(data.trophy.trophyEarnedRate) + Number.EPSILON) * 100,
-        ) / 100,
-      timesEarned: stackTrophy.timesEarned,
-      rarity: Number(stackTrophy.rarity),
-      value: Number(stackTrophy.value),
+      quality: 0,
+      timesEarned: timesEarned,
+      rarity: 0,
+      value: 0,
     };
 
-    if (data.avgTrophyEarnRate > 50) {
-      const qL = (data.avgTrophyEarnRate / 100) * stackTrophyData.quality;
+    const lodgeRate =
+      Math.round(
+        ((totalTimesEarned / data.totalTimesStarted) * 100 + Number.EPSILON) *
+          100,
+      ) / 100;
+
+    if (data.totalTimesStarted >= 100) {
+      stackTrophyData.quality =
+        Math.round((100 - lodgeRate + Number.EPSILON) * 100) / 100;
+    } else {
+      const psnRateMultiplier = 100 - data.totalTimesStarted;
+
+      let gamePsnRate = 0;
+
+      const [getGamePsnRate, numberOfStacks] = await Promise.all([
+        prisma.stackTrophy.aggregate({
+          _sum: {
+            psnRate: true,
+          },
+          where: {
+            gameId: stackTrophy.gameId,
+            trophyId: stackTrophy.trophyId,
+            stackId: { not: stackTrophy.stackId },
+          },
+        }),
+        prisma.stack.count({ where: { gameId: stackTrophy.gameId } }),
+      ]);
+
+      if (getGamePsnRate._sum.psnRate) {
+        gamePsnRate =
+          Math.round(
+            ((Number(getGamePsnRate._sum.psnRate) +
+              Number(data.trophy.trophyEarnedRate)) /
+              numberOfStacks +
+              Number.EPSILON) *
+              100,
+          ) / 100;
+      } else {
+        gamePsnRate =
+          Math.round(
+            (Number(data.trophy.trophyEarnedRate) + Number.EPSILON) * 100,
+          ) / 100;
+      }
 
       stackTrophyData.quality =
-        Math.round((stackTrophyData.quality - qL + Number.EPSILON) * 100) / 100;
-    } else if (data.avgTrophyEarnRate > 15) {
-      const qL = (data.avgTrophyEarnRate / 100) * stackTrophyData.quality;
-      const c = 0.5 * qL;
-
-      stackTrophyData.quality =
-        Math.round((stackTrophyData.quality - c + Number.EPSILON) * 100) / 100;
-    } else if (data.avgTrophyEarnRate > 5) {
-      const qL = (data.avgTrophyEarnRate / 100) * stackTrophyData.quality;
-      const c = 0.15 * qL;
-
-      stackTrophyData.quality =
-        Math.round((stackTrophyData.quality - c + Number.EPSILON) * 100) / 100;
-    }
-
-    if (data.trophy.earned && !findProjectTrophy) {
-      stackTrophyData.timesEarned += 1;
-    }
-
-    if (stackTrophyData.timesEarned) {
-      stackTrophyData.rarity =
         Math.round(
-          ((stackTrophy.timesEarned / data.profilesCount) * 100 +
+          (100 -
+            (psnRateMultiplier * gamePsnRate +
+              data.totalTimesStarted * lodgeRate) /
+              100 +
             Number.EPSILON) *
             100,
         ) / 100;
-    } else {
-      stackTrophyData.rarity = 0;
-    }
 
-    switch (data.trophy.trophyType) {
-      case "platinum": {
-        stackTrophyData.value =
-          Math.round(
-            ((stackTrophyData.quality / 100) * 300 + Number.EPSILON) * 100,
-          ) / 100;
-        break;
-      }
+      if (stackTrophyData.quality) {
+        const qL =
+          stackTrophyData.quality -
+          (stackTrophyData.quality / 100) * stackTrophyData.quality;
 
-      case "gold": {
-        stackTrophyData.value =
-          Math.round(
-            ((stackTrophyData.quality / 100) * 90 + Number.EPSILON) * 100,
-          ) / 100;
-        break;
-      }
+        const aL = (psnRateMultiplier / 100) * qL;
 
-      case "silver": {
-        stackTrophyData.value =
-          Math.round(
-            ((stackTrophyData.quality / 100) * 30 + Number.EPSILON) * 100,
-          ) / 100;
-        break;
-      }
-
-      case "bronze": {
-        stackTrophyData.value =
-          Math.round(
-            ((stackTrophyData.quality / 100) * 15 + Number.EPSILON) * 100,
-          ) / 100;
-        break;
+        stackTrophyData.quality =
+          Math.round((stackTrophyData.quality - aL + Number.EPSILON) * 100) /
+          100;
       }
     }
 
-    const valueMultiplier =
-      Math.round((1 - (stackTrophyData.rarity / 100 + Number.EPSILON)) * 100) /
-      100;
-
-    stackTrophyData.value =
+    stackTrophyData.rarity =
       Math.round(
-        (valueMultiplier * stackTrophyData.value + Number.EPSILON) * 100,
+        ((stackTrophyData.timesEarned / data.profilesCount) * 100 +
+          Number.EPSILON) *
+          100,
       ) / 100;
+
+    if (stackTrophyData.quality < 0) {
+      stackTrophyData.quality = 0;
+    }
+
+    if (stackTrophyData.quality) {
+      switch (data.trophy.trophyType) {
+        case "platinum": {
+          stackTrophyData.value =
+            Math.round(
+              ((stackTrophyData.quality / 100) * 300 + Number.EPSILON) * 100,
+            ) / 100;
+          break;
+        }
+
+        case "gold": {
+          stackTrophyData.value =
+            Math.round(
+              ((stackTrophyData.quality / 100) * 90 + Number.EPSILON) * 100,
+            ) / 100;
+          break;
+        }
+
+        case "silver": {
+          stackTrophyData.value =
+            Math.round(
+              ((stackTrophyData.quality / 100) * 30 + Number.EPSILON) * 100,
+            ) / 100;
+          break;
+        }
+
+        case "bronze": {
+          stackTrophyData.value =
+            Math.round(
+              ((stackTrophyData.quality / 100) * 15 + Number.EPSILON) * 100,
+            ) / 100;
+          break;
+        }
+      }
+
+      const valueMultiplier =
+        Math.round((1 - stackTrophyData.rarity / 100 + Number.EPSILON) * 100) /
+        100;
+
+      stackTrophyData.value =
+        Math.round(
+          (valueMultiplier * stackTrophyData.value + Number.EPSILON) * 100,
+        ) / 100;
+    }
 
     let streamTrophy = false;
     let streamId = null;
