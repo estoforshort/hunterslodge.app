@@ -8,7 +8,7 @@ dayjs.extend(duration);
 
 defineProps<{
   group: {
-    stackId: string;
+    gameId: number;
     groupId: string;
     name: string;
     definedPlatinum: number;
@@ -36,7 +36,7 @@ const route = useRoute();
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/api/games/${group.stackId}/groups/${group.groupId}/image`"
+            :src="`${config.public.baseUrl}/images/games/${group.gameId}/${group.groupId}`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder

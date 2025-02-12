@@ -11,6 +11,7 @@ const props = defineProps<{
   orderBy: string;
   project: {
     stackId: string;
+    gameId: number;
     name: string;
     platforms: {
       platformId: string;
@@ -85,7 +86,7 @@ const route = useRoute();
       <div class="flex bg-gray-200 dark:bg-gray-800">
         <div class="my-auto max-w-20">
           <NuxtImg
-            :src="`${config.public.baseUrl}/api/games/${project.stackId}/image`"
+            :src="`${config.public.baseUrl}/images/games/${project.gameId}`"
             width="80"
             class="min-h-20 min-w-20 object-contain"
             placeholder

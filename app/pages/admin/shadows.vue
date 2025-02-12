@@ -15,6 +15,7 @@ const { data: hunters, refresh } = await useFetch("/api/hunters/shadow", {
   transform: (hunters) => {
     return {
       data: hunters.data.map((hunter) => ({
+        id: hunter.id,
         region: hunter.region,
         onlineId: hunter.onlineId,
         earnedPlatinum: hunter.earnedPlatinum,
@@ -83,7 +84,7 @@ async function queueUpdate(onlineId: string) {
     queueing.value = true;
 
     try {
-      const response = await $fetch(`/api/hunters/shadow/${onlineId}/update`, {
+      const response = await $fetch(`/api/hunters/shadow/${onlineId}`, {
         method: "POST",
       });
 
@@ -128,7 +129,7 @@ const config = useRuntimeConfig();
           <div class="flex items-center gap-3">
             <div class="bg-cool-200 dark:bg-cool-800 rounded">
               <NuxtImg
-                :src="`${config.public.baseUrl}/api/hunters/shadow/${row.onlineId}/image`"
+                :src="`${config.public.baseUrl}/images/profiles/${row.id}`"
                 width="48"
                 class="max-h-12 min-h-12 min-w-12 max-w-12 rounded object-contain"
                 placeholder

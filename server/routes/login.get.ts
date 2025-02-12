@@ -8,6 +8,7 @@ export default defineOAuthTwitchEventHandler({
         username: true,
         displayName: true,
         imageUrl: true,
+        downloaded: true,
         isAdmin: true,
         profile: {
           select: {
@@ -39,10 +40,17 @@ export default defineOAuthTwitchEventHandler({
         if (fetchImage.ok) {
           const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-          await prisma.userImage.create({
+          await useStorage("images").setItemRaw(
+            `users/${createUser.id}`,
+            image,
+          );
+
+          await prisma.user.update({
             data: {
-              userId: createUser.id,
-              image,
+              downloaded: true,
+            },
+            where: {
+              id: createUser.id,
             },
           });
         }
@@ -78,23 +86,34 @@ export default defineOAuthTwitchEventHandler({
       });
     }
 
-    if (findUser.imageUrl !== user.profile_image_url) {
+    if (!findUser.downloaded || findUser.imageUrl !== user.profile_image_url) {
       try {
         const fetchImage = await fetch(user.profile_image_url);
 
         if (fetchImage.ok) {
           const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-          await prisma.userImage.update({
-            where: {
-              userId: findUser.id,
-            },
+          await useStorage("images").setItemRaw(`users/${findUser.id}`, image);
+
+          await prisma.user.update({
             data: {
-              image,
+              downloaded: true,
+            },
+            where: {
+              id: findUser.id,
             },
           });
         }
       } catch (error) {
+        await prisma.user.update({
+          data: {
+            downloaded: false,
+          },
+          where: {
+            id: findUser.id,
+          },
+        });
+
         console.error(error);
       }
     }

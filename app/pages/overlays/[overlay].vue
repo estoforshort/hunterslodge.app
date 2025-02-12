@@ -28,7 +28,7 @@ const { data: overlay, refresh: refreshOverlay } = await useFetch(
       return {
         style: overlay.data.style,
         profile: {
-          displayName: overlay.data.profile.user.displayName,
+          displayName: overlay.data.profile.user?.displayName,
           onlineId: overlay.data.profile.onlineId,
           startedProjects: overlay.data.profile.startedProjects,
           completedProjects: overlay.data.profile.completedProjects,
@@ -47,7 +47,8 @@ const { data: overlay, refresh: refreshOverlay } = await useFetch(
         },
         project: overlay.data.project
           ? {
-              id: overlay.data.project.stack.id,
+              id: overlay.data.project.stackId,
+              gameId: overlay.data.project.stack.gameId,
               definedTrophies:
                 overlay.data.project.stack.definedPlatinum +
                 overlay.data.project.stack.definedGold +
@@ -137,7 +138,7 @@ onMounted(() => {
       v-if="overlay.project"
       class="flex text-center font-mono text-xl font-semibold text-white"
     >
-      <img :src="`/api/games/${overlay.project.id}/image`" class="me-2 h-11" />
+      <img :src="`/images/games/${overlay.project.gameId}`" class="me-2 h-11" />
 
       <UIcon
         v-if="overlay.project.progress === 100"

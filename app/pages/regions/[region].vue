@@ -148,7 +148,7 @@ const config = useRuntimeConfig();
                   >
                     <NuxtLink :to="`/hunters/${row.user.username}`">
                       <NuxtImg
-                        :src="`${config.public.baseUrl}/api/hunters/${row.user.username}/images/twitch`"
+                        :src="`${config.public.baseUrl}/images/users/${row.user.id}`"
                         width="48"
                         class="max-h-12 min-h-12 min-w-12 max-w-12 rounded object-contain"
                         placeholder

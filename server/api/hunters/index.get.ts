@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
   const [data, totalSize] = await Promise.all([
     prisma.profile.findMany({
       select: {
+        userId: true,
         user: {
           select: {
             username: true,
@@ -55,9 +56,9 @@ export default defineEventHandler(async (event) => {
             isFounder: true,
           },
         },
+        regionId: true,
         region: {
           select: {
-            id: true,
             name: true,
           },
         },

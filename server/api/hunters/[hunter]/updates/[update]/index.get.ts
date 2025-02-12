@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
               select: {
                 stack: {
                   select: {
+                    gameId: true,
                     game: {
                       select: {
                         name: true,

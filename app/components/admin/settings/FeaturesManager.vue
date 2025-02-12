@@ -2,9 +2,9 @@
 const { data: settings } = await useFetch("/api/app/settings");
 
 const features = reactive({
-  overlaysEnabled: settings.value?.data.overlaysEnabled,
-  linkingEnabled: settings.value?.data.linkingEnabled,
-  updatesEnabled: settings.value?.data.updatesEnabled,
+  overlaysEnabled: settings.value?.data?.overlaysEnabled,
+  linkingEnabled: settings.value?.data?.linkingEnabled,
+  updatesEnabled: settings.value?.data?.updatesEnabled,
 });
 
 const toast = useToast();
@@ -28,9 +28,9 @@ async function updateFeatures() {
   } catch (e) {
     console.error(e);
 
-    features.overlaysEnabled = settings.value?.data.overlaysEnabled;
-    features.linkingEnabled = settings.value?.data.linkingEnabled;
-    features.updatesEnabled = settings.value?.data.updatesEnabled;
+    features.overlaysEnabled = settings.value?.data?.overlaysEnabled;
+    features.linkingEnabled = settings.value?.data?.linkingEnabled;
+    features.updatesEnabled = settings.value?.data?.updatesEnabled;
 
     toast.add({
       description: "Successfully failed to update the features",

@@ -33,6 +33,10 @@ export default defineNuxtConfig({
       cache: {
         driver: "redis",
       },
+      images: {
+        driver: "fs",
+        base: "./images",
+      },
     },
   },
   routeRules: {

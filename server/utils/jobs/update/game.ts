@@ -70,10 +70,17 @@ export const updateGame = async (data: Data) => {
             if (fetchImage.ok) {
               const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-              await prisma.gameImage.create({
+              await useStorage("images").setItemRaw(
+                `games/${createGame.id}`,
+                image,
+              );
+
+              await prisma.game.update({
                 data: {
-                  gameId: createGame.id,
-                  image,
+                  downloaded: true,
+                },
+                where: {
+                  id: createGame.id,
                 },
               });
             }
@@ -86,6 +93,34 @@ export const updateGame = async (data: Data) => {
         }
 
         await updatePlatforms(findGame.id);
+
+        if (!findGame.downloaded) {
+          try {
+            const fetchImage = await fetch(data.imageUrl);
+
+            if (fetchImage.ok) {
+              const image = new Uint8Array(await fetchImage.arrayBuffer());
+
+              await useStorage("images").setItemRaw(
+                `games/${findGame.id}`,
+                image,
+              );
+
+              await prisma.game.update({
+                data: {
+                  imageUrl: data.imageUrl,
+                  downloaded: true,
+                },
+                where: {
+                  id: findGame.id,
+                },
+              });
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
         return findGame;
 
         async function updatePlatforms(gameId: number) {

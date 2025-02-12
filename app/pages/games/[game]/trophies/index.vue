@@ -9,7 +9,7 @@ const { data: groups } = await useFetch(
     transform: (groups) => {
       return {
         data: groups.data.map((group) => ({
-          stackId: group.stackId,
+          gameId: group.gameId,
           groupId: group.groupId,
           name: group.gameGroup.name,
           definedPlatinum: group.definedPlatinum,

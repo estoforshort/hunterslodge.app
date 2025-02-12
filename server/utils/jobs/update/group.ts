@@ -74,11 +74,20 @@ export const updateGroup = async (data: Data) => {
             if (fetchImage.ok) {
               const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-              await prisma.groupImage.create({
+              await useStorage("images").setItemRaw(
+                `groups/${createGroup.gameId}/${createGroup.id}`,
+                image,
+              );
+
+              await prisma.group.update({
                 data: {
-                  gameId: createGroup.gameId,
-                  groupId: createGroup.id,
-                  image,
+                  downloaded: true,
+                },
+                where: {
+                  gameId_id: {
+                    gameId: createGroup.gameId,
+                    id: createGroup.id,
+                  },
                 },
               });
             }
@@ -87,6 +96,36 @@ export const updateGroup = async (data: Data) => {
           }
 
           return createGroup;
+        }
+
+        if (!findGroup.downloaded) {
+          try {
+            const fetchImage = await fetch(data.group.trophyGroupIconUrl);
+
+            if (fetchImage.ok) {
+              const image = new Uint8Array(await fetchImage.arrayBuffer());
+
+              await useStorage("images").setItemRaw(
+                `groups/${findGroup.gameId}/${findGroup.id}`,
+                image,
+              );
+
+              await prisma.group.update({
+                data: {
+                  imageUrl: data.group.trophyGroupIconUrl,
+                  downloaded: true,
+                },
+                where: {
+                  gameId_id: {
+                    gameId: findGroup.gameId,
+                    id: findGroup.id,
+                  },
+                },
+              });
+            }
+          } catch (e) {
+            console.error(e);
+          }
         }
 
         return findGroup;
