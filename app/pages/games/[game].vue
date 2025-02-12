@@ -11,6 +11,7 @@ const { data: game } = await useFetch(
 
       return {
         id: game.data.id,
+        gameId: game.data.gameId,
         name: game.data.game.name,
         platforms: game.data.game.platforms,
         definedPlatinum: game.data.definedPlatinum,
@@ -58,7 +59,7 @@ const config = useRuntimeConfig();
     <UPageBody v-if="game">
       <div class="flex justify-center">
         <NuxtImg
-          :src="`${config.public.baseUrl}/api/games/${game.id}/image`"
+          :src="`${config.public.baseUrl}/images/games/${game.gameId}`"
           height="176"
           placeholder
           class="rounded-lg"

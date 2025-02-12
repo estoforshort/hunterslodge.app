@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
       id: true,
       accountId: true,
       imageUrl: true,
+      downloaded: true,
       platinum: true,
       gold: true,
       silver: true,
@@ -170,22 +171,40 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  if (findAvatar && findAvatar.url !== profile.imageUrl) {
-    try {
-      const fetchImage = await fetch(findAvatar.url);
+  if (findAvatar) {
+    if (!profile.downloaded || findAvatar.url !== profile.imageUrl) {
+      try {
+        const fetchImage = await fetch(findAvatar.url);
 
-      if (fetchImage.ok) {
-        const image = new Uint8Array(await fetchImage.arrayBuffer());
+        if (fetchImage.ok) {
+          const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-        await prisma.profileImage.update({
-          where: {
-            profileId: profile.id,
+          await useStorage("images").setItemRaw(
+            `profiles/${profile.id}`,
+            image,
+          );
+
+          await prisma.profile.update({
+            data: {
+              downloaded: true,
+            },
+            where: {
+              id: profile.id,
+            },
+          });
+        }
+      } catch (e) {
+        await prisma.profile.update({
+          data: {
+            downloaded: false,
           },
-          data: { image },
+          where: {
+            id: profile.id,
+          },
         });
+
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
     }
   }
 

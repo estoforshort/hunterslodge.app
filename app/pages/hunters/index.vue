@@ -14,7 +14,9 @@ const { data: hunters } = await useFetch("/api/hunters", {
   transform: (hunters) => {
     return {
       data: hunters.data.map((hunter) => ({
+        userId: hunter.userId,
         user: hunter.user,
+        regionId: hunter.regionId,
         region: hunter.region,
         earnedPlatinum: hunter.earnedPlatinum,
         earnedGold: hunter.earnedGold,
@@ -129,7 +131,7 @@ const config = useRuntimeConfig();
                   >
                     <NuxtLink :to="`/hunters/${row.user.username}`">
                       <NuxtImg
-                        :src="`${config.public.baseUrl}/api/hunters/${row.user.username}/images/twitch`"
+                        :src="`${config.public.baseUrl}/images/users/${row.userId}`"
                         width="48"
                         class="max-h-12 min-h-12 min-w-12 max-w-12 rounded object-contain"
                         placeholder
@@ -153,7 +155,7 @@ const config = useRuntimeConfig();
                     size="sm"
                     class="align-middle"
                   >
-                    <UIcon :name="`i-circle-flags-${row.region.id}`" />
+                    <UIcon :name="`i-circle-flags-${row.regionId}`" />
                     {{ row.region.name }}
                   </UBadge>
                 </span>

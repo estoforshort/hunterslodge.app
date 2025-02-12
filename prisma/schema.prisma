@@ -67,6 +67,7 @@ model User {
   username    String   @unique @db.VarChar(25)
   displayName String   @db.VarChar(50)
   imageUrl    String   @db.VarChar(512)
+  downloaded  Boolean  @default(false)
   isAdmin     Boolean
   isFounder   Boolean
   createdAt   DateTime @default(now())
@@ -125,6 +126,7 @@ model Profile {
   accountId           String    @unique @db.VarChar(36)
   onlineId            String    @unique @db.VarChar(16)
   imageUrl            String    @db.VarChar(512)
+  downloaded          Boolean   @default(false)
   platinum            Int       @db.UnsignedSmallInt
   gold                Int       @db.UnsignedMediumInt
   silver              Int       @db.UnsignedMediumInt
@@ -320,6 +322,7 @@ model Game {
   service         String   @db.VarChar(7)
   name            String   @db.VarChar(512)
   imageUrl        String   @db.VarChar(512)
+  downloaded      Boolean  @default(false)
   definedPlatinum Int      @default(0) @db.UnsignedTinyInt
   definedGold     Int      @default(0) @db.UnsignedSmallInt
   definedSilver   Int      @default(0) @db.UnsignedSmallInt
@@ -380,6 +383,7 @@ model Group {
   id              String   @db.Char(3)
   name            String   @db.VarChar(512)
   imageUrl        String   @db.VarChar(512)
+  downloaded      Boolean  @default(false)
   definedPlatinum Int      @default(0) @db.UnsignedTinyInt
   definedGold     Int      @default(0) @db.UnsignedTinyInt
   definedSilver   Int      @default(0) @db.UnsignedTinyInt
@@ -404,6 +408,7 @@ model GroupImage {
   updatedAt DateTime @updatedAt
 
   @@id([gameId, groupId])
+  @@index([gameId])
 }
 
 enum TrophyType {
@@ -426,6 +431,7 @@ model Trophy {
   name        String     @db.VarChar(512)
   description String     @db.VarChar(1024)
   imageUrl    String     @db.VarChar(512)
+  downloaded  Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -446,6 +452,7 @@ model TrophyImage {
   updatedAt DateTime @updatedAt
 
   @@id([gameId, groupId, trophyId])
+  @@index([gameId])
 }
 
 model Stack {

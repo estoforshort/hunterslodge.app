@@ -15,5 +15,6 @@ export default defineNitroPlugin(async () => {
     });
   }
 
+  await moveImages();
   await worker.run();
 });

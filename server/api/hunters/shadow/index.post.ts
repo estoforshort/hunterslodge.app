@@ -117,10 +117,17 @@ export default defineEventHandler(async (event) => {
     if (fetchImage.ok) {
       const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-      await prisma.profileImage.create({
+      await useStorage("images").setItemRaw(
+        `profiles/${createProfile.id}`,
+        image,
+      );
+
+      await prisma.profile.update({
         data: {
-          profileId: createProfile.id,
-          image,
+          downloaded: true,
+        },
+        where: {
+          id: createProfile.id,
         },
       });
     }

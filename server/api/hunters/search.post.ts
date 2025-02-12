@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
     async (name: string) => {
       return await prisma.profile.findMany({
         select: {
+          userId: true,
           user: {
             select: {
               username: true,
@@ -19,9 +20,9 @@ export default defineEventHandler(async (event) => {
               isFounder: true,
             },
           },
+          regionId: true,
           region: {
             select: {
-              id: true,
               name: true,
             },
           },

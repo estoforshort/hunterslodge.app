@@ -14,11 +14,12 @@ export default defineEventHandler(async (event) => {
       groupChanges: {
         select: {
           stackId: true,
-          groupId: true,
           projectGroup: {
             select: {
               stackGroup: {
                 select: {
+                  gameId: true,
+                  groupId: true,
                   gameGroup: {
                     select: {
                       name: true,

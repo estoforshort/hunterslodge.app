@@ -48,6 +48,7 @@ const { data: projects } = await useFetch(
       return {
         data: projects.data.map((project) => ({
           stackId: project.stack.id,
+          gameId: project.stack.gameId,
           name: project.stack.game.name,
           platforms: project.stack.game.platforms,
           definedPlatinum: project.stack.definedPlatinum,

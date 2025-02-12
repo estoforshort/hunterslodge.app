@@ -86,6 +86,7 @@ const { data: games } = await useFetch(`/api/games`, {
     return {
       data: games.data.map((game) => ({
         id: game.id,
+        gameId: game.gameId,
         name: game.game.name,
         platforms: game.game.platforms,
         definedPlatinum: game.definedPlatinum,
@@ -110,6 +111,7 @@ const { data: games } = await useFetch(`/api/games`, {
 const searchResults = ref<
   {
     id: string;
+    gameId: number;
     name: string;
     platforms: {
       platformId: string;
@@ -158,6 +160,7 @@ async function search() {
           if (result) {
             searchResults.value.push({
               id: result.id,
+              gameId: result.gameId,
               name: result.game.name,
               platforms: result.game.platforms,
               definedPlatinum: result.definedPlatinum,

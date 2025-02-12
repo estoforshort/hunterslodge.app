@@ -26,6 +26,37 @@ export const updateTrophy = async (data: Data) => {
     });
 
     if (findTrophy) {
+      if (!findTrophy.downloaded) {
+        try {
+          const fetchImage = await fetch(data.trophy.trophyIconUrl);
+
+          if (fetchImage.ok) {
+            const image = new Uint8Array(await fetchImage.arrayBuffer());
+
+            await useStorage("images").setItemRaw(
+              `trophies/${data.gameId}/${data.groupId}/${findTrophy.id}`,
+              image,
+            );
+
+            await prisma.trophy.update({
+              data: {
+                imageUrl: data.trophy.trophyIconUrl,
+                downloaded: true,
+              },
+              where: {
+                gameId_groupId_id: {
+                  gameId: findTrophy.gameId,
+                  groupId: findTrophy.groupId,
+                  id: findTrophy.id,
+                },
+              },
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       return {
         data: findTrophy,
       };
@@ -50,12 +81,21 @@ export const updateTrophy = async (data: Data) => {
       if (fetchImage.ok) {
         const image = new Uint8Array(await fetchImage.arrayBuffer());
 
-        await prisma.trophyImage.create({
+        await useStorage("images").setItemRaw(
+          `trophies/${data.gameId}/${data.groupId}/${createTrophy.id}`,
+          image,
+        );
+
+        await prisma.trophy.update({
           data: {
-            gameId: createTrophy.gameId,
-            groupId: createTrophy.groupId,
-            trophyId: createTrophy.id,
-            image,
+            downloaded: true,
+          },
+          where: {
+            gameId_groupId_id: {
+              gameId: createTrophy.gameId,
+              groupId: createTrophy.groupId,
+              id: createTrophy.id,
+            },
           },
         });
       }

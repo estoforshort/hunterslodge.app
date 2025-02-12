@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
     prisma.stack.findMany({
       select: {
         id: true,
+        gameId: true,
         game: {
           select: {
             name: true,

@@ -12,10 +12,11 @@ const { data: hunter } = await useFetch(
       }
 
       return {
-        username: hunter.data.user.username,
-        displayName: hunter.data.user.displayName,
-        admin: hunter.data.user.isAdmin,
-        founder: hunter.data.user.isFounder,
+        id: hunter.data.userId,
+        username: hunter.data.user?.username,
+        displayName: hunter.data.user?.displayName,
+        admin: hunter.data.user?.isAdmin,
+        founder: hunter.data.user?.isFounder,
         region: {
           name: hunter.data.region.name,
         },
@@ -102,10 +103,7 @@ const links = computed(() => [
             <div
               class="absolute inset-x-0 top-0 mx-auto -mt-24 flex h-48 w-48 items-center justify-center rounded-full shadow-2xl"
             >
-              <img
-                :src="`/api/hunters/${hunter.username}/images/twitch`"
-                class="rounded-full"
-              />
+              <img :src="`/images/users/${hunter.id}`" class="rounded-full" />
             </div>
           </div>
 

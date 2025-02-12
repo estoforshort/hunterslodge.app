@@ -14,7 +14,7 @@ const { data: trophies } = await useFetch(
     transform: (trophies) => {
       return {
         data: trophies.data.map((trophy) => ({
-          stackId: trophy.stackId,
+          gameId: trophy.gameId,
           groupId: trophy.groupId,
           trophyId: trophy.trophyId,
           type: trophy.gameTrophy.type,
@@ -49,9 +49,11 @@ const config = useRuntimeConfig();
               : 'to-orange-400 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800'
       "
     >
-      <img
-        :src="`${config.public.baseUrl}/api/games/${trophy.stackId}/groups/${trophy.groupId}/trophies/${trophy.trophyId}/image`"
+      <NuxtImg
+        :src="`${config.public.baseUrl}/images/games/${trophy.gameId}/${trophy.groupId}/${trophy.trophyId}`"
+        width="80"
         class="mb-auto min-h-20 min-w-20 max-w-20 justify-start object-contain"
+        placeholder
       />
 
       <div class="mx-2 my-auto flex-auto">

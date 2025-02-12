@@ -39,7 +39,7 @@ const { data: projectTrophies } = await useFetch(
 
 function isEarned(id: number) {
   const earned = projectTrophies.value?.data.find(
-    (trophy) => trophy.trophyId === id,
+    (trophy) => trophy.stackTrophy.trophyId === id,
   );
 
   if (earned) {
@@ -111,9 +111,11 @@ const config = useRuntimeConfig();
                 : 'to-orange-400 opacity-40 hover:opacity-100 dark:from-gray-900 dark:via-slate-950 dark:to-orange-800 dark:opacity-20 dark:hover:opacity-100'
       "
     >
-      <img
-        :src="`${config.public.baseUrl}/api/games/${trophy.stackId}/groups/${trophy.groupId}/trophies/${trophy.trophyId}/image`"
+      <NuxtImg
+        :src="`${config.public.baseUrl}/images/games/${trophy.gameId}/${trophy.groupId}/${trophy.trophyId}`"
+        width="80"
         class="mb-auto min-h-20 min-w-20 max-w-20 justify-start object-contain"
+        placeholder
       />
 
       <div class="mx-2 my-auto flex-auto">

@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
       trophies: {
         select: {
           stackId: true,
+          gameId: true,
           groupId: true,
           trophyId: true,
           gameTrophy: {

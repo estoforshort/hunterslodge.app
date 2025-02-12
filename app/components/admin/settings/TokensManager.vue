@@ -31,7 +31,7 @@ function openUpdateTokensModal() {
       <div class="justify-between gap-2 lg:flex">
         <div class="mb-2 lg:mb-0">
           <UBadge
-            v-if="!tokens?.data.refreshTokenExpiresAt"
+            v-if="!tokens?.data?.refreshTokenExpiresAt"
             size="md"
             color="red"
             variant="outline"
@@ -66,7 +66,7 @@ function openUpdateTokensModal() {
 
         <div class="mb-2 lg:mb-0">
           <UBadge
-            v-if="!tokens?.data.expiresAt"
+            v-if="!tokens?.data?.expiresAt"
             size="md"
             color="red"
             variant="outline"
@@ -95,7 +95,7 @@ function openUpdateTokensModal() {
           </UBadge>
         </div>
 
-        <div v-if="tokens?.data.updatedAt" class="mb-2 lg:mb-0">
+        <div v-if="tokens?.data?.updatedAt" class="mb-2 lg:mb-0">
           <UBadge size="md" color="gray">
             <strong class="me-1">Updated:</strong>
             {{
