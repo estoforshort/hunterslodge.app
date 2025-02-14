@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
         stackId: params.game,
         groupId: params.group,
         trophyId: params.trophy,
-        createdAt: { gt: new Date("2025-01-28T08:00:00") },
+        createdAt: { gt: new Date("2025-01-28T10:00:00") },
       },
     }),
   ]);

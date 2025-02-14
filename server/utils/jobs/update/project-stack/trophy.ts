@@ -273,7 +273,6 @@ export const updateProjectAndStackTrophy = async (data: Data) => {
               stackId: data.stackId,
               groupId: data.groupId,
               trophyId: data.trophy.trophyId,
-              appId: "app",
               streamId,
               earnedAt: data.trophy.earnedDateTime
                 ? dayjs(data.trophy.earnedDateTime).format()

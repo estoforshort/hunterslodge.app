@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
     prisma.stackChange.count({
       where: {
         stackId: params.game,
-        createdAt: { gt: new Date("2025-01-28T08:00:00") },
+        createdAt: { gt: new Date("2025-01-28T10:00:00") },
       },
     }),
   ]);

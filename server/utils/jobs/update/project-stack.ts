@@ -262,7 +262,6 @@ export const updateProjectAndStack = async (data: Data) => {
           data: {
             profileId: data.profile.id,
             stackId: stack.id,
-            appId: "app",
           },
         });
       };

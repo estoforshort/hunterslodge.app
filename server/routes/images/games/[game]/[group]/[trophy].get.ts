@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
+
   return await useStorage("images").getItemRaw(
     `trophies/${params.game}/${params.group}/${params.trophy}`,
   );

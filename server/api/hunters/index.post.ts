@@ -110,7 +110,6 @@ export default defineEventHandler(async (event) => {
     return await prisma.profileRegion.create({
       data: {
         id: psnProfile.data.profile.region,
-        appId: "app",
         name: getName(psnProfile.data.profile.region),
       },
     });
@@ -173,7 +172,6 @@ export default defineEventHandler(async (event) => {
 
       const createUpdate = await prisma.update.create({
         data: {
-          appId: "app",
           profileId: updateProfile.id,
           status: "WAITING",
           type: "MANUAL",
@@ -230,7 +228,6 @@ export default defineEventHandler(async (event) => {
   const createProfile = await prisma.profile.create({
     data: {
       userId: session.user.id,
-      appId: "app",
       regionId: region.id,
       accountId: psnProfile.data.trophySummary.accountId,
       onlineId: psnProfile.data.profile.onlineId,
@@ -270,7 +267,6 @@ export default defineEventHandler(async (event) => {
 
   const createUpdate = await prisma.update.create({
     data: {
-      appId: "app",
       profileId: createProfile.id,
       status: "WAITING",
       type: "INITIAL",

@@ -423,7 +423,6 @@ export default defineCachedEventHandler(
               ) {
                 const createUpdate = await prisma.update.create({
                   data: {
-                    appId: "app",
                     profileId: findOverlay.profile.id,
                     status: "WAITING",
                     type: "OVERLAY",

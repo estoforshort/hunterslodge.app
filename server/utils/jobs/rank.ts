@@ -50,24 +50,43 @@ export const runRankings = async () => {
     for (let r = 0, rl = regions.length; r < rl; r++) {
       const region = regions[r];
 
-      if (region.position !== regionPosition) {
-        await prisma.profileRegion.update({
-          where: {
-            id: region.id,
-          },
-          data: {
-            position: regionPosition,
-            positionChanges: {
-              create: {
-                positionFrom: region.position,
-                positionTo: regionPosition,
+      if (Number(region.points) > 0) {
+        if (region.position !== regionPosition) {
+          await prisma.profileRegion.update({
+            where: {
+              id: region.id,
+            },
+            data: {
+              position: regionPosition,
+              positionChanges: {
+                create: {
+                  positionFrom: region.position,
+                  positionTo: regionPosition,
+                },
               },
             },
-          },
-        });
-      }
+          });
+        }
 
-      regionPosition += 1;
+        regionPosition += 1;
+      } else {
+        if (region.position !== 0) {
+          await prisma.profileRegion.update({
+            where: {
+              id: region.id,
+            },
+            data: {
+              position: 0,
+              positionChanges: {
+                create: {
+                  positionFrom: region.position,
+                  positionTo: 0,
+                },
+              },
+            },
+          });
+        }
+      }
     }
 
     let profileGlobalPosition = 1;

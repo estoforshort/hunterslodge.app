@@ -56,7 +56,6 @@ export const updateGame = async (data: Data) => {
         if (!findGame) {
           const createGame = await prisma.game.create({
             data: {
-              appId: "app",
               hash: data.hash,
               service: data.service,
               name: data.name,
@@ -139,7 +138,6 @@ export const updateGame = async (data: Data) => {
               const createPlatform = await prisma.platform.create({
                 data: {
                   id: platform.toLowerCase(),
-                  appId: "app",
                 },
               });
 

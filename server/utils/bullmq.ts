@@ -3,6 +3,7 @@ import { runRankings } from "./jobs/rank";
 import { Queue, Worker } from "bullmq";
 
 import type { UpdateType } from "@prisma/client";
+
 import type {
   ConnectionOptions,
   Job,
@@ -68,8 +69,7 @@ export const addJob = async (data: JobData) => {
 
     return;
   } catch (e) {
-    console.error(e);
-    return;
+    return console.error(e);
   }
 };
 

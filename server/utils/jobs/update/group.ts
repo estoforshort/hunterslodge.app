@@ -58,7 +58,6 @@ export const updateGroup = async (data: Data) => {
           const createGroup = await prisma.group.create({
             data: {
               gameId: data.gameId,
-              appId: "app",
               id:
                 data.group.trophyGroupId === "default"
                   ? "000"

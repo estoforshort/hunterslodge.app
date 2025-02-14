@@ -217,7 +217,6 @@ export default defineEventHandler(async (event) => {
   ) {
     const createUpdate = await prisma.update.create({
       data: {
-        appId: "app",
         profileId: profile.id,
         status: "WAITING",
         type: "MANUAL",

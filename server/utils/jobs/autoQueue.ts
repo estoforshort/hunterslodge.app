@@ -153,7 +153,6 @@ export const runAutoQueue = async () => {
 
               const createUpdate = await prisma.update.create({
                 data: {
-                  appId: "app",
                   profileId: profile.id,
                   status: "WAITING",
                   type: "AUTOMATIC",
