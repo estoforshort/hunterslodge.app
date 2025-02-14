@@ -16,23 +16,8 @@ model App {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tokens         AppTokens?
-  settings       AppSettings?
-  users          User[]
-  profileRegions ProfileRegion[]
-  profiles       Profile[]
-  overlays       Overlay[]
-  streams        Stream[]
-  updates        Update[]
-  games          Game[]
-  platforms      Platform[]
-  groups         Group[]
-  trophies       Trophy[]
-  stacks         Stack[]
-  stackGroups    StackGroup[]
-  stackTrophies  StackTrophy[]
-  projects       Project[]
-  earnedTrophies ProjectTrophy[]
+  tokens   AppTokens?
+  settings AppSettings?
 }
 
 model AppTokens {
@@ -61,9 +46,6 @@ model AppSettings {
 model User {
   id String @id @db.VarChar(36)
 
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   username    String   @unique @db.VarChar(25)
   displayName String   @db.VarChar(50)
   imageUrl    String   @db.VarChar(512)
@@ -73,26 +55,13 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  image   UserImage?
   profile Profile?
 
   @@fulltext([displayName])
 }
 
-model UserImage {
-  userId String @unique @db.VarChar(36)
-  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
-
-  image     Bytes    @db.MediumBlob
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model ProfileRegion {
   id String @id @db.Char(2)
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   name           String?  @db.VarChar(64)
   earnedPlatinum Int      @default(0) @db.UnsignedMediumInt
@@ -113,9 +82,6 @@ model ProfileRegion {
 
 model Profile {
   id Int @id @default(autoincrement()) @db.UnsignedSmallInt
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   userId String? @unique @db.VarChar(36)
   user   User?   @relation(references: [id], fields: [userId], onDelete: SetNull)
@@ -161,7 +127,6 @@ model Profile {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  image                  ProfileImage?
   overlay                Overlay?
   streams                Stream[]
   updates                Update[]
@@ -178,15 +143,6 @@ model Profile {
   @@index([streamPosition])
 }
 
-model ProfileImage {
-  profileId Int     @unique @db.UnsignedSmallInt
-  profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
-
-  image     Bytes    @db.MediumBlob
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 enum OverlayStyle {
   default
   streamer
@@ -194,9 +150,6 @@ enum OverlayStyle {
 
 model Overlay {
   id String @id @default(uuid()) @db.VarChar(36)
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   profileId Int     @unique @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
@@ -214,9 +167,6 @@ model Overlay {
 
 model Stream {
   id String @id @db.VarChar(36)
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
@@ -253,9 +203,6 @@ enum UpdateType {
 
 model Update {
   id Int @id @default(autoincrement()) @db.UnsignedInt
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   profileId Int     @db.UnsignedSmallInt
   profile   Profile @relation(references: [id], fields: [profileId], onDelete: Cascade)
@@ -315,9 +262,6 @@ model Update {
 model Game {
   id Int @id @default(autoincrement()) @db.UnsignedSmallInt
 
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   hash            String   @unique @db.Char(32)
   service         String   @db.VarChar(7)
   name            String   @db.VarChar(512)
@@ -330,7 +274,6 @@ model Game {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  image     GameImage?
   platforms PlatformsOnGames[]
   groups    Group[]
   stacks    Stack[]
@@ -338,20 +281,8 @@ model Game {
   @@fulltext([name])
 }
 
-model GameImage {
-  gameId Int  @unique @db.UnsignedSmallInt
-  game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
-
-  image     Bytes    @db.MediumBlob
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Platform {
   id String @id @db.VarChar(6)
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -377,9 +308,6 @@ model Group {
   gameId Int  @db.UnsignedSmallInt
   game   Game @relation(references: [id], fields: [gameId], onDelete: Cascade)
 
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   id              String   @db.Char(3)
   name            String   @db.VarChar(512)
   imageUrl        String   @db.VarChar(512)
@@ -391,24 +319,10 @@ model Group {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  image       GroupImage?
   trophies    Trophy[]
   stackGroups StackGroup[]
 
   @@id([gameId, id])
-}
-
-model GroupImage {
-  gameId  Int    @db.UnsignedSmallInt
-  groupId String @db.Char(3)
-  group   Group  @relation(references: [gameId, id], fields: [gameId, groupId], onDelete: Cascade)
-
-  image     Bytes    @db.MediumBlob
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([gameId, groupId])
-  @@index([gameId])
 }
 
 enum TrophyType {
@@ -423,9 +337,6 @@ model Trophy {
   groupId String @db.Char(3)
   group   Group  @relation(fields: [gameId, groupId], references: [gameId, id], onDelete: Cascade)
 
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   id          Int        @db.UnsignedSmallInt
   type        TrophyType
   name        String     @db.VarChar(512)
@@ -435,31 +346,13 @@ model Trophy {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  image         TrophyImage?
   stackTrophies StackTrophy[]
 
   @@id([gameId, groupId, id])
 }
 
-model TrophyImage {
-  gameId   Int    @db.UnsignedSmallInt
-  groupId  String @db.Char(3)
-  trophyId Int    @db.UnsignedSmallInt
-  trophy   Trophy @relation(references: [gameId, groupId, id], fields: [gameId, groupId, trophyId], onDelete: Cascade)
-
-  image     Bytes    @db.MediumBlob
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([gameId, groupId, trophyId])
-  @@index([gameId])
-}
-
 model Stack {
   id String @id @db.VarChar(36)
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   gameId Int  @db.UnsignedSmallInt
   game   Game @relation(references: [id], fields: [gameId])
@@ -487,9 +380,6 @@ model Stack {
 }
 
 model StackGroup {
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   stackId String @db.VarChar(36)
   stack   Stack  @relation(references: [id], fields: [stackId])
 
@@ -519,9 +409,6 @@ model StackGroup {
 }
 
 model StackTrophy {
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
-
   stackId    String     @db.VarChar(36)
   groupId    String     @db.Char(3)
   stackGroup StackGroup @relation(fields: [stackId, groupId], references: [stackId, groupId])
@@ -557,9 +444,6 @@ model Project {
 
   stackId String @db.VarChar(36)
   stack   Stack  @relation(fields: [stackId], references: [id])
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   earnedPlatinum      Int       @default(0) @db.UnsignedTinyInt
   earnedGold          Int       @default(0) @db.UnsignedSmallInt
@@ -647,9 +531,6 @@ model ProjectTrophy {
 
   trophyId    Int         @db.UnsignedSmallInt
   stackTrophy StackTrophy @relation(fields: [stackId, groupId, trophyId], references: [stackId, groupId, trophyId])
-
-  appId String @default("app") @db.Char(3)
-  app   App    @relation(references: [id], fields: [appId])
 
   streamId String? @db.VarChar(36)
   stream   Stream? @relation(fields: [streamId], references: [id], onDelete: Cascade)

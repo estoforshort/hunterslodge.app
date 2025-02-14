@@ -13,7 +13,6 @@ export default defineEventHandler(async () => {
       updatedAt: true,
     },
     where: {
-      points: { gte: 0.01 },
       position: { gte: 1 },
     },
     orderBy: {

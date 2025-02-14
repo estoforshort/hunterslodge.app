@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
   });
 
   const params = await getValidatedRouterParams(event, paramsSchema.parse);
+
   return await useStorage("images").getItemRaw(
     `groups/${params.game}/${params.group}`,
   );

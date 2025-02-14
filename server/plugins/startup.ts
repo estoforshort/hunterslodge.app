@@ -1,7 +1,7 @@
 export default defineNitroPlugin(async () => {
-  const appData = await prisma.app.findUnique({ where: { id: "app" } });
+  const app = await prisma.app.findUnique({ where: { id: "app" } });
 
-  if (!appData) {
+  if (!app) {
     await prisma.app.create({
       data: {
         id: "app",
@@ -15,6 +15,5 @@ export default defineNitroPlugin(async () => {
     });
   }
 
-  await moveImages();
   await worker.run();
 });

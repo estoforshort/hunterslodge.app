@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, bodySchema.parse);
 
-  const gameSearch = defineCachedFunction(
+  const hunterSearch = defineCachedFunction(
     async (name: string) => {
       return await prisma.profile.findMany({
         select: {
@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
     { maxAge: 60, staleMaxAge: 60 },
   );
 
-  const data = await gameSearch(body.name);
+  const data = await hunterSearch(body.name);
 
   return { data };
 });

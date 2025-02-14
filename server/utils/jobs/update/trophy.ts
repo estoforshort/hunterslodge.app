@@ -66,7 +66,6 @@ export const updateTrophy = async (data: Data) => {
       data: {
         gameId: data.gameId,
         groupId: data.groupId,
-        appId: "app",
         id: data.trophy.trophyId,
         type: data.trophy.trophyType,
         name: data.trophy.trophyName.replace(/\s+/g, " ").trim(),

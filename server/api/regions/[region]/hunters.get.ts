@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
           skip: Math.floor((page - 1) * pageSize),
           take: pageSize,
           orderBy: { regionalPosition: "asc" },
-          where: { regionalPosition: { gte: 1 } },
+          where: { regionId: params.region, regionalPosition: { gte: 1 } },
         },
       },
       where: { id: params.region },
