@@ -25,7 +25,6 @@ export default defineOAuthTwitchEventHandler({
       const createUser = await prisma.user.create({
         data: {
           id: user.id,
-          appId: "app",
           username: user.login,
           displayName: user.display_name,
           imageUrl: user.profile_image_url,
